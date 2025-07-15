@@ -8,7 +8,7 @@ public abstract class BaseDto
     /// <summary>
     /// Unique identifier
     /// </summary>
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     /// <summary>
     /// Creation timestamp
