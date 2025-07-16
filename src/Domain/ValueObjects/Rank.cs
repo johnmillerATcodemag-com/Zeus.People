@@ -1,4 +1,5 @@
 using FluentValidation;
+using System.Text.Json.Serialization;
 
 namespace Zeus.People.Domain.ValueObjects;
 
@@ -13,6 +14,7 @@ public class Rank : ValueObject
 
     public string Value { get; private set; }
 
+    [JsonConstructor]
     private Rank(string value)
     {
         Value = value;

@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Zeus.People.Domain.ValueObjects;
 
 namespace Zeus.People.Domain.Events;
@@ -19,6 +20,16 @@ public class AcademicCreatedEvent : DomainEvent
         EmpName = empName;
         Rank = rank;
     }
+
+    [JsonConstructor]
+    public AcademicCreatedEvent(Guid academicId, EmpNr empNr, EmpName empName, Rank rank, Guid eventId, DateTime occurredAt, int version)
+        : base(eventId, occurredAt, version)
+    {
+        AcademicId = academicId;
+        EmpNr = empNr;
+        EmpName = empName;
+        Rank = rank;
+    }
 }
 
 /// <summary>
@@ -31,6 +42,15 @@ public class AcademicRankChangedEvent : DomainEvent
     public Rank NewRank { get; }
 
     public AcademicRankChangedEvent(Guid academicId, Rank oldRank, Rank newRank)
+    {
+        AcademicId = academicId;
+        OldRank = oldRank;
+        NewRank = newRank;
+    }
+
+    [JsonConstructor]
+    public AcademicRankChangedEvent(Guid academicId, Rank oldRank, Rank newRank, Guid eventId, DateTime occurredAt, int version)
+        : base(eventId, occurredAt, version)
     {
         AcademicId = academicId;
         OldRank = oldRank;

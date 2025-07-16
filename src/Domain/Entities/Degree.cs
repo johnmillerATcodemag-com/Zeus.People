@@ -68,9 +68,12 @@ public class Degree : AggregateRoot
 /// </summary>
 public class AcademicDegree
 {
-    public Guid AcademicId { get; }
-    public Guid DegreeId { get; }
-    public Guid UniversityId { get; }
+    public Guid AcademicId { get; private set; }
+    public Guid DegreeId { get; private set; }
+    public Guid UniversityId { get; private set; }
+
+    // Parameterless constructor for EF Core
+    private AcademicDegree() { }
 
     public AcademicDegree(Guid academicId, Guid degreeId, Guid universityId)
     {

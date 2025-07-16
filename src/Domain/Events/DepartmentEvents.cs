@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Zeus.People.Domain.ValueObjects;
 
 namespace Zeus.People.Domain.Events;
@@ -11,6 +12,14 @@ public class DepartmentCreatedEvent : DomainEvent
     public string Name { get; }
 
     public DepartmentCreatedEvent(Guid departmentId, string name)
+    {
+        DepartmentId = departmentId;
+        Name = name;
+    }
+
+    [JsonConstructor]
+    public DepartmentCreatedEvent(Guid departmentId, string name, Guid eventId, DateTime occurredAt, int version)
+        : base(eventId, occurredAt, version)
     {
         DepartmentId = departmentId;
         Name = name;

@@ -1,4 +1,5 @@
 using FluentValidation;
+using System.Text.Json.Serialization;
 using Zeus.People.Domain.ValueObjects;
 
 namespace Zeus.People.Domain.ValueObjects;
@@ -10,6 +11,7 @@ public class EmpNr : ValueObject
 {
     public string Value { get; private set; }
 
+    [JsonConstructor]
     private EmpNr(string value)
     {
         Value = value;

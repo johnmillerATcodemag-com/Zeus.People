@@ -34,32 +34,3 @@ public class RoomOccupancyDto
     public string? OccupiedByEmpNr { get; set; }
     public DateTime? OccupiedSince { get; set; }
 }
-
-/// <summary>
-/// Extension data transfer object
-/// </summary>
-public class ExtensionDto : BaseDto
-{
-    public string ExtensionNumber { get; set; } = null!;
-    public string AccessLevelCode { get; set; } = null!;
-    public string AccessLevelDescription { get; set; } = null!;
-
-    // Usage
-    public Guid? UsedByAcademicId { get; set; }
-    public string? UsedByAcademicName { get; set; }
-    public string? UsedByEmpNr { get; set; }
-    public bool IsInUse { get; set; }
-}
-
-/// <summary>
-/// Extension access level DTO
-/// </summary>
-public class ExtensionAccessLevelDto
-{
-    public Guid ExtensionId { get; set; }
-    public string ExtensionNumber { get; set; } = null!;
-    public string AccessLevelCode { get; set; } = null!;
-    public string AccessLevelDescription { get; set; } = null!;
-    public bool IsInUse { get; set; }
-    public string? UsedByAcademicName { get; set; }
-}

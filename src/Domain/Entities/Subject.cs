@@ -81,9 +81,12 @@ public class Subject : AggregateRoot
 /// </summary>
 public class Teaching
 {
-    public Guid SubjectId { get; }
-    public Guid AcademicId { get; }
+    public Guid SubjectId { get; private set; }
+    public Guid AcademicId { get; private set; }
     public Rating? Rating { get; private set; }
+
+    // Parameterless constructor for EF Core
+    private Teaching() { }
 
     public Teaching(Guid subjectId, Guid academicId)
     {

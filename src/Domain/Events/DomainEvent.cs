@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Zeus.People.Domain.Events;
 
 /// <summary>
@@ -10,6 +12,14 @@ public abstract class DomainEvent : IDomainEvent
         EventId = Guid.NewGuid();
         OccurredAt = DateTime.UtcNow;
         Version = 1;
+    }
+
+    [JsonConstructor]
+    protected DomainEvent(Guid eventId, DateTime occurredAt, int version)
+    {
+        EventId = eventId;
+        OccurredAt = occurredAt;
+        Version = version;
     }
 
     public Guid EventId { get; private set; }
