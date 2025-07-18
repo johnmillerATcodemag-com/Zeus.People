@@ -195,3 +195,40 @@ public class GetAcademicCountByDepartmentQueryHandler : IRequestHandler<GetAcade
         }
     }
 }
+
+/// <summary>
+/// Handler for GetTenuredAcademicsQuery
+/// </summary>
+public class GetTenuredAcademicsQueryHandler : IRequestHandler<GetTenuredAcademicsQuery, Result<PagedResult<AcademicSummaryDto>>>
+{
+    private readonly IAcademicReadRepository _academicReadRepository;
+    private readonly ILogger<GetTenuredAcademicsQueryHandler> _logger;
+
+    public GetTenuredAcademicsQueryHandler(
+        IAcademicReadRepository academicReadRepository,
+        ILogger<GetTenuredAcademicsQueryHandler> logger)
+    {
+        _academicReadRepository = academicReadRepository;
+        _logger = logger;
+    }
+
+    public async Task<Result<PagedResult<AcademicSummaryDto>>> Handle(GetTenuredAcademicsQuery request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogInformation("Getting tenured academics - Page: {PageNumber}, Size: {PageSize}", request.PageNumber, request.PageSize);
+
+            var result = await _academicReadRepository.GetTenuredAsync(
+                request.PageNumber,
+                request.PageSize,
+                cancellationToken);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting tenured academics");
+            return Result.Failure<PagedResult<AcademicSummaryDto>>(new Error("Academic.GetTenuredFailed", "Failed to get tenured academics"));
+        }
+    }
+}

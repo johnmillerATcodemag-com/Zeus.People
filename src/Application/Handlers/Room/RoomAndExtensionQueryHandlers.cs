@@ -112,3 +112,42 @@ public class GetAvailableRoomsQueryHandler : IRequestHandler<GetAvailableRoomsQu
         }
     }
 }
+
+/// <summary>
+/// Handler for GetAllRoomsQuery
+/// </summary>
+public class GetAllRoomsQueryHandler : IRequestHandler<GetAllRoomsQuery, Result<PagedResult<RoomDto>>>
+{
+    private readonly IRoomReadRepository _roomReadRepository;
+    private readonly ILogger<GetAllRoomsQueryHandler> _logger;
+
+    public GetAllRoomsQueryHandler(
+        IRoomReadRepository roomReadRepository,
+        ILogger<GetAllRoomsQueryHandler> logger)
+    {
+        _roomReadRepository = roomReadRepository;
+        _logger = logger;
+    }
+
+    public async Task<Result<PagedResult<RoomDto>>> Handle(GetAllRoomsQuery request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogInformation("Getting all rooms - Page: {PageNumber}, Size: {PageSize}", request.PageNumber, request.PageSize);
+
+            var result = await _roomReadRepository.GetAllAsync(
+                request.PageNumber,
+                request.PageSize,
+                request.RoomNumberFilter,
+                request.IsOccupiedFilter,
+                cancellationToken);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all rooms");
+            return Result.Failure<PagedResult<RoomDto>>(new Error("Room.GetAllFailed", "Failed to get all rooms"));
+        }
+    }
+}

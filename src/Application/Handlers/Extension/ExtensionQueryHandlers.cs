@@ -116,3 +116,43 @@ public class GetAvailableExtensionsQueryHandler : IRequestHandler<GetAvailableEx
         }
     }
 }
+
+/// <summary>
+/// Handler for GetAllExtensionsQuery
+/// </summary>
+public class GetAllExtensionsQueryHandler : IRequestHandler<GetAllExtensionsQuery, Result<PagedResult<ExtensionDto>>>
+{
+    private readonly IExtensionReadRepository _extensionReadRepository;
+    private readonly ILogger<GetAllExtensionsQueryHandler> _logger;
+
+    public GetAllExtensionsQueryHandler(
+        IExtensionReadRepository extensionReadRepository,
+        ILogger<GetAllExtensionsQueryHandler> logger)
+    {
+        _extensionReadRepository = extensionReadRepository;
+        _logger = logger;
+    }
+
+    public async Task<Result<PagedResult<ExtensionDto>>> Handle(GetAllExtensionsQuery request, CancellationToken cancellationToken)
+    {
+        try
+        {
+            _logger.LogInformation("Getting all extensions - Page: {PageNumber}, Size: {PageSize}", request.PageNumber, request.PageSize);
+
+            var result = await _extensionReadRepository.GetAllAsync(
+                request.PageNumber,
+                request.PageSize,
+                request.ExtensionNumberFilter,
+                request.AccessLevelFilter,
+                request.IsInUseFilter,
+                cancellationToken);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all extensions");
+            return Result.Failure<PagedResult<ExtensionDto>>(new Error("Extension.GetAllFailed", "Failed to get all extensions"));
+        }
+    }
+}
