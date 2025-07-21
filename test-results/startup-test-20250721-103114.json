@@ -1,0 +1,106 @@
+{
+  "TestResults": [
+    {
+      "TestName": "Prerequisites: .NET Runtime",
+      "Passed": true,
+      "Message": ".NET runtime available",
+      "Details": "Version: 9.0.302",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:42.0635607-07:00"
+    },
+    {
+      "TestName": "Prerequisites: Project File",
+      "Passed": true,
+      "Message": "API project file found",
+      "Details": "",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:42.0748179-07:00"
+    },
+    {
+      "TestName": "Prerequisites: Config File",
+      "Passed": true,
+      "Message": "Configuration file found",
+      "Details": "appsettings.json",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:42.0773964-07:00"
+    },
+    {
+      "TestName": "Prerequisites: Config File",
+      "Passed": true,
+      "Message": "Configuration file found",
+      "Details": "appsettings.Development.json",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:42.0803872-07:00"
+    },
+    {
+      "TestName": "Build: Compilation",
+      "Passed": true,
+      "Message": "Application built successfully",
+      "Details": "",
+      "Duration": 11471,
+      "Timestamp": "2025-07-21T10:30:53.5641609-07:00"
+    },
+    {
+      "TestName": "Configuration: JSON Syntax",
+      "Passed": true,
+      "Message": "Base configuration file is valid JSON",
+      "Details": "",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:53.5763991-07:00"
+    },
+    {
+      "TestName": "Configuration: Required Sections",
+      "Passed": true,
+      "Message": "Section 'Logging' found",
+      "Details": "",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:53.5820144-07:00"
+    },
+    {
+      "TestName": "Configuration: Required Sections",
+      "Passed": true,
+      "Message": "Section 'AllowedHosts' found",
+      "Details": "",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:53.583722-07:00"
+    },
+    {
+      "TestName": "Configuration: Environment Config",
+      "Passed": true,
+      "Message": "Environment configuration loaded successfully",
+      "Details": "",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:53.5864615-07:00"
+    },
+    {
+      "TestName": "Key Vault: Access Test",
+      "Passed": true,
+      "Message": "Skipped (not requested)",
+      "Details": "",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:30:53.5906293-07:00"
+    },
+    {
+      "TestName": "Application: Startup",
+      "Passed": false,
+      "Message": "Application startup timeout or failed",
+      "Details": "Output: ",
+      "Duration": 0,
+      "Timestamp": "2025-07-21T10:31:14.381926-07:00"
+    }
+  ],
+  "Summary": {
+    "SuccessRate": 90.91,
+    "TotalTests": 11,
+    "FailedTests": 1,
+    "PassedTests": 10
+  },
+  "TestRunInfo": {
+    "StartTime": "2025-07-21T10:30:41.906131-07:00",
+    "ApplicationUrl": "https://localhost:7001",
+    "EndTime": "2025-07-21T10:31:14.530074-07:00",
+    "Environment": "Development",
+    "TotalDuration": 32.5423263,
+    "KeyVaultName": ""
+  }
+}

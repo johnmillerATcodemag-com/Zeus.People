@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Zeus.People.Application.Interfaces;
@@ -124,6 +125,13 @@ public static class DependencyInjection
         services.AddSingleton<CosmosClient>(serviceProvider =>
         {
             var cosmosDbConfig = serviceProvider.GetRequiredService<IOptions<CosmosDbConfiguration>>().Value;
+            var configuration = serviceProvider.GetRequiredService<IConfiguration>();
+            var environment = serviceProvider.GetService<IHostEnvironment>();
+
+            // Check if we're in a test environment
+            var isTestEnvironment = environment?.EnvironmentName.Equals("Testing", StringComparison.OrdinalIgnoreCase) == true ||
+                                  environment?.EnvironmentName.Equals("Test", StringComparison.OrdinalIgnoreCase) == true;
+
             var cosmosClientOptions = new CosmosClientOptions
             {
                 MaxRetryAttemptsOnRateLimitedRequests = cosmosDbConfig.MaxRetryAttemptsOnRateLimitedRequests,
@@ -132,6 +140,23 @@ public static class DependencyInjection
                 RequestTimeout = TimeSpan.FromSeconds(cosmosDbConfig.RequestTimeoutInSeconds)
             };
 
+            // In test environments, use a mock/fake connection or emulator
+            if (isTestEnvironment)
+            {
+                // Use Cosmos DB Emulator connection or return a test client
+                var testConnectionString = "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==";
+                try
+                {
+                    return new CosmosClient(testConnectionString, cosmosClientOptions);
+                }
+                catch
+                {
+                    // If emulator is not available, create a minimal client for testing
+                    return new CosmosClient("https://test.documents.azure.com:443/", "test-key", cosmosClientOptions);
+                }
+            }
+
+            // For non-test environments, use the original logic
             // Prefer managed identity when configured, fall back to connection string
             if (cosmosDbConfig.UseManagedIdentity && !string.IsNullOrEmpty(cosmosDbConfig.Endpoint))
             {
