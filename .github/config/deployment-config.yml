@@ -1,0 +1,157 @@
+# Environment Configuration for Deployments
+# This file contains environment-specific configuration for CI/CD pipelines
+
+environments:
+  staging:
+    azure_location: "eastus2"
+    resource_group_prefix: "rg-zeus-people-staging"
+    app_service_plan_sku: "B1"
+    cosmos_db_throughput: 400
+    key_vault_name: "kv-zeus-people-staging"
+    application_insights_name: "appi-zeus-people-staging"
+    monitoring_enabled: true
+    auto_scaling_enabled: false
+    deployment_slots: 1
+    health_check_path: "/health"
+    performance_baseline:
+      max_response_time_ms: 2000
+      max_error_rate_percent: 5
+      min_availability_percent: 99
+    
+  production:
+    azure_location: "eastus2"
+    secondary_location: "westus2"
+    resource_group_prefix: "rg-zeus-people-prod"
+    app_service_plan_sku: "P1v3"
+    cosmos_db_throughput: 1000
+    key_vault_name: "kv-zeus-people-prod"
+    application_insights_name: "appi-zeus-people-prod"
+    monitoring_enabled: true
+    auto_scaling_enabled: true
+    deployment_slots: 2
+    health_check_path: "/health"
+    backup_enabled: true
+    disaster_recovery_enabled: true
+    performance_baseline:
+      max_response_time_ms: 1000
+      max_error_rate_percent: 1
+      min_availability_percent: 99.9
+
+# Deployment strategies
+deployment_strategies:
+  staging:
+    strategy: "direct"
+    rollback_enabled: true
+    approval_required: false
+    
+  production:
+    strategy: "blue_green"
+    rollback_enabled: true
+    approval_required: true
+    warm_up_duration_seconds: 300
+    traffic_split_percentage: 10
+    monitoring_duration_minutes: 30
+
+# Notification settings
+notifications:
+  channels:
+    - type: "email"
+      recipients: ["devops@zeuspeople.com"]
+    - type: "teams"
+      webhook_url: "${{ secrets.TEAMS_WEBHOOK_URL }}"
+  
+  triggers:
+    - event: "deployment_success"
+      environments: ["production"]
+    - event: "deployment_failure"
+      environments: ["staging", "production"]
+    - event: "security_alert"
+      environments: ["staging", "production"]
+    - event: "performance_degradation"
+      environments: ["production"]
+
+# Testing configuration
+testing:
+  unit_tests:
+    timeout_minutes: 10
+    coverage_threshold: 80
+    
+  integration_tests:
+    timeout_minutes: 20
+    cosmos_db_emulator: true
+    
+  performance_tests:
+    duration_minutes: 5
+    virtual_users: 50
+    ramp_up_duration_seconds: 60
+    
+  security_tests:
+    timeout_minutes: 30
+    include_container_scan: true
+    include_dependency_scan: true
+    include_sast: true
+
+# Monitoring configuration
+monitoring:
+  metrics:
+    - name: "response_time"
+      threshold: 2000
+      unit: "milliseconds"
+    - name: "error_rate"
+      threshold: 5
+      unit: "percentage"
+    - name: "cpu_usage"
+      threshold: 80
+      unit: "percentage"
+    - name: "memory_usage"
+      threshold: 85
+      unit: "percentage"
+      
+  alerts:
+    - name: "high_response_time"
+      condition: "response_time > threshold"
+      severity: "warning"
+      
+    - name: "high_error_rate"
+      condition: "error_rate > threshold"
+      severity: "critical"
+      
+    - name: "service_unavailable"
+      condition: "availability < 99%"
+      severity: "critical"
+
+# Security configuration
+security:
+  scans:
+    - type: "sast"
+      tool: "codeql"
+      schedule: "on_push"
+      
+    - type: "dependency"
+      tool: "dotnet_list_package"
+      schedule: "daily"
+      
+    - type: "container"
+      tool: "trivy"
+      schedule: "on_push"
+      
+    - type: "infrastructure"
+      tool: "checkov"
+      schedule: "on_push"
+      
+    - type: "secrets"
+      tool: "gitleaks"
+      schedule: "on_push"
+
+# Backup and recovery
+backup:
+  production:
+    enabled: true
+    frequency: "daily"
+    retention_days: 30
+    point_in_time_recovery: true
+    
+  staging:
+    enabled: false
+    frequency: "weekly"
+    retention_days: 7

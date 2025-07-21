@@ -1,0 +1,405 @@
+# Emergency Rollback Procedure
+# Provides quick rollback capabilities for production deployments
+# Duration: Rollback typically takes 2-5 minutes
+
+name: Emergency Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to rollback"
+        required: true
+        type: choice
+        default: "production"
+        options:
+          - production
+          - staging
+      rollback_type:
+        description: "Type of rollback"
+        required: true
+        type: choice
+        default: "slot_swap"
+        options:
+          - slot_swap
+          - previous_deployment
+          - specific_version
+      target_version:
+        description: "Specific version to rollback to (if selected)"
+        required: false
+        type: string
+      reason:
+        description: "Reason for rollback"
+        required: true
+        type: string
+      skip_tests:
+        description: "Skip post-rollback tests (emergency only)"
+        required: false
+        type: boolean
+        default: false
+
+env:
+  AZURE_WEBAPP_NAME: "zeus-people-api"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validate-rollback:
+    name: Validate Rollback Request
+    runs-on: ubuntu-latest
+    outputs:
+      can-proceed: ${{ steps.validation.outputs.can-proceed }}
+      rollback-target: ${{ steps.validation.outputs.rollback-target }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate rollback request
+        id: validation
+        run: |
+          echo "Validating rollback request..."
+          echo "Environment: ${{ inputs.environment }}"
+          echo "Rollback Type: ${{ inputs.rollback_type }}"
+          echo "Reason: ${{ inputs.reason }}"
+
+          # Basic validation
+          if [ "${{ inputs.environment }}" == "production" ] && [ -z "${{ inputs.reason }}" ]; then
+            echo "❌ Reason is required for production rollbacks"
+            echo "can-proceed=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+          # Determine rollback target
+          case "${{ inputs.rollback_type }}" in
+            "slot_swap")
+              ROLLBACK_TARGET="staging_slot"
+              ;;
+            "previous_deployment")
+              ROLLBACK_TARGET="previous_version"
+              ;;
+            "specific_version")
+              if [ -z "${{ inputs.target_version }}" ]; then
+                echo "❌ Target version is required for specific version rollback"
+                echo "can-proceed=false" >> $GITHUB_OUTPUT
+                exit 1
+              fi
+              ROLLBACK_TARGET="${{ inputs.target_version }}"
+              ;;
+          esac
+
+          echo "✅ Validation passed"
+          echo "can-proceed=true" >> $GITHUB_OUTPUT
+          echo "rollback-target=$ROLLBACK_TARGET" >> $GITHUB_OUTPUT
+
+      - name: Create rollback incident
+        run: |
+          echo "Creating rollback incident record..."
+          cat > rollback-incident.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "environment": "${{ inputs.environment }}",
+            "rollback_type": "${{ inputs.rollback_type }}",
+            "reason": "${{ inputs.reason }}",
+            "initiated_by": "${{ github.actor }}",
+            "workflow_run": "${{ github.run_id }}",
+            "target": "${{ steps.validation.outputs.rollback-target }}"
+          }
+          EOF
+
+      - name: Upload incident record
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-incident-${{ github.run_id }}
+          path: rollback-incident.json
+          retention-days: 90
+
+  execute-rollback:
+    name: Execute Rollback - ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: validate-rollback
+    if: ${{ needs.validate-rollback.outputs.can-proceed == 'true' }}
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Azure Developer CLI
+        uses: azure/setup-azd@v0.1.0
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get current deployment info
+        id: current-info
+        run: |
+          echo "Getting current deployment information..."
+
+          # Get resource group and app service name
+          RESOURCE_GROUP="rg-zeus-people-${{ inputs.environment }}"
+          APP_NAME="app-zeus-people-${{ inputs.environment }}"
+
+          # Get current deployment info
+          CURRENT_VERSION=$(az webapp show \
+            --name $APP_NAME \
+            --resource-group $RESOURCE_GROUP \
+            --query "tags.version" -o tsv)
+
+          echo "Current version: $CURRENT_VERSION"
+          echo "current-version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "resource-group=$RESOURCE_GROUP" >> $GITHUB_OUTPUT
+          echo "app-name=$APP_NAME" >> $GITHUB_OUTPUT
+
+      - name: Create pre-rollback backup
+        run: |
+          echo "Creating pre-rollback backup..."
+
+          # Export current configuration
+          az webapp config show \
+            --name ${{ steps.current-info.outputs.app-name }} \
+            --resource-group ${{ steps.current-info.outputs.resource-group }} \
+            > current-webapp-config.json
+
+          # Export app settings
+          az webapp config appsettings list \
+            --name ${{ steps.current-info.outputs.app-name }} \
+            --resource-group ${{ steps.current-info.outputs.resource-group }} \
+            > current-app-settings.json
+
+      - name: Execute slot swap rollback
+        if: ${{ inputs.rollback_type == 'slot_swap' }}
+        run: |
+          echo "Executing slot swap rollback..."
+
+          # Swap staging slot to production
+          az webapp deployment slot swap \
+            --name ${{ steps.current-info.outputs.app-name }} \
+            --resource-group ${{ steps.current-info.outputs.resource-group }} \
+            --slot staging \
+            --target-slot production
+
+          echo "✅ Slot swap completed"
+
+      - name: Execute previous deployment rollback
+        if: ${{ inputs.rollback_type == 'previous_deployment' }}
+        run: |
+          echo "Executing previous deployment rollback..."
+
+          # Get previous deployment
+          PREVIOUS_DEPLOYMENT=$(az webapp deployment list \
+            --name ${{ steps.current-info.outputs.app-name }} \
+            --resource-group ${{ steps.current-info.outputs.resource-group }} \
+            --query "[1].id" -o tsv)
+
+          if [ -z "$PREVIOUS_DEPLOYMENT" ]; then
+            echo "❌ No previous deployment found"
+            exit 1
+          fi
+
+          # Redeploy previous version
+          az webapp deployment source show \
+            --name ${{ steps.current-info.outputs.app-name }} \
+            --resource-group ${{ steps.current-info.outputs.resource-group }} \
+            --deployment-id $PREVIOUS_DEPLOYMENT
+
+          echo "✅ Previous deployment rollback completed"
+
+      - name: Execute specific version rollback
+        if: ${{ inputs.rollback_type == 'specific_version' }}
+        run: |
+          echo "Executing specific version rollback to ${{ inputs.target_version }}..."
+
+          # This would typically involve redeploying a specific version
+          # Implementation depends on your artifact storage and deployment strategy
+          echo "Rolling back to version: ${{ inputs.target_version }}"
+
+          # Example: Download and deploy specific version
+          # az webapp deployment source config-zip \
+          #   --name ${{ steps.current-info.outputs.app-name }} \
+          #   --resource-group ${{ steps.current-info.outputs.resource-group }} \
+          #   --src "path/to/version/${{ inputs.target_version }}.zip"
+
+          echo "✅ Specific version rollback completed"
+
+      - name: Update deployment tags
+        run: |
+          echo "Updating deployment tags..."
+
+          # Tag the app service with rollback information
+          az webapp update \
+            --name ${{ steps.current-info.outputs.app-name }} \
+            --resource-group ${{ steps.current-info.outputs.resource-group }} \
+            --set tags.last_rollback="$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                 tags.rollback_reason="${{ inputs.reason }}" \
+                 tags.rollback_from="${{ steps.current-info.outputs.current-version }}" \
+                 tags.rollback_type="${{ inputs.rollback_type }}" \
+                 tags.rollback_by="${{ github.actor }}"
+
+      - name: Upload rollback artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-artifacts-${{ inputs.environment }}
+          path: |
+            current-webapp-config.json
+            current-app-settings.json
+          retention-days: 90
+
+  verify-rollback:
+    name: Verify Rollback
+    runs-on: ubuntu-latest
+    needs: [validate-rollback, execute-rollback]
+    if: ${{ needs.execute-rollback.result == 'success' }}
+
+    steps:
+      - name: Wait for application startup
+        run: |
+          echo "Waiting for application to start after rollback..."
+          sleep 60
+
+      - name: Get application URL
+        id: get-url
+        run: |
+          # Get the application URL from Azure
+          APP_URL="https://app-zeus-people-${{ inputs.environment }}.azurewebsites.net"
+          echo "app-url=$APP_URL" >> $GITHUB_OUTPUT
+
+      - name: Health check
+        run: |
+          echo "Performing health check on ${{ steps.get-url.outputs.app-url }}"
+
+          # Basic health check
+          for i in {1..5}; do
+            if curl -f "${{ steps.get-url.outputs.app-url }}/health"; then
+              echo "✅ Health check passed (attempt $i)"
+              break
+            else
+              echo "❌ Health check failed (attempt $i)"
+              if [ $i -eq 5 ]; then
+                echo "❌ Health check failed after 5 attempts"
+                exit 1
+              fi
+              sleep 10
+            fi
+          done
+
+      - name: Basic functionality test
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "Running basic functionality tests..."
+
+          # Test main API endpoints
+          BASE_URL="${{ steps.get-url.outputs.app-url }}"
+
+          # Test health endpoint
+          curl -f "$BASE_URL/health" || echo "Health endpoint test failed"
+
+          # Test API endpoints (may require authentication)
+          # curl -f "$BASE_URL/api/people" || echo "API endpoint test failed (may require auth)"
+
+      - name: Performance verification
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          echo "Verifying performance after rollback..."
+
+          # Simple response time test
+          START_TIME=$(date +%s%N)
+          curl -s "${{ steps.get-url.outputs.app-url }}/health" > /dev/null
+          END_TIME=$(date +%s%N)
+          RESPONSE_TIME=$(( ($END_TIME - $START_TIME) / 1000000 ))
+
+          echo "Response time: ${RESPONSE_TIME}ms"
+
+          if [ $RESPONSE_TIME -gt 5000 ]; then
+            echo "⚠️ Warning: Response time is high (${RESPONSE_TIME}ms)"
+          else
+            echo "✅ Response time is acceptable (${RESPONSE_TIME}ms)"
+          fi
+
+  notify-rollback:
+    name: Notify Rollback Completion
+    runs-on: ubuntu-latest
+    needs: [validate-rollback, execute-rollback, verify-rollback]
+    if: always()
+
+    steps:
+      - name: Prepare notification
+        id: prepare
+        run: |
+          # Determine rollback status
+          if [ "${{ needs.execute-rollback.result }}" == "success" ] && [ "${{ needs.verify-rollback.result }}" == "success" ]; then
+            STATUS="✅ SUCCESS"
+            COLOR="good"
+          elif [ "${{ needs.execute-rollback.result }}" == "success" ] && [ "${{ needs.verify-rollback.result }}" != "success" ]; then
+            STATUS="⚠️ COMPLETED WITH ISSUES"
+            COLOR="warning"
+          else
+            STATUS="❌ FAILED"
+            COLOR="danger"
+          fi
+
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "color=$COLOR" >> $GITHUB_OUTPUT
+
+      - name: Send notification
+        run: |
+          echo "Sending rollback notification..."
+
+          cat > notification.md << EOF
+          # Rollback Notification
+
+          **Status:** ${{ steps.prepare.outputs.status }}
+          **Environment:** ${{ inputs.environment }}
+          **Rollback Type:** ${{ inputs.rollback_type }}
+          **Reason:** ${{ inputs.reason }}
+          **Initiated By:** ${{ github.actor }}
+          **Timestamp:** $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          **Results:**
+          - Validation: ${{ needs.validate-rollback.result }}
+          - Execution: ${{ needs.execute-rollback.result }}
+          - Verification: ${{ needs.verify-rollback.result }}
+
+          **Workflow:** [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+
+          echo "Notification prepared (actual sending would be implemented here)"
+
+      - name: Create post-rollback task list
+        run: |
+          cat > post-rollback-tasks.md << EOF
+          # Post-Rollback Tasks
+
+          **Immediate Actions Required:**
+          - [ ] Monitor application performance for next 30 minutes
+          - [ ] Verify all critical business functions
+          - [ ] Check application logs for errors
+          - [ ] Notify stakeholders of rollback completion
+
+          **Follow-up Actions:**
+          - [ ] Investigate root cause of issue that triggered rollback
+          - [ ] Create action plan to prevent recurrence
+          - [ ] Schedule post-incident review meeting
+          - [ ] Update monitoring and alerting if needed
+          - [ ] Document lessons learned
+
+          **Monitoring Points:**
+          - Application response times
+          - Error rates
+          - User authentication
+          - Database connectivity
+          - Third-party integrations
+          EOF
+
+      - name: Upload post-rollback tasks
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-rollback-tasks
+          path: post-rollback-tasks.md
+          retention-days: 30

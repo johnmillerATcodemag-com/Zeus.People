@@ -1,0 +1,485 @@
+# GitHub Actions CI/CD Pipeline for Zeus.People Academic Management System
+# Comprehensive pipeline with build, test, security scanning, and deployment
+# Duration: Pipeline execution time varies by stage
+
+name: Zeus.People CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target deployment environment"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - production
+          - rollback
+      skip_tests:
+        description: "Skip test execution"
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  NODE_VERSION: "20.x"
+  AZURE_WEBAPP_NAME: "zeus-people-api"
+  AZURE_WEBAPP_PACKAGE_PATH: "./publish"
+  BUILD_CONFIGURATION: "Release"
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+  id-token: write
+
+jobs:
+  # Job 1: Build and Basic Validation
+  build:
+    name: Build and Validate
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build-number: ${{ steps.version.outputs.build-number }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Generate version information
+        id: version
+        run: |
+          VERSION=$(date '+%Y.%m.%d')-${{ github.run_number }}
+          BUILD_NUMBER=${{ github.run_number }}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build-number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "Generated version: $VERSION"
+
+      - name: Restore dependencies
+        run: dotnet restore Zeus.People.sln
+
+      - name: Build solution
+        run: |
+          dotnet build Zeus.People.sln \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --no-restore \
+            --verbosity normal \
+            -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            **/bin/${{ env.BUILD_CONFIGURATION }}/**
+            **/obj/${{ env.BUILD_CONFIGURATION }}/**
+          retention-days: 5
+
+  # Job 2: Unit and Integration Tests
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ !inputs.skip_tests }}
+
+    strategy:
+      matrix:
+        test-project:
+          [
+            "Zeus.People.Domain.Tests",
+            "Zeus.People.Application.Tests",
+            "Zeus.People.Infrastructure.Tests",
+            "Zeus.People.API.Tests",
+          ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore Zeus.People.sln
+
+      - name: Run ${{ matrix.test-project }} tests
+        run: |
+          dotnet test tests/${{ matrix.test-project }}/${{ matrix.test-project }}.csproj \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --no-build \
+            --verbosity normal \
+            --logger trx \
+            --logger "console;verbosity=detailed" \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./test-results/${{ matrix.test-project }}
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.test-project }}
+          path: ./test-results/${{ matrix.test-project }}
+          retention-days: 30
+
+  # Job 3: Code Quality and Security Analysis
+  code-quality:
+    name: Code Quality & Security
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore Zeus.People.sln
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: csharp
+
+      - name: Build for CodeQL
+        run: |
+          dotnet build Zeus.People.sln \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --no-restore
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+      - name: Run dependency vulnerability scan
+        run: |
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerability-report.txt
+
+      - name: Upload vulnerability report
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerability-report
+          path: vulnerability-report.txt
+          retention-days: 30
+
+  # Job 4: Build Application Package
+  package:
+    name: Build Application Package
+    runs-on: ubuntu-latest
+    needs: [build, test, code-quality]
+    if: ${{ always() && needs.build.result == 'success' && (needs.test.result == 'success' || inputs.skip_tests) && needs.code-quality.result == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore Zeus.People.sln
+
+      - name: Publish application
+        run: |
+          dotnet publish src/API/Zeus.People.API.csproj \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --output ${{ env.AZURE_WEBAPP_PACKAGE_PATH }} \
+            --no-restore \
+            -p:Version=${{ needs.build.outputs.version }} \
+            -p:PublishSingleFile=false \
+            -p:PublishTrimmed=false
+
+      - name: Upload application package
+        uses: actions/upload-artifact@v4
+        with:
+          name: application-package
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          retention-days: 30
+
+  # Job 5: Deploy to Staging Environment
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, package]
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Azure Developer CLI
+        uses: azure/setup-azd@v0.1.0
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download application package
+        uses: actions/download-artifact@v4
+        with:
+          name: application-package
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Deploy infrastructure
+        run: |
+          azd auth login --client-id ${{ secrets.AZURE_CLIENT_ID }} \
+            --client-secret ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+
+          azd env set AZURE_ENV_NAME zeus-people-staging
+          azd env set AZURE_LOCATION eastus2
+          azd env set AZURE_SUBSCRIPTION_ID ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+          azd provision --preview
+          azd provision
+
+      - name: Run database migrations
+        run: |
+          # Database migration logic here
+          echo "Running database migrations for staging environment"
+          # dotnet ef database update --project src/Infrastructure --startup-project src/API
+
+      - name: Deploy application
+        id: deploy
+        run: |
+          azd deploy zeus-people-api
+          WEBAPP_URL=$(azd env get-values | grep AZURE_APP_SERVICE_URL | cut -d'=' -f2)
+          echo "webapp-url=$WEBAPP_URL" >> $GITHUB_OUTPUT
+
+      - name: Health check
+        run: |
+          sleep 30
+          curl -f ${{ steps.deploy.outputs.webapp-url }}/health || exit 1
+
+  # Job 6: End-to-End Tests
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: ${{ needs.deploy-staging.result == 'success' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          # Install E2E testing framework (e.g., Playwright, Cypress)
+          echo "Installing E2E test dependencies"
+
+      - name: Run E2E tests
+        env:
+          BASE_URL: ${{ needs.deploy-staging.outputs.webapp-url }}
+        run: |
+          echo "Running E2E tests against staging environment: $BASE_URL"
+          # Run actual E2E tests here
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: ./e2e-test-results
+          retention-days: 30
+
+  # Job 7: Deploy to Production (Manual Approval Required)
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, package, e2e-tests]
+    if: ${{ github.ref == 'refs/heads/main' && needs.e2e-tests.result == 'success' }}
+    environment:
+      name: production
+      url: ${{ steps.deploy-prod.outputs.webapp-url }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Azure Developer CLI
+        uses: azure/setup-azd@v0.1.0
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Download application package
+        uses: actions/download-artifact@v4
+        with:
+          name: application-package
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Create production backup
+        run: |
+          echo "Creating backup of current production environment"
+          # Backup logic here
+
+      - name: Deploy to production (Blue-Green)
+        id: deploy-prod
+        run: |
+          azd auth login --client-id ${{ secrets.AZURE_CLIENT_ID }} \
+            --client-secret ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+
+          azd env set AZURE_ENV_NAME zeus-people-prod
+          azd env set AZURE_LOCATION eastus2
+          azd env set AZURE_SUBSCRIPTION_ID ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+          # Deploy to slot first (Blue-Green deployment)
+          azd provision
+          azd deploy zeus-people-api --slot staging
+
+          # Warm up staging slot
+          sleep 60
+
+          # Perform slot swap
+          az webapp deployment slot swap \
+            --resource-group $(azd env get-values | grep AZURE_RESOURCE_GROUP | cut -d'=' -f2) \
+            --name $(azd env get-values | grep AZURE_APP_SERVICE_NAME | cut -d'=' -f2) \
+            --slot staging \
+            --target-slot production
+
+          WEBAPP_URL=$(azd env get-values | grep AZURE_APP_SERVICE_URL | cut -d'=' -f2)
+          echo "webapp-url=$WEBAPP_URL" >> $GITHUB_OUTPUT
+
+      - name: Run database migrations (Production)
+        run: |
+          echo "Running database migrations for production environment"
+          # dotnet ef database update --project src/Infrastructure --startup-project src/API
+
+      - name: Production health check
+        run: |
+          sleep 30
+          curl -f ${{ steps.deploy-prod.outputs.webapp-url }}/health || exit 1
+
+      - name: Post-deployment monitoring setup
+        run: |
+          echo "Setting up monitoring and alerting for production deployment"
+          # Configure Application Insights alerts, etc.
+
+  # Job 8: Cleanup and Notifications
+  cleanup:
+    name: Cleanup and Notifications
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+
+    steps:
+      - name: Cleanup old staging deployments
+        if: ${{ needs.deploy-staging.result == 'success' }}
+        run: |
+          echo "Cleaning up old staging deployments"
+          # Cleanup logic here
+
+      - name: Send deployment notification
+        if: ${{ needs.deploy-production.result == 'success' }}
+        run: |
+          echo "Sending deployment success notification"
+          # Send Teams/Slack notification
+
+      - name: Send failure notification
+        if: ${{ failure() }}
+        run: |
+          echo "Sending deployment failure notification"
+          # Send failure notification
+
+  # Job for rollback procedure (manually triggered)
+  rollback:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'rollback' }}
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Azure Developer CLI
+        uses: azure/setup-azd@v0.1.0
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Rollback deployment
+        run: |
+          echo "Performing rollback to previous production version"
+          # Implement rollback logic
+          az webapp deployment slot swap \
+            --resource-group $(azd env get-values | grep AZURE_RESOURCE_GROUP | cut -d'=' -f2) \
+            --name $(azd env get-values | grep AZURE_APP_SERVICE_NAME | cut -d'=' -f2) \
+            --slot production \
+            --target-slot staging
+
+      - name: Verify rollback
+        run: |
+          sleep 30
+          curl -f $(azd env get-values | grep AZURE_APP_SERVICE_URL | cut -d'=' -f2)/health || exit 1

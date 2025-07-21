@@ -1,0 +1,102 @@
+# Infrastructure Validation Pipeline
+# Validates Bicep templates and infrastructure changes
+# Duration: Infrastructure validation typically takes 5-10 minutes
+
+name: Infrastructure Validation
+
+on:
+  push:
+    paths:
+      - "infra/**"
+      - "azure.yaml"
+  pull_request:
+    paths:
+      - "infra/**"
+      - "azure.yaml"
+  workflow_dispatch:
+
+env:
+  AZURE_LOCATION: "eastus2"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  validate-infrastructure:
+    name: Validate Infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Azure Developer CLI
+        uses: azure/setup-azd@v0.1.0
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Validate Bicep templates
+        run: |
+          # Validate main.bicep template
+          az bicep build --file infra/main.bicep
+
+          # Validate template deployment (what-if)
+          az deployment sub validate \
+            --location ${{ env.AZURE_LOCATION }} \
+            --template-file infra/main.bicep \
+            --parameters @infra/main.parameters.dev.json
+
+      - name: Run infrastructure what-if
+        run: |
+          az deployment sub what-if \
+            --location ${{ env.AZURE_LOCATION }} \
+            --template-file infra/main.bicep \
+            --parameters @infra/main.parameters.dev.json
+
+      - name: Check resource naming conventions
+        run: |
+          echo "Validating resource naming conventions"
+          # Add custom validation scripts here
+
+      - name: Validate azure.yaml
+        run: |
+          azd config list-alpha
+          azd env new temp-validation --location ${{ env.AZURE_LOCATION }}
+          azd package --all
+          azd env delete temp-validation --force
+
+  security-scan:
+    name: Security Scan Infrastructure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Checkov security scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: infra/
+          framework: bicep
+          output_format: sarif
+          output_file_path: checkov-results.sarif
+
+      - name: Upload Checkov results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: checkov-results.sarif
+
+      - name: Upload Checkov results as artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checkov-results
+          path: checkov-results.sarif
+          retention-days: 30

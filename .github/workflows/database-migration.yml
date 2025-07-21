@@ -1,0 +1,141 @@
+# Database Migration Workflow
+# Handles automated database migrations for different environments
+# Duration: Database migration time varies by size and complexity
+
+name: Database Migration
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: "Target environment for migration"
+      migration_type:
+        required: false
+        type: string
+        default: "update"
+        description: "Migration type: update, rollback, or seed"
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: choice
+        default: "staging"
+        description: "Target environment for migration"
+        options:
+          - staging
+          - production
+      migration_type:
+        required: false
+        type: choice
+        default: "update"
+        description: "Migration type"
+        options:
+          - update
+          - rollback
+          - seed
+
+env:
+  DOTNET_VERSION: "8.0.x"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  migrate-database:
+    name: Database Migration - ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Install EF Core tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get database connection string
+        id: get-connection
+        run: |
+          # Get connection string from Key Vault
+          CONNECTION_STRING=$(az keyvault secret show \
+            --vault-name "kv-zeus-people-${{ inputs.environment }}" \
+            --name "CosmosDbConnectionString" \
+            --query value -o tsv)
+          echo "::add-mask::$CONNECTION_STRING"
+          echo "connection-string=$CONNECTION_STRING" >> $GITHUB_OUTPUT
+
+      - name: Backup database (Production only)
+        if: ${{ inputs.environment == 'production' }}
+        run: |
+          echo "Creating database backup before migration"
+          # Add database backup logic here
+          # For Cosmos DB, this might involve exporting data
+
+      - name: Run database migration
+        env:
+          ConnectionStrings__DefaultConnection: ${{ steps.get-connection.outputs.connection-string }}
+        run: |
+          case "${{ inputs.migration_type }}" in
+            "update")
+              echo "Running database update migration"
+              dotnet ef database update \
+                --project src/Infrastructure/Zeus.People.Infrastructure.csproj \
+                --startup-project src/API/Zeus.People.API.csproj \
+                --verbose
+              ;;
+            "rollback")
+              echo "Rolling back database migration"
+              # Add rollback logic
+              dotnet ef database update [PreviousMigration] \
+                --project src/Infrastructure/Zeus.People.Infrastructure.csproj \
+                --startup-project src/API/Zeus.People.API.csproj \
+                --verbose
+              ;;
+            "seed")
+              echo "Seeding database with initial data"
+              # Run data seeding
+              dotnet run --project src/API/Zeus.People.API.csproj -- --seed-data
+              ;;
+          esac
+
+      - name: Verify migration
+        env:
+          ConnectionStrings__DefaultConnection: ${{ steps.get-connection.outputs.connection-string }}
+        run: |
+          echo "Verifying database migration was successful"
+          # Add verification logic here
+          dotnet ef migrations list \
+            --project src/Infrastructure/Zeus.People.Infrastructure.csproj \
+            --startup-project src/API/Zeus.People.API.csproj
+
+      - name: Run post-migration tests
+        env:
+          ConnectionStrings__DefaultConnection: ${{ steps.get-connection.outputs.connection-string }}
+        run: |
+          echo "Running post-migration validation tests"
+          # Run specific tests to validate migration
+          dotnet test tests/Zeus.People.Infrastructure.Tests/ \
+            --configuration Release \
+            --filter "Category=Migration" \
+            --logger trx
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          echo "Migration failed - running cleanup procedures"
+          # Add cleanup logic if migration fails

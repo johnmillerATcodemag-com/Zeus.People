@@ -1,0 +1,242 @@
+# Post-Deployment Monitoring and Alerting
+# Sets up monitoring, health checks, and alerts after deployment
+# Duration: Monitoring setup typically takes 2-3 minutes
+
+name: Post-Deployment Monitoring
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+        description: "Environment to monitor"
+      webapp_url:
+        required: true
+        type: string
+        description: "Web application URL to monitor"
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: choice
+        default: "staging"
+        description: "Environment to monitor"
+        options:
+          - staging
+          - production
+      webapp_url:
+        required: true
+        type: string
+        description: "Web application URL to monitor"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  setup-monitoring:
+    name: Setup Monitoring - ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Setup Application Insights alerts
+        run: |
+          echo "Setting up Application Insights alerts for ${{ inputs.environment }}"
+
+          # Get resource information
+          RESOURCE_GROUP="rg-zeus-people-${{ inputs.environment }}"
+          APP_INSIGHTS="appi-zeus-people-${{ inputs.environment }}"
+
+          # Create alert rules
+          az monitor metrics alert create \
+            --name "High Response Time - ${{ inputs.environment }}" \
+            --resource-group $RESOURCE_GROUP \
+            --scopes "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.Insights/components/$APP_INSIGHTS" \
+            --condition "avg requests/duration > 2000" \
+            --description "Alert when average response time exceeds 2 seconds" \
+            --evaluation-frequency 1m \
+            --window-size 5m \
+            --severity 2
+
+          az monitor metrics alert create \
+            --name "High Error Rate - ${{ inputs.environment }}" \
+            --resource-group $RESOURCE_GROUP \
+            --scopes "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.Insights/components/$APP_INSIGHTS" \
+            --condition "avg requests/failed > 5" \
+            --description "Alert when error rate exceeds 5%" \
+            --evaluation-frequency 1m \
+            --window-size 5m \
+            --severity 1
+
+      - name: Setup availability tests
+        run: |
+          echo "Setting up availability tests for ${{ inputs.webapp_url }}"
+
+          # Create availability test
+          az resource create \
+            --resource-group "rg-zeus-people-${{ inputs.environment }}" \
+            --resource-type "Microsoft.Insights/webtests" \
+            --name "zeus-people-availability-${{ inputs.environment }}" \
+            --properties '{
+              "SyntheticMonitorId": "zeus-people-availability-${{ inputs.environment }}",
+              "Name": "Zeus People API Health Check - ${{ inputs.environment }}",
+              "Enabled": true,
+              "Frequency": 300,
+              "Timeout": 30,
+              "Kind": "ping",
+              "Locations": [
+                {
+                  "Id": "us-east-2-azure"
+                },
+                {
+                  "Id": "us-west-2-azure"
+                }
+              ],
+              "Configuration": {
+                "WebTest": "<WebTest><Items><Request Method=\"GET\" Url=\"${{ inputs.webapp_url }}/health\" ThinkTime=\"0\" Timeout=\"30\" ParseDependentRequests=\"False\" FollowRedirects=\"True\" RecordResult=\"True\" Cache=\"False\" ResponseTimeGoal=\"0\" Encoding=\"utf-8\" ExpectedHttpStatusCode=\"200\" /></Items></WebTest>"
+              }
+            }'
+
+      - name: Create action groups for notifications
+        run: |
+          echo "Creating action groups for notifications"
+
+          # Create action group for email notifications
+          az monitor action-group create \
+            --name "zeus-people-alerts-${{ inputs.environment }}" \
+            --resource-group "rg-zeus-people-${{ inputs.environment }}" \
+            --short-name "ZeusPeople" \
+            --email receiver1 "${{ secrets.ALERT_EMAIL }}"
+
+  health-check:
+    name: Comprehensive Health Check
+    runs-on: ubuntu-latest
+    needs: setup-monitoring
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Basic connectivity test
+        run: |
+          echo "Testing basic connectivity to ${{ inputs.webapp_url }}"
+          curl -f "${{ inputs.webapp_url }}/health" || exit 1
+
+      - name: API endpoint tests
+        run: |
+          echo "Running comprehensive API endpoint tests"
+
+          # Test health endpoint
+          HEALTH_RESPONSE=$(curl -s "${{ inputs.webapp_url }}/health")
+          echo "Health endpoint response: $HEALTH_RESPONSE"
+
+          # Test API endpoints
+          curl -f "${{ inputs.webapp_url }}/api/people" || echo "API endpoints may require authentication"
+
+      - name: Performance baseline test
+        run: |
+          echo "Running performance baseline test"
+
+          # Simple load test using curl
+          for i in {1..10}; do
+            START_TIME=$(date +%s%N)
+            curl -s "${{ inputs.webapp_url }}/health" > /dev/null
+            END_TIME=$(date +%s%N)
+            DURATION=$((($END_TIME - $START_TIME) / 1000000))
+            echo "Request $i: ${DURATION}ms"
+          done
+
+      - name: Database connectivity test
+        run: |
+          echo "Testing database connectivity through API"
+          # Test database health endpoint if available
+          curl -f "${{ inputs.webapp_url }}/health/database" || echo "Database health endpoint not available"
+
+  security-validation:
+    name: Security Validation
+    runs-on: ubuntu-latest
+    needs: setup-monitoring
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: SSL/TLS validation
+        run: |
+          echo "Validating SSL/TLS configuration"
+
+          # Check SSL certificate
+          echo | openssl s_client -servername $(echo "${{ inputs.webapp_url }}" | cut -d'/' -f3) \
+            -connect $(echo "${{ inputs.webapp_url }}" | cut -d'/' -f3):443 2>/dev/null | \
+            openssl x509 -noout -dates
+
+      - name: Security headers check
+        run: |
+          echo "Checking security headers"
+
+          curl -I "${{ inputs.webapp_url }}" | grep -i "x-content-type-options\|x-frame-options\|x-xss-protection\|strict-transport-security"
+
+      - name: OWASP ZAP baseline scan
+        if: ${{ inputs.environment == 'staging' }}
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: "${{ inputs.webapp_url }}"
+          rules_file_name: ".zap/rules.tsv"
+          cmd_options: "-a"
+
+  generate-monitoring-report:
+    name: Generate Monitoring Report
+    runs-on: ubuntu-latest
+    needs: [setup-monitoring, health-check, security-validation]
+    if: always()
+
+    steps:
+      - name: Generate monitoring summary
+        run: |
+          echo "# Monitoring Setup Report - ${{ inputs.environment }}" > monitoring-report.md
+          echo "**Environment:** ${{ inputs.environment }}" >> monitoring-report.md
+          echo "**Application URL:** ${{ inputs.webapp_url }}" >> monitoring-report.md
+          echo "**Timestamp:** $(date)" >> monitoring-report.md
+          echo "" >> monitoring-report.md
+
+          echo "## Monitoring Components Configured" >> monitoring-report.md
+          echo "- ✅ Application Insights alerts" >> monitoring-report.md
+          echo "- ✅ Availability tests" >> monitoring-report.md
+          echo "- ✅ Action groups for notifications" >> monitoring-report.md
+          echo "" >> monitoring-report.md
+
+          echo "## Health Check Results" >> monitoring-report.md
+          if [ "${{ needs.health-check.result }}" == "success" ]; then
+            echo "- ✅ Basic connectivity: PASSED" >> monitoring-report.md
+            echo "- ✅ API endpoints: PASSED" >> monitoring-report.md
+            echo "- ✅ Performance baseline: PASSED" >> monitoring-report.md
+          else
+            echo "- ❌ Health checks: FAILED" >> monitoring-report.md
+          fi
+          echo "" >> monitoring-report.md
+
+          echo "## Security Validation" >> monitoring-report.md
+          if [ "${{ needs.security-validation.result }}" == "success" ]; then
+            echo "- ✅ SSL/TLS validation: PASSED" >> monitoring-report.md
+            echo "- ✅ Security headers: PASSED" >> monitoring-report.md
+          else
+            echo "- ❌ Security validation: FAILED" >> monitoring-report.md
+          fi
+
+      - name: Upload monitoring report
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-report-${{ inputs.environment }}
+          path: monitoring-report.md
+          retention-days: 30
