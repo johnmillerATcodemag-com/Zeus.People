@@ -1,0 +1,27 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "dev"
+    },
+    "applicationPrefix": {
+      "value": "academic"
+    },
+    "primaryLocation": {
+      "value": "eastus2"
+    },
+    "secondaryLocation": {
+      "value": "westus2"
+    },
+    "sqlAdminLogin": {
+      "value": "sqladmin"
+    },
+    "sqlAdminPassword": {
+      "value": "P@ssw0rd123!"
+    },
+    "keyVaultAccessPrincipalId": {
+      "value": "a94c0fd7-fc44-41aa-b98e-a75a19412723"
+    }
+  }
+}

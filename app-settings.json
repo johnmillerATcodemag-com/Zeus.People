@@ -1,0 +1,10 @@
+[
+  {
+    "name": "ConnectionStrings__AcademicDatabase",
+    "value": "@Microsoft.KeyVault(VaultName=kvdyrtbsyffmtgk;SecretName=DefaultConnection)"
+  },
+  {
+    "name": "ConnectionStrings__EventStoreDatabase",
+    "value": "@Microsoft.KeyVault(VaultName=kvdyrtbsyffmtgk;SecretName=EventStoreConnection)"
+  }
+]

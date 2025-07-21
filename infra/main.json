@@ -1,0 +1,2772 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.33.93.31351",
+      "templateHash": "11135795407300412039"
+    }
+  },
+  "parameters": {
+    "environmentName": {
+      "type": "string",
+      "defaultValue": "dev",
+      "allowedValues": [
+        "dev",
+        "staging",
+        "prod"
+      ],
+      "metadata": {
+        "description": "Environment name (dev, staging, prod)"
+      }
+    },
+    "applicationPrefix": {
+      "type": "string",
+      "defaultValue": "academic",
+      "metadata": {
+        "description": "Application name prefix"
+      }
+    },
+    "primaryLocation": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "metadata": {
+        "description": "Primary Azure region for deployment"
+      }
+    },
+    "secondaryLocation": {
+      "type": "string",
+      "defaultValue": "westus2",
+      "metadata": {
+        "description": "Secondary Azure region for high availability (prod only)"
+      }
+    },
+    "resourceToken": {
+      "type": "string",
+      "defaultValue": "[uniqueString(subscription().subscriptionId, parameters('environmentName'))]",
+      "metadata": {
+        "description": "Resource token for unique resource naming"
+      }
+    },
+    "sqlAdminLogin": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SQL Database administrator login"
+      }
+    },
+    "sqlAdminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "SQL Database administrator password"
+      }
+    },
+    "timestamp": {
+      "type": "string",
+      "defaultValue": "[utcNow()]",
+      "metadata": {
+        "description": "Current timestamp for tagging"
+      }
+    },
+    "keyVaultAccessPrincipalId": {
+      "type": "string",
+      "metadata": {
+        "description": "Principal ID for Key Vault access (service principal or user)"
+      }
+    }
+  },
+  "variables": {
+    "resourceGroupName": "[format('rg-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('primaryLocation'))]",
+    "commonTags": {
+      "azd-env-name": "[parameters('environmentName')]",
+      "environment": "[parameters('environmentName')]",
+      "application": "[parameters('applicationPrefix')]",
+      "created-by": "bicep",
+      "created-on": "[parameters('timestamp')]",
+      "project": "Zeus.People",
+      "purpose": "Academic Management System"
+    },
+    "environmentConfig": {
+      "dev": {
+        "sqlSkuName": "Basic",
+        "sqlSkuTier": "Basic",
+        "appServicePlanSku": "B1",
+        "cosmosDbThroughput": 400,
+        "serviceBusSku": "Standard",
+        "keyVaultSku": "standard",
+        "enableHighAvailability": false,
+        "enablePrivateEndpoints": false
+      },
+      "staging": {
+        "sqlSkuName": "S2",
+        "sqlSkuTier": "Standard",
+        "appServicePlanSku": "S2",
+        "cosmosDbThroughput": 1000,
+        "serviceBusSku": "Standard",
+        "keyVaultSku": "standard",
+        "enableHighAvailability": false,
+        "enablePrivateEndpoints": true
+      },
+      "prod": {
+        "sqlSkuName": "P2",
+        "sqlSkuTier": "Premium",
+        "appServicePlanSku": "P2v3",
+        "cosmosDbThroughput": 4000,
+        "serviceBusSku": "Premium",
+        "keyVaultSku": "premium",
+        "enableHighAvailability": true,
+        "enablePrivateEndpoints": true
+      }
+    },
+    "currentConfig": "[variables('environmentConfig')[parameters('environmentName')]]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2024-11-01",
+      "name": "[variables('resourceGroupName')]",
+      "location": "[parameters('primaryLocation')]",
+      "tags": "[union(variables('commonTags'), createObject('azd-env-name', parameters('environmentName')))]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "logAnalytics-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "workspaceName": {
+            "value": "[format('law-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "tags": {
+            "value": "[variables('commonTags')]"
+          },
+          "retentionInDays": "[if(equals(parameters('environmentName'), 'prod'), createObject('value', 90), createObject('value', 30))]"
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "1883366722411803164"
+            }
+          },
+          "parameters": {
+            "workspaceName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Log Analytics workspace"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the Log Analytics workspace"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to the workspace"
+              }
+            },
+            "retentionInDays": {
+              "type": "int",
+              "defaultValue": 30,
+              "minValue": 30,
+              "maxValue": 730,
+              "metadata": {
+                "description": "Data retention in days"
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "PerGB2018",
+              "allowedValues": [
+                "Free",
+                "Standard",
+                "Premium",
+                "PerNode",
+                "PerGB2018",
+                "Standalone",
+                "CapacityReservation"
+              ],
+              "metadata": {
+                "description": "SKU for the Log Analytics workspace"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2023-09-01",
+              "name": "[parameters('workspaceName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "sku": {
+                  "name": "[parameters('skuName')]"
+                },
+                "retentionInDays": "[parameters('retentionInDays')]",
+                "features": {
+                  "enableLogAccessUsingOnlyResourcePermissions": true
+                },
+                "workspaceCapping": {
+                  "dailyQuotaGb": 10
+                },
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled"
+              }
+            }
+          ],
+          "outputs": {
+            "workspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the Log Analytics workspace"
+              },
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName'))]"
+            },
+            "workspaceName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Log Analytics workspace"
+              },
+              "value": "[parameters('workspaceName')]"
+            },
+            "customerId": {
+              "type": "string",
+              "metadata": {
+                "description": "The customer ID of the Log Analytics workspace"
+              },
+              "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', parameters('workspaceName')), '2023-09-01').customerId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "appInsights-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "appInsightsName": {
+            "value": "[format('ai-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "tags": {
+            "value": "[variables('commonTags')]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment'), '2022-09-01').outputs.workspaceId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "7783383500688178400"
+            }
+          },
+          "parameters": {
+            "appInsightsName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Application Insights instance"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for Application Insights"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to the resource"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics workspace ID for Application Insights"
+              }
+            },
+            "applicationType": {
+              "type": "string",
+              "defaultValue": "web",
+              "allowedValues": [
+                "web",
+                "other"
+              ],
+              "metadata": {
+                "description": "Application type"
+              }
+            },
+            "ingestionMode": {
+              "type": "string",
+              "defaultValue": "LogAnalytics",
+              "allowedValues": [
+                "ApplicationInsights",
+                "ApplicationInsightsWithDiagnosticSettings",
+                "LogAnalytics"
+              ],
+              "metadata": {
+                "description": "Ingestion mode"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Insights/components",
+              "apiVersion": "2020-02-02",
+              "name": "[parameters('appInsightsName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "[parameters('applicationType')]",
+              "properties": {
+                "Application_Type": "[parameters('applicationType')]",
+                "WorkspaceResourceId": "[parameters('logAnalyticsWorkspaceId')]",
+                "IngestionMode": "[parameters('ingestionMode')]",
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled",
+                "DisableIpMasking": false,
+                "DisableLocalAuth": false
+              }
+            }
+          ],
+          "outputs": {
+            "appInsightsId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of Application Insights"
+              },
+              "value": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]"
+            },
+            "appInsightsName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of Application Insights"
+              },
+              "value": "[parameters('appInsightsName')]"
+            },
+            "instrumentationKey": {
+              "type": "string",
+              "metadata": {
+                "description": "The instrumentation key for Application Insights"
+              },
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').InstrumentationKey]"
+            },
+            "connectionString": {
+              "type": "string",
+              "metadata": {
+                "description": "The connection string for Application Insights"
+              },
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').ConnectionString]"
+            },
+            "appId": {
+              "type": "string",
+              "metadata": {
+                "description": "The App ID for Application Insights"
+              },
+              "value": "[reference(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), '2020-02-02').AppId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "keyVault-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "keyVaultName": {
+            "value": "[format('kv{0}', take(parameters('resourceToken'), 16))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "tags": {
+            "value": "[variables('commonTags')]"
+          },
+          "tenantId": {
+            "value": "[subscription().tenantId]"
+          },
+          "accessPrincipalId": {
+            "value": "[parameters('keyVaultAccessPrincipalId')]"
+          },
+          "skuName": {
+            "value": "[variables('currentConfig').keyVaultSku]"
+          },
+          "enableRbacAuthorization": {
+            "value": true
+          },
+          "enableSoftDelete": {
+            "value": true
+          },
+          "enablePurgeProtection": {
+            "value": "[equals(parameters('environmentName'), 'prod')]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment'), '2022-09-01').outputs.workspaceId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "3019197052621953918"
+            }
+          },
+          "parameters": {
+            "keyVaultName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Key Vault"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the Key Vault"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to the Key Vault"
+              }
+            },
+            "tenantId": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure AD tenant ID"
+              }
+            },
+            "accessPrincipalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Principal ID for Key Vault access"
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "standard",
+              "allowedValues": [
+                "standard",
+                "premium"
+              ],
+              "metadata": {
+                "description": "SKU name for Key Vault"
+              }
+            },
+            "enableRbacAuthorization": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Enable RBAC authorization"
+              }
+            },
+            "enableSoftDelete": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Enable soft delete"
+              }
+            },
+            "enablePurgeProtection": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Enable purge protection"
+              }
+            },
+            "softDeleteRetentionInDays": {
+              "type": "int",
+              "defaultValue": 90,
+              "minValue": 7,
+              "maxValue": 90,
+              "metadata": {
+                "description": "Soft delete retention days"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics workspace ID for diagnostics"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults",
+              "apiVersion": "2023-07-01",
+              "name": "[parameters('keyVaultName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "properties": {
+                "tenantId": "[parameters('tenantId')]",
+                "sku": {
+                  "family": "A",
+                  "name": "[parameters('skuName')]"
+                },
+                "enableRbacAuthorization": "[parameters('enableRbacAuthorization')]",
+                "enableSoftDelete": "[parameters('enableSoftDelete')]",
+                "enablePurgeProtection": "[parameters('enablePurgeProtection')]",
+                "softDeleteRetentionInDays": "[parameters('softDeleteRetentionInDays')]",
+                "enabledForDeployment": false,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": true,
+                "publicNetworkAccess": "Enabled",
+                "networkAcls": {
+                  "defaultAction": "Allow",
+                  "bypass": "AzureServices"
+                },
+                "accessPolicies": "[if(parameters('enableRbacAuthorization'), createArray(), createArray(createObject('tenantId', parameters('tenantId'), 'objectId', parameters('accessPrincipalId'), 'permissions', createObject('keys', createArray('get', 'list', 'create', 'update', 'delete', 'backup', 'restore', 'recover'), 'secrets', createArray('get', 'list', 'set', 'delete', 'backup', 'restore', 'recover'), 'certificates', createArray('get', 'list', 'create', 'update', 'delete', 'backup', 'restore', 'recover')))))]"
+              }
+            },
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('keyVaultName'))]",
+              "name": "[format('{0}-diagnostics', parameters('keyVaultName'))]",
+              "properties": {
+                "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+                "logs": [
+                  {
+                    "categoryGroup": "audit",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false,
+                      "days": 0
+                    }
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false,
+                      "days": 0
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "keyVaultId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the Key Vault"
+              },
+              "value": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
+            },
+            "keyVaultName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Key Vault"
+              },
+              "value": "[parameters('keyVaultName')]"
+            },
+            "keyVaultUri": {
+              "type": "string",
+              "metadata": {
+                "description": "The URI of the Key Vault"
+              },
+              "value": "[reference(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), '2023-07-01').vaultUri]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "managedIdentity-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "managedIdentityName": {
+            "value": "[format('mi-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "tags": {
+            "value": "[variables('commonTags')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "13428023924941869956"
+            }
+          },
+          "parameters": {
+            "managedIdentityName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the managed identity"
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Location for the resources"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to all resources"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[parameters('managedIdentityName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]"
+            }
+          ],
+          "outputs": {
+            "managedIdentityId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the managed identity"
+              },
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]"
+            },
+            "managedIdentityName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the managed identity"
+              },
+              "value": "[parameters('managedIdentityName')]"
+            },
+            "principalId": {
+              "type": "string",
+              "metadata": {
+                "description": "The principal ID of the managed identity"
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').principalId]"
+            },
+            "clientId": {
+              "type": "string",
+              "metadata": {
+                "description": "The client ID of the managed identity"
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').clientId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "sqlDatabase-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "sqlServerName": {
+            "value": "[format('sql-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "tags": {
+            "value": "[variables('commonTags')]"
+          },
+          "administratorLogin": {
+            "value": "[parameters('sqlAdminLogin')]"
+          },
+          "administratorLoginPassword": {
+            "value": "[parameters('sqlAdminPassword')]"
+          },
+          "databaseName": {
+            "value": "Zeus.People"
+          },
+          "eventStoreDatabaseName": {
+            "value": "Zeus.People.EventStore"
+          },
+          "skuName": {
+            "value": "[variables('currentConfig').sqlSkuName]"
+          },
+          "skuTier": {
+            "value": "[variables('currentConfig').sqlSkuTier]"
+          },
+          "enableAdvancedThreatProtection": {
+            "value": true
+          },
+          "enableAuditingToLogAnalytics": {
+            "value": true
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment'), '2022-09-01').outputs.workspaceId.value]"
+          },
+          "managedIdentityPrincipalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'managedIdentity-deployment'), '2022-09-01').outputs.principalId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "2898992791995771394"
+            }
+          },
+          "parameters": {
+            "sqlServerName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the SQL Server"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for SQL Server"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to SQL resources"
+              }
+            },
+            "administratorLogin": {
+              "type": "string",
+              "metadata": {
+                "description": "SQL Server administrator login"
+              }
+            },
+            "administratorLoginPassword": {
+              "type": "securestring",
+              "metadata": {
+                "description": "SQL Server administrator password"
+              }
+            },
+            "databaseName": {
+              "type": "string",
+              "defaultValue": "Zeus.People",
+              "metadata": {
+                "description": "Name of the main database"
+              }
+            },
+            "eventStoreDatabaseName": {
+              "type": "string",
+              "defaultValue": "Zeus.People.EventStore",
+              "metadata": {
+                "description": "Name of the event store database"
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "S2",
+              "metadata": {
+                "description": "SKU name for the databases"
+              }
+            },
+            "skuTier": {
+              "type": "string",
+              "defaultValue": "Standard",
+              "metadata": {
+                "description": "SKU tier for the databases"
+              }
+            },
+            "enableAdvancedThreatProtection": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Enable Advanced Threat Protection"
+              }
+            },
+            "enableAuditingToLogAnalytics": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Enable auditing to Log Analytics"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics workspace ID for auditing"
+              }
+            },
+            "managedIdentityPrincipalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Managed identity principal ID for RBAC"
+              }
+            },
+            "minimalTlsVersion": {
+              "type": "string",
+              "defaultValue": "1.2",
+              "allowedValues": [
+                "1.0",
+                "1.1",
+                "1.2"
+              ],
+              "metadata": {
+                "description": "Minimum TLS version"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Sql/servers",
+              "apiVersion": "2021-11-01",
+              "name": "[parameters('sqlServerName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "administratorLogin": "[parameters('administratorLogin')]",
+                "administratorLoginPassword": "[parameters('administratorLoginPassword')]",
+                "version": "12.0",
+                "minimalTlsVersion": "[parameters('minimalTlsVersion')]",
+                "publicNetworkAccess": "Enabled",
+                "restrictOutboundNetworkAccess": "Disabled"
+              }
+            },
+            {
+              "condition": "[not(empty(parameters('managedIdentityPrincipalId')))]",
+              "type": "Microsoft.Sql/servers/administrators",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('sqlServerName'), 'ActiveDirectory')]",
+              "properties": {
+                "administratorType": "ActiveDirectory",
+                "login": "Zeus.People.API",
+                "sid": "[parameters('managedIdentityPrincipalId')]",
+                "tenantId": "[subscription().tenantId]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Sql/servers/firewallRules",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('sqlServerName'), 'AllowAllWindowsAzureIps')]",
+              "properties": {
+                "startIpAddress": "0.0.0.0",
+                "endIpAddress": "0.0.0.0"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Sql/servers/databases",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('sqlServerName'), parameters('databaseName'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]"
+              },
+              "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 2147483648,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false,
+                "readScale": "Disabled",
+                "requestedBackupStorageRedundancy": "Geo",
+                "isLedgerOn": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Sql/servers/databases",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('sqlServerName'), parameters('eventStoreDatabaseName'))]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]"
+              },
+              "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 2147483648,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false,
+                "readScale": "Disabled",
+                "requestedBackupStorageRedundancy": "Geo",
+                "isLedgerOn": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+              ]
+            },
+            {
+              "condition": "[parameters('enableAdvancedThreatProtection')]",
+              "type": "Microsoft.Sql/servers/securityAlertPolicies",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('sqlServerName'), 'Default')]",
+              "properties": {
+                "state": "Enabled",
+                "emailAddresses": [],
+                "emailAccountAdmins": true,
+                "retentionDays": 30
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+              ]
+            },
+            {
+              "condition": "[parameters('enableAdvancedThreatProtection')]",
+              "type": "Microsoft.Sql/servers/vulnerabilityAssessments",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('sqlServerName'), 'Default')]",
+              "properties": {
+                "storageContainerPath": "[format('https://sqlsecurityaudit{0}.blob.core.windows.net/vulnerability-assessment/', uniqueString(resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))))]",
+                "recurringScans": {
+                  "isEnabled": true,
+                  "emailSubscriptionAdmins": true,
+                  "emails": []
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]",
+                "[resourceId('Microsoft.Sql/servers/securityAlertPolicies', parameters('sqlServerName'), 'Default')]"
+              ]
+            },
+            {
+              "condition": "[parameters('enableAuditingToLogAnalytics')]",
+              "type": "Microsoft.Sql/servers/auditingSettings",
+              "apiVersion": "2021-11-01",
+              "name": "[format('{0}/{1}', parameters('sqlServerName'), 'default')]",
+              "properties": {
+                "state": "Enabled",
+                "isAzureMonitorTargetEnabled": true,
+                "retentionDays": 30
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "sqlServerId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the SQL Server"
+              },
+              "value": "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]"
+            },
+            "sqlServerName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the SQL Server"
+              },
+              "value": "[parameters('sqlServerName')]"
+            },
+            "sqlServerFqdn": {
+              "type": "string",
+              "metadata": {
+                "description": "The FQDN of the SQL Server"
+              },
+              "value": "[reference(resourceId('Microsoft.Sql/servers', parameters('sqlServerName')), '2021-11-01').fullyQualifiedDomainName]"
+            },
+            "academicDatabaseName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the academic database"
+              },
+              "value": "[parameters('databaseName')]"
+            },
+            "eventStoreDatabaseName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the event store database"
+              },
+              "value": "[parameters('eventStoreDatabaseName')]"
+            },
+            "academicDatabaseConnectionString": {
+              "type": "string",
+              "metadata": {
+                "description": "The academic database connection string"
+              },
+              "value": "[format('Server=tcp:{0},1433;Initial Catalog={1};Authentication=Active Directory Default;', reference(resourceId('Microsoft.Sql/servers', parameters('sqlServerName')), '2021-11-01').fullyQualifiedDomainName, parameters('databaseName'))]"
+            },
+            "eventStoreDatabaseConnectionString": {
+              "type": "string",
+              "metadata": {
+                "description": "The event store database connection string"
+              },
+              "value": "[format('Server=tcp:{0},1433;Initial Catalog={1};Authentication=Active Directory Default;', reference(resourceId('Microsoft.Sql/servers', parameters('sqlServerName')), '2021-11-01').fullyQualifiedDomainName, parameters('eventStoreDatabaseName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'managedIdentity-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "cosmosDb-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "cosmosDbAccountName": {
+            "value": "[format('cosmos-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "tags": {
+            "value": "[variables('commonTags')]"
+          },
+          "databaseName": {
+            "value": "Zeus.People"
+          },
+          "throughput": {
+            "value": "[variables('currentConfig').cosmosDbThroughput]"
+          },
+          "enableMultipleWriteLocations": {
+            "value": "[variables('currentConfig').enableHighAvailability]"
+          },
+          "secondaryLocation": "[if(variables('currentConfig').enableHighAvailability, createObject('value', parameters('secondaryLocation')), createObject('value', ''))]",
+          "managedIdentityPrincipalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'managedIdentity-deployment'), '2022-09-01').outputs.principalId.value]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment'), '2022-09-01').outputs.workspaceId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "15695106369832490926"
+            }
+          },
+          "parameters": {
+            "cosmosDbAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Cosmos DB account"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for Cosmos DB"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to Cosmos DB"
+              }
+            },
+            "databaseName": {
+              "type": "string",
+              "defaultValue": "Zeus.People",
+              "metadata": {
+                "description": "Name of the Cosmos DB database"
+              }
+            },
+            "throughput": {
+              "type": "int",
+              "defaultValue": 400,
+              "minValue": 400,
+              "maxValue": 100000,
+              "metadata": {
+                "description": "Throughput for the database (RU/s)"
+              }
+            },
+            "enableMultipleWriteLocations": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Enable multiple write locations"
+              }
+            },
+            "secondaryLocation": {
+              "type": "string",
+              "defaultValue": "",
+              "metadata": {
+                "description": "Secondary location for geo-replication"
+              }
+            },
+            "managedIdentityPrincipalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Managed identity principal ID for RBAC"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics workspace ID for diagnostics"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "defaultValue": "GlobalDocumentDB",
+              "allowedValues": [
+                "GlobalDocumentDB",
+                "MongoDB",
+                "Parse"
+              ],
+              "metadata": {
+                "description": "API kind for Cosmos DB"
+              }
+            },
+            "consistencyLevel": {
+              "type": "string",
+              "defaultValue": "Session",
+              "allowedValues": [
+                "Eventual",
+                "Session",
+                "BoundedStaleness",
+                "Strong",
+                "ConsistentPrefix"
+              ],
+              "metadata": {
+                "description": "Consistency level"
+              }
+            }
+          },
+          "variables": {
+            "locations": "[if(and(parameters('enableMultipleWriteLocations'), not(empty(parameters('secondaryLocation')))), createArray(createObject('locationName', parameters('location'), 'failoverPriority', 0, 'isZoneRedundant', false()), createObject('locationName', parameters('secondaryLocation'), 'failoverPriority', 1, 'isZoneRedundant', false())), createArray(createObject('locationName', parameters('location'), 'failoverPriority', 0, 'isZoneRedundant', false())))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts",
+              "apiVersion": "2024-11-15",
+              "name": "[parameters('cosmosDbAccountName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "[parameters('kind')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "databaseAccountOfferType": "Standard",
+                "consistencyPolicy": {
+                  "defaultConsistencyLevel": "[parameters('consistencyLevel')]"
+                },
+                "locations": "[variables('locations')]",
+                "enableMultipleWriteLocations": false,
+                "enableAutomaticFailover": false,
+                "publicNetworkAccess": "Enabled"
+              }
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+              "apiVersion": "2024-11-15",
+              "name": "[format('{0}/{1}', parameters('cosmosDbAccountName'), parameters('databaseName'))]",
+              "properties": {
+                "resource": {
+                  "id": "[parameters('databaseName')]"
+                },
+                "options": "[if(lessOrEquals(parameters('throughput'), 4000), createObject('throughput', parameters('throughput')), createObject('autoscaleSettings', createObject('maxThroughput', parameters('throughput'))))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2024-11-15",
+              "name": "[format('{0}/{1}/{2}', parameters('cosmosDbAccountName'), parameters('databaseName'), 'academics')]",
+              "properties": {
+                "resource": {
+                  "id": "academics",
+                  "partitionKey": {
+                    "paths": [
+                      "/id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "automatic": true,
+                    "includedPaths": [
+                      {
+                        "path": "/*"
+                      }
+                    ],
+                    "excludedPaths": [
+                      {
+                        "path": "/\"_etag\"/?"
+                      }
+                    ],
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/departmentId",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/title",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  },
+                  "uniqueKeyPolicy": {
+                    "uniqueKeys": [
+                      {
+                        "paths": [
+                          "/employeeId"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('cosmosDbAccountName'), parameters('databaseName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2024-11-15",
+              "name": "[format('{0}/{1}/{2}', parameters('cosmosDbAccountName'), parameters('databaseName'), 'departments')]",
+              "properties": {
+                "resource": {
+                  "id": "departments",
+                  "partitionKey": {
+                    "paths": [
+                      "/id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "automatic": true,
+                    "includedPaths": [
+                      {
+                        "path": "/*"
+                      }
+                    ],
+                    "excludedPaths": [
+                      {
+                        "path": "/\"_etag\"/?"
+                      }
+                    ],
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/building",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/name",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('cosmosDbAccountName'), parameters('databaseName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2024-11-15",
+              "name": "[format('{0}/{1}/{2}', parameters('cosmosDbAccountName'), parameters('databaseName'), 'rooms')]",
+              "properties": {
+                "resource": {
+                  "id": "rooms",
+                  "partitionKey": {
+                    "paths": [
+                      "/id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "automatic": true,
+                    "includedPaths": [
+                      {
+                        "path": "/*"
+                      }
+                    ],
+                    "excludedPaths": [
+                      {
+                        "path": "/\"_etag\"/?"
+                      }
+                    ],
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/building",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/roomNumber",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  },
+                  "uniqueKeyPolicy": {
+                    "uniqueKeys": [
+                      {
+                        "paths": [
+                          "/roomNumber"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('cosmosDbAccountName'), parameters('databaseName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+              "apiVersion": "2024-11-15",
+              "name": "[format('{0}/{1}/{2}', parameters('cosmosDbAccountName'), parameters('databaseName'), 'extensions')]",
+              "properties": {
+                "resource": {
+                  "id": "extensions",
+                  "partitionKey": {
+                    "paths": [
+                      "/id"
+                    ],
+                    "kind": "Hash"
+                  },
+                  "indexingPolicy": {
+                    "indexingMode": "consistent",
+                    "automatic": true,
+                    "includedPaths": [
+                      {
+                        "path": "/*"
+                      }
+                    ],
+                    "excludedPaths": [
+                      {
+                        "path": "/\"_etag\"/?"
+                      }
+                    ],
+                    "compositeIndexes": [
+                      [
+                        {
+                          "path": "/academicId",
+                          "order": "ascending"
+                        },
+                        {
+                          "path": "/phoneNumber",
+                          "order": "ascending"
+                        }
+                      ]
+                    ]
+                  },
+                  "uniqueKeyPolicy": {
+                    "uniqueKeys": [
+                      {
+                        "paths": [
+                          "/phoneNumber"
+                        ]
+                      }
+                    ]
+                  }
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts/sqlDatabases', parameters('cosmosDbAccountName'), parameters('databaseName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+              "apiVersion": "2024-11-15",
+              "name": "[format('{0}/{1}', parameters('cosmosDbAccountName'), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), parameters('managedIdentityPrincipalId'), 'CosmosDBDataContributor'))]",
+              "properties": {
+                "roleDefinitionId": "[format('{0}/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002', resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')))]",
+                "principalId": "[parameters('managedIdentityPrincipalId')]",
+                "scope": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[format('Microsoft.DocumentDB/databaseAccounts/{0}', parameters('cosmosDbAccountName'))]",
+              "name": "[format('{0}-diagnostics', parameters('cosmosDbAccountName'))]",
+              "properties": {
+                "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+                "logs": [
+                  {
+                    "categoryGroup": "audit",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false,
+                      "days": 0
+                    }
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "Requests",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false,
+                      "days": 0
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "cosmosDbAccountId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the Cosmos DB account"
+              },
+              "value": "[resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName'))]"
+            },
+            "cosmosDbAccountName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Cosmos DB account"
+              },
+              "value": "[parameters('cosmosDbAccountName')]"
+            },
+            "cosmosDbEndpoint": {
+              "type": "string",
+              "metadata": {
+                "description": "The endpoint of the Cosmos DB account"
+              },
+              "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2024-11-15').documentEndpoint]"
+            },
+            "primaryMasterKey": {
+              "type": "string",
+              "metadata": {
+                "description": "The primary master key for Cosmos DB (secure)"
+              },
+              "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosDbAccountName')), '2024-11-15').primaryMasterKey]"
+            },
+            "databaseName": {
+              "type": "string",
+              "metadata": {
+                "description": "The database name"
+              },
+              "value": "[parameters('databaseName')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'managedIdentity-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "serviceBus-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "serviceBusNamespaceName": {
+            "value": "[format('sb-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "tags": {
+            "value": "[variables('commonTags')]"
+          },
+          "skuName": {
+            "value": "[variables('currentConfig').serviceBusSku]"
+          },
+          "topicName": {
+            "value": "domain-events"
+          },
+          "subscriptionName": {
+            "value": "zeus-people-subscription"
+          },
+          "managedIdentityPrincipalId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'managedIdentity-deployment'), '2022-09-01').outputs.principalId.value]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment'), '2022-09-01').outputs.workspaceId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "10542765902988212754"
+            }
+          },
+          "parameters": {
+            "serviceBusNamespaceName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the Service Bus namespace"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for Service Bus"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to Service Bus"
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "Standard",
+              "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+              ],
+              "metadata": {
+                "description": "SKU name for Service Bus"
+              }
+            },
+            "skuTier": {
+              "type": "string",
+              "defaultValue": "Standard",
+              "allowedValues": [
+                "Basic",
+                "Standard",
+                "Premium"
+              ],
+              "metadata": {
+                "description": "SKU tier for Service Bus"
+              }
+            },
+            "topicName": {
+              "type": "string",
+              "defaultValue": "domain-events",
+              "metadata": {
+                "description": "Name of the topic for domain events"
+              }
+            },
+            "subscriptionName": {
+              "type": "string",
+              "defaultValue": "zeus-people-subscription",
+              "metadata": {
+                "description": "Name of the subscription"
+              }
+            },
+            "managedIdentityPrincipalId": {
+              "type": "string",
+              "metadata": {
+                "description": "Managed identity principal ID for RBAC"
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics workspace ID for diagnostics"
+              }
+            },
+            "enableZoneRedundant": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Enable zone redundancy (Premium only)"
+              }
+            },
+            "minimumTlsVersion": {
+              "type": "string",
+              "defaultValue": "1.2",
+              "allowedValues": [
+                "1.0",
+                "1.1",
+                "1.2"
+              ],
+              "metadata": {
+                "description": "Minimum TLS version"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ServiceBus/namespaces",
+              "apiVersion": "2024-01-01",
+              "name": "[parameters('serviceBusNamespaceName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]",
+                "capacity": "[if(equals(parameters('skuName'), 'Premium'), 1, null())]"
+              },
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "minimumTlsVersion": "[parameters('minimumTlsVersion')]",
+                "publicNetworkAccess": "Enabled",
+                "disableLocalAuth": false,
+                "zoneRedundant": "[if(equals(parameters('skuName'), 'Premium'), parameters('enableZoneRedundant'), false())]",
+                "premiumMessagingPartitions": "[if(equals(parameters('skuName'), 'Premium'), 1, null())]"
+              }
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/topics",
+              "apiVersion": "2024-01-01",
+              "name": "[format('{0}/{1}', parameters('serviceBusNamespaceName'), parameters('topicName'))]",
+              "properties": {
+                "maxSizeInMegabytes": "[if(equals(parameters('skuName'), 'Premium'), 81920, 5120)]",
+                "requiresDuplicateDetection": true,
+                "duplicateDetectionHistoryTimeWindow": "PT10M",
+                "enableBatchedOperations": true,
+                "supportOrdering": true,
+                "autoDeleteOnIdle": "P14D",
+                "enablePartitioning": "[not(equals(parameters('skuName'), 'Premium'))]",
+                "enableExpress": false,
+                "maxMessageSizeInKilobytes": "[if(equals(parameters('skuName'), 'Premium'), 100000, 256)]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+              "apiVersion": "2024-01-01",
+              "name": "[format('{0}/{1}/{2}', parameters('serviceBusNamespaceName'), parameters('topicName'), parameters('subscriptionName'))]",
+              "properties": {
+                "requiresSession": false,
+                "enableBatchedOperations": true,
+                "lockDuration": "PT1M",
+                "defaultMessageTimeToLive": "P14D",
+                "deadLetteringOnFilterEvaluationExceptions": true,
+                "deadLetteringOnMessageExpiration": true,
+                "maxDeliveryCount": 3,
+                "autoDeleteOnIdle": "P14D"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusNamespaceName'), parameters('topicName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+              "apiVersion": "2024-01-01",
+              "name": "[format('{0}/{1}/{2}', parameters('serviceBusNamespaceName'), parameters('topicName'), format('{0}-deadletter', parameters('subscriptionName')))]",
+              "properties": {
+                "requiresSession": false,
+                "enableBatchedOperations": true,
+                "lockDuration": "PT5M",
+                "defaultMessageTimeToLive": "P30D",
+                "deadLetteringOnFilterEvaluationExceptions": false,
+                "deadLetteringOnMessageExpiration": false,
+                "maxDeliveryCount": 1,
+                "autoDeleteOnIdle": "P30D"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces/topics', parameters('serviceBusNamespaceName'), parameters('topicName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ServiceBus/namespaces/AuthorizationRules",
+              "apiVersion": "2024-01-01",
+              "name": "[format('{0}/{1}', parameters('serviceBusNamespaceName'), 'zeus-people-auth-rule')]",
+              "properties": {
+                "rights": [
+                  "Send",
+                  "Listen",
+                  "Manage"
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.ServiceBus/namespaces/{0}', parameters('serviceBusNamespaceName'))]",
+              "name": "[guid(resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName')), parameters('managedIdentityPrincipalId'), '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39')]",
+                "principalId": "[parameters('managedIdentityPrincipalId')]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.ServiceBus/namespaces/{0}', parameters('serviceBusNamespaceName'))]",
+              "name": "[guid(resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName')), parameters('managedIdentityPrincipalId'), '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '4f6d3b9b-027b-4f4c-9142-0e5a2a2247e0')]",
+                "principalId": "[parameters('managedIdentityPrincipalId')]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[format('Microsoft.ServiceBus/namespaces/{0}', parameters('serviceBusNamespaceName'))]",
+              "name": "[format('{0}-diagnostics', parameters('serviceBusNamespaceName'))]",
+              "properties": {
+                "workspaceId": "[parameters('logAnalyticsWorkspaceId')]",
+                "logs": [
+                  {
+                    "categoryGroup": "audit",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false,
+                      "days": 0
+                    }
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": false,
+                      "days": 0
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "serviceBusNamespaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the Service Bus namespace"
+              },
+              "value": "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName'))]"
+            },
+            "serviceBusNamespaceName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Service Bus namespace"
+              },
+              "value": "[parameters('serviceBusNamespaceName')]"
+            },
+            "serviceBusNamespaceFqdn": {
+              "type": "string",
+              "metadata": {
+                "description": "The FQDN of the Service Bus namespace"
+              },
+              "value": "[format('{0}.servicebus.windows.net', parameters('serviceBusNamespaceName'))]"
+            },
+            "serviceBusEndpoint": {
+              "type": "string",
+              "metadata": {
+                "description": "The Service Bus endpoint"
+              },
+              "value": "[reference(resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespaceName')), '2024-01-01').serviceBusEndpoint]"
+            },
+            "primaryConnectionString": {
+              "type": "string",
+              "metadata": {
+                "description": "The primary connection string (secure)"
+              },
+              "value": "[listKeys(resourceId('Microsoft.ServiceBus/namespaces/AuthorizationRules', parameters('serviceBusNamespaceName'), 'zeus-people-auth-rule'), '2024-01-01').primaryConnectionString]"
+            },
+            "topicName": {
+              "type": "string",
+              "metadata": {
+                "description": "The topic name"
+              },
+              "value": "[parameters('topicName')]"
+            },
+            "subscriptionName": {
+              "type": "string",
+              "metadata": {
+                "description": "The subscription name"
+              },
+              "value": "[parameters('subscriptionName')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'logAnalytics-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'managedIdentity-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "appServicePlan-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "appServicePlanName": {
+            "value": "[format('asp-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "tags": {
+            "value": "[variables('commonTags')]"
+          },
+          "skuName": {
+            "value": "[variables('currentConfig').appServicePlanSku]"
+          },
+          "kind": {
+            "value": "linux"
+          },
+          "reserved": {
+            "value": true
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "12334736808830360177"
+            }
+          },
+          "parameters": {
+            "appServicePlanName": {
+              "type": "string",
+              "metadata": {
+                "description": "Name of the App Service Plan"
+              }
+            },
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Location for the App Service Plan"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to the App Service Plan"
+              }
+            },
+            "skuName": {
+              "type": "string",
+              "defaultValue": "B1",
+              "metadata": {
+                "description": "SKU name for the App Service Plan"
+              }
+            },
+            "skuTier": {
+              "type": "string",
+              "defaultValue": "Basic",
+              "metadata": {
+                "description": "SKU tier for the App Service Plan"
+              }
+            },
+            "kind": {
+              "type": "string",
+              "defaultValue": "linux",
+              "allowedValues": [
+                "app",
+                "linux",
+                "windows"
+              ],
+              "metadata": {
+                "description": "Kind of App Service Plan"
+              }
+            },
+            "reserved": {
+              "type": "bool",
+              "defaultValue": true,
+              "metadata": {
+                "description": "Is Linux App Service Plan"
+              }
+            },
+            "zoneRedundant": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Enable zone redundancy"
+              }
+            },
+            "targetWorkerCount": {
+              "type": "int",
+              "defaultValue": 1,
+              "metadata": {
+                "description": "Target worker count"
+              }
+            },
+            "maximumElasticWorkerCount": {
+              "type": "int",
+              "defaultValue": 1,
+              "metadata": {
+                "description": "Maximum elastic worker count"
+              }
+            },
+            "perSiteScaling": {
+              "type": "bool",
+              "defaultValue": false,
+              "metadata": {
+                "description": "Enable per-site scaling"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Web/serverfarms",
+              "apiVersion": "2024-04-01",
+              "name": "[parameters('appServicePlanName')]",
+              "location": "[parameters('location')]",
+              "tags": "[parameters('tags')]",
+              "kind": "[parameters('kind')]",
+              "sku": {
+                "name": "[parameters('skuName')]",
+                "tier": "[parameters('skuTier')]",
+                "capacity": "[parameters('targetWorkerCount')]"
+              },
+              "properties": {
+                "reserved": "[parameters('reserved')]",
+                "zoneRedundant": "[parameters('zoneRedundant')]",
+                "targetWorkerCount": "[parameters('targetWorkerCount')]",
+                "maximumElasticWorkerCount": "[parameters('maximumElasticWorkerCount')]",
+                "perSiteScaling": "[parameters('perSiteScaling')]",
+                "elasticScaleEnabled": false,
+                "hyperV": false,
+                "isXenon": false
+              }
+            }
+          ],
+          "outputs": {
+            "appServicePlanId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the App Service Plan"
+              },
+              "value": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+            },
+            "appServicePlanName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the App Service Plan"
+              },
+              "value": "[parameters('appServicePlanName')]"
+            },
+            "appServicePlanKind": {
+              "type": "string",
+              "metadata": {
+                "description": "The kind of the App Service Plan"
+              },
+              "value": "[reference(resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName')), '2024-04-01', 'full').kind]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "appService-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "appServiceName": {
+            "value": "[format('app-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "appServicePlanName": {
+            "value": "[format('asp-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "location": {
+            "value": "[parameters('primaryLocation')]"
+          },
+          "envConfig": {
+            "value": "[variables('currentConfig')]"
+          },
+          "tags": {
+            "value": "[union(variables('commonTags'), createObject('azd-service-name', 'api'))]"
+          },
+          "managedIdentityName": {
+            "value": "[format('mi-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          },
+          "keyVaultName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVault-deployment'), '2022-09-01').outputs.keyVaultName.value]"
+          },
+          "applicationInsightsConnectionString": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights-deployment'), '2022-09-01').outputs.connectionString.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "14840498767478487047"
+            }
+          },
+          "parameters": {
+            "appServiceName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the App Service"
+              }
+            },
+            "appServicePlanName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the App Service Plan"
+              }
+            },
+            "location": {
+              "type": "string",
+              "defaultValue": "[resourceGroup().location]",
+              "metadata": {
+                "description": "Location for the resources"
+              }
+            },
+            "envConfig": {
+              "type": "object",
+              "metadata": {
+                "description": "Environment configuration object"
+              }
+            },
+            "tags": {
+              "type": "object",
+              "defaultValue": {},
+              "metadata": {
+                "description": "Tags to apply to all resources"
+              }
+            },
+            "managedIdentityName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the managed identity"
+              }
+            },
+            "keyVaultName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Key Vault"
+              }
+            },
+            "applicationInsightsConnectionString": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Application Insights connection string"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Web/sites",
+              "apiVersion": "2024-04-01",
+              "name": "[parameters('appServiceName')]",
+              "location": "[parameters('location')]",
+              "kind": "app,linux",
+              "tags": "[parameters('tags')]",
+              "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')))]": {}
+                }
+              },
+              "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]",
+                "reserved": true,
+                "httpsOnly": true,
+                "clientAffinityEnabled": false,
+                "siteConfig": {
+                  "linuxFxVersion": "DOTNETCORE|8.0",
+                  "alwaysOn": "[parameters('envConfig').alwaysOn]",
+                  "healthCheckPath": "/health",
+                  "minTlsVersion": "1.2",
+                  "ftpsState": "Disabled",
+                  "cors": {
+                    "allowedOrigins": [
+                      "[format('https://{0}.azurewebsites.net', parameters('appServiceName'))]"
+                    ],
+                    "supportCredentials": false
+                  },
+                  "appSettings": [
+                    {
+                      "name": "ASPNETCORE_ENVIRONMENT",
+                      "value": "[parameters('envConfig').aspnetcoreEnvironment]"
+                    },
+                    {
+                      "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                      "value": "[parameters('applicationInsightsConnectionString')]"
+                    },
+                    {
+                      "name": "ApplicationInsights__InstrumentationKey",
+                      "value": "[parameters('applicationInsightsConnectionString')]"
+                    },
+                    {
+                      "name": "ConnectionStrings__DefaultConnection",
+                      "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=DefaultConnection)', parameters('keyVaultName'))]"
+                    },
+                    {
+                      "name": "ConnectionStrings__EventStoreConnection",
+                      "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=EventStoreConnection)', parameters('keyVaultName'))]"
+                    },
+                    {
+                      "name": "ConnectionStrings__CosmosDbConnection",
+                      "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=CosmosDbConnection)', parameters('keyVaultName'))]"
+                    },
+                    {
+                      "name": "ConnectionStrings__ServiceBusConnection",
+                      "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName=ServiceBusConnection)', parameters('keyVaultName'))]"
+                    },
+                    {
+                      "name": "KeyVaultSettings__VaultName",
+                      "value": "[parameters('keyVaultName')]"
+                    },
+                    {
+                      "name": "KeyVaultSettings__ClientId",
+                      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').clientId]"
+                    },
+                    {
+                      "name": "AZURE_CLIENT_ID",
+                      "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').clientId]"
+                    }
+                  ],
+                  "scmIpSecurityRestrictionsUseMain": true,
+                  "detailedErrorLoggingEnabled": true,
+                  "httpLoggingEnabled": true,
+                  "requestTracingEnabled": true,
+                  "autoHealEnabled": true,
+                  "autoHealRules": {
+                    "triggers": {
+                      "requests": {
+                        "count": 100,
+                        "timeInterval": "00:01:00"
+                      },
+                      "privateBytesInKB": 0,
+                      "statusCodes": [
+                        {
+                          "status": 500,
+                          "subStatus": 0,
+                          "win32Status": 0,
+                          "count": 10,
+                          "timeInterval": "00:01:00"
+                        }
+                      ]
+                    },
+                    "actions": {
+                      "actionType": "Recycle",
+                      "minProcessExecutionTime": "00:01:00"
+                    }
+                  }
+                },
+                "keyVaultReferenceIdentity": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName'))]",
+                "vnetRouteAllEnabled": "[parameters('envConfig').vnetIntegration]",
+                "publicNetworkAccess": "[parameters('envConfig').publicNetworkAccess]"
+              }
+            },
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[format('Microsoft.Web/sites/{0}', parameters('appServiceName'))]",
+              "name": "[format('{0}-diagnostics', parameters('appServiceName'))]",
+              "properties": {
+                "logs": [
+                  {
+                    "categoryGroup": "audit",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": true,
+                      "days": "[parameters('envConfig').logRetentionDays]"
+                    }
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true,
+                    "retentionPolicy": {
+                      "enabled": true,
+                      "days": "[parameters('envConfig').metricRetentionDays]"
+                    }
+                  }
+                ],
+                "workspaceId": "[parameters('envConfig').logAnalyticsWorkspaceId]"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('appServiceName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "appServiceId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the App Service"
+              },
+              "value": "[resourceId('Microsoft.Web/sites', parameters('appServiceName'))]"
+            },
+            "appServiceName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the App Service"
+              },
+              "value": "[parameters('appServiceName')]"
+            },
+            "defaultHostName": {
+              "type": "string",
+              "metadata": {
+                "description": "The default hostname of the App Service"
+              },
+              "value": "[reference(resourceId('Microsoft.Web/sites', parameters('appServiceName')), '2024-04-01').defaultHostName]"
+            },
+            "appServiceUrl": {
+              "type": "string",
+              "metadata": {
+                "description": "The URL of the App Service"
+              },
+              "value": "[format('https://{0}', reference(resourceId('Microsoft.Web/sites', parameters('appServiceName')), '2024-04-01').defaultHostName)]"
+            },
+            "outboundIpAddresses": {
+              "type": "string",
+              "metadata": {
+                "description": "The outbound IP addresses of the App Service"
+              },
+              "value": "[reference(resourceId('Microsoft.Web/sites', parameters('appServiceName')), '2024-04-01').outboundIpAddresses]"
+            },
+            "possibleOutboundIpAddresses": {
+              "type": "string",
+              "metadata": {
+                "description": "The possible outbound IP addresses of the App Service"
+              },
+              "value": "[reference(resourceId('Microsoft.Web/sites', parameters('appServiceName')), '2024-04-01').possibleOutboundIpAddresses]"
+            },
+            "managedIdentityPrincipalId": {
+              "type": "string",
+              "metadata": {
+                "description": "The principal ID of the managed identity"
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').principalId]"
+            },
+            "managedIdentityClientId": {
+              "type": "string",
+              "metadata": {
+                "description": "The client ID of the managed identity"
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').clientId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appServicePlan-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVault-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'managedIdentity-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "keyVaultAccess-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "keyVaultName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVault-deployment'), '2022-09-01').outputs.keyVaultName.value]"
+          },
+          "managedIdentityName": {
+            "value": "[format('mi-{0}-{1}-{2}', parameters('applicationPrefix'), parameters('environmentName'), parameters('resourceToken'))]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "3622777123257238399"
+            }
+          },
+          "parameters": {
+            "keyVaultName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Key Vault"
+              }
+            },
+            "managedIdentityName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the managed identity"
+              }
+            }
+          },
+          "variables": {
+            "keyVaultSecretsUserRoleId": "4633458b-17de-408a-b874-0445c86b69e6"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[format('Microsoft.KeyVault/vaults/{0}', parameters('keyVaultName'))]",
+              "name": "[guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), variables('keyVaultSecretsUserRoleId'))]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', variables('keyVaultSecretsUserRoleId'))]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal",
+                "description": "Allows the managed identity to read secrets from Key Vault"
+              }
+            }
+          ],
+          "outputs": {
+            "keyVaultSecretsUserAssignmentId": {
+              "type": "string",
+              "metadata": {
+                "description": "The resource ID of the Key Vault Secrets User role assignment"
+              },
+              "value": "[extensionResourceId(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), 'Microsoft.Authorization/roleAssignments', guid(resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), variables('keyVaultSecretsUserRoleId')))]"
+            },
+            "managedIdentityPrincipalId": {
+              "type": "string",
+              "metadata": {
+                "description": "The principal ID of the managed identity"
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').principalId]"
+            },
+            "managedIdentityClientId": {
+              "type": "string",
+              "metadata": {
+                "description": "The client ID of the managed identity"
+              },
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2023-01-31').clientId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVault-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'managedIdentity-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2022-09-01",
+      "name": "keyVaultSecrets-deployment",
+      "resourceGroup": "[variables('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "keyVaultName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVault-deployment'), '2022-09-01').outputs.keyVaultName.value]"
+          },
+          "sqlConnectionStrings": {
+            "value": {
+              "defaultConnection": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'sqlDatabase-deployment'), '2022-09-01').outputs.academicDatabaseConnectionString.value]",
+              "eventStoreConnection": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'sqlDatabase-deployment'), '2022-09-01').outputs.eventStoreDatabaseConnectionString.value]"
+            }
+          },
+          "cosmosDbConnectionString": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'cosmosDb-deployment'), '2022-09-01').outputs.primaryMasterKey.value]"
+          },
+          "serviceBusConnectionString": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'serviceBus-deployment'), '2022-09-01').outputs.primaryConnectionString.value]"
+          },
+          "applicationInsightsConnectionString": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights-deployment'), '2022-09-01').outputs.connectionString.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.33.93.31351",
+              "templateHash": "5559498032823784434"
+            }
+          },
+          "parameters": {
+            "keyVaultName": {
+              "type": "string",
+              "metadata": {
+                "description": "The name of the Key Vault"
+              }
+            },
+            "sqlConnectionStrings": {
+              "type": "secureObject",
+              "metadata": {
+                "description": "SQL Database connection strings"
+              }
+            },
+            "cosmosDbConnectionString": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Cosmos DB connection string"
+              }
+            },
+            "serviceBusConnectionString": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Service Bus connection string"
+              }
+            },
+            "applicationInsightsConnectionString": {
+              "type": "securestring",
+              "metadata": {
+                "description": "Application Insights connection string"
+              }
+            }
+          },
+          "resources": [
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2023-07-01",
+              "name": "[format('{0}/{1}', parameters('keyVaultName'), 'DefaultConnection')]",
+              "properties": {
+                "value": "[parameters('sqlConnectionStrings').defaultConnection]",
+                "contentType": "SQL Server connection string",
+                "attributes": {
+                  "enabled": true
+                }
+              }
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2023-07-01",
+              "name": "[format('{0}/{1}', parameters('keyVaultName'), 'EventStoreConnection')]",
+              "properties": {
+                "value": "[parameters('sqlConnectionStrings').eventStoreConnection]",
+                "contentType": "SQL Server connection string for Event Store",
+                "attributes": {
+                  "enabled": true
+                }
+              }
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2023-07-01",
+              "name": "[format('{0}/{1}', parameters('keyVaultName'), 'CosmosDbConnection')]",
+              "properties": {
+                "value": "[parameters('cosmosDbConnectionString')]",
+                "contentType": "Cosmos DB connection string",
+                "attributes": {
+                  "enabled": true
+                }
+              }
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2023-07-01",
+              "name": "[format('{0}/{1}', parameters('keyVaultName'), 'ServiceBusConnection')]",
+              "properties": {
+                "value": "[parameters('serviceBusConnectionString')]",
+                "contentType": "Service Bus connection string",
+                "attributes": {
+                  "enabled": true
+                }
+              }
+            },
+            {
+              "type": "Microsoft.KeyVault/vaults/secrets",
+              "apiVersion": "2023-07-01",
+              "name": "[format('{0}/{1}', parameters('keyVaultName'), 'ApplicationInsightsConnection')]",
+              "properties": {
+                "value": "[parameters('applicationInsightsConnectionString')]",
+                "contentType": "Application Insights connection string",
+                "attributes": {
+                  "enabled": true
+                }
+              }
+            }
+          ],
+          "outputs": {
+            "defaultConnectionReference": {
+              "type": "string",
+              "metadata": {
+                "description": "Key Vault reference for DefaultConnection"
+              },
+              "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName={1})', parameters('keyVaultName'), 'DefaultConnection')]"
+            },
+            "eventStoreConnectionReference": {
+              "type": "string",
+              "metadata": {
+                "description": "Key Vault reference for EventStoreConnection"
+              },
+              "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName={1})', parameters('keyVaultName'), 'EventStoreConnection')]"
+            },
+            "cosmosDbConnectionReference": {
+              "type": "string",
+              "metadata": {
+                "description": "Key Vault reference for CosmosDbConnection"
+              },
+              "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName={1})', parameters('keyVaultName'), 'CosmosDbConnection')]"
+            },
+            "serviceBusConnectionReference": {
+              "type": "string",
+              "metadata": {
+                "description": "Key Vault reference for ServiceBusConnection"
+              },
+              "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName={1})', parameters('keyVaultName'), 'ServiceBusConnection')]"
+            },
+            "applicationInsightsConnectionReference": {
+              "type": "string",
+              "metadata": {
+                "description": "Key Vault reference for ApplicationInsightsConnection"
+              },
+              "value": "[format('@Microsoft.KeyVault(VaultName={0};SecretName={1})', parameters('keyVaultName'), 'ApplicationInsightsConnection')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'cosmosDb-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVault-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVaultAccess-deployment')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'serviceBus-deployment')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'sqlDatabase-deployment')]"
+      ]
+    }
+  ],
+  "outputs": {
+    "AZURE_RESOURCE_GROUP_NAME": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the resource group"
+      },
+      "value": "[variables('resourceGroupName')]"
+    },
+    "AZURE_LOCATION": {
+      "type": "string",
+      "metadata": {
+        "description": "The location of the primary region"
+      },
+      "value": "[parameters('primaryLocation')]"
+    },
+    "SERVICE_API_NAME": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the App Service"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appService-deployment'), '2022-09-01').outputs.appServiceName.value]"
+    },
+    "SERVICE_API_URI": {
+      "type": "string",
+      "metadata": {
+        "description": "The URL of the App Service"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appService-deployment'), '2022-09-01').outputs.appServiceUrl.value]"
+    },
+    "AZURE_KEY_VAULT_NAME": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Key Vault"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVault-deployment'), '2022-09-01').outputs.keyVaultName.value]"
+    },
+    "AZURE_KEY_VAULT_ENDPOINT": {
+      "type": "string",
+      "metadata": {
+        "description": "The URL of the Key Vault"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'keyVault-deployment'), '2022-09-01').outputs.keyVaultUri.value]"
+    },
+    "AZURE_APPLICATION_INSIGHTS_NAME": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Application Insights instance"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights-deployment'), '2022-09-01').outputs.appInsightsName.value]"
+    },
+    "AZURE_APPLICATION_INSIGHTS_CONNECTION_STRING": {
+      "type": "string",
+      "metadata": {
+        "description": "The connection string for Application Insights"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'appInsights-deployment'), '2022-09-01').outputs.connectionString.value]"
+    },
+    "AZURE_SQL_SERVER_NAME": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the SQL Server"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'sqlDatabase-deployment'), '2022-09-01').outputs.sqlServerName.value]"
+    },
+    "AZURE_SQL_SERVER_FQDN": {
+      "type": "string",
+      "metadata": {
+        "description": "The FQDN of the SQL Server"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'sqlDatabase-deployment'), '2022-09-01').outputs.sqlServerFqdn.value]"
+    },
+    "AZURE_SQL_DATABASE_NAME": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the academic database"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'sqlDatabase-deployment'), '2022-09-01').outputs.academicDatabaseName.value]"
+    },
+    "AZURE_COSMOS_DB_ACCOUNT_NAME": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Cosmos DB account"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'cosmosDb-deployment'), '2022-09-01').outputs.cosmosDbAccountName.value]"
+    },
+    "AZURE_COSMOS_DB_ENDPOINT": {
+      "type": "string",
+      "metadata": {
+        "description": "The endpoint of the Cosmos DB account"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'cosmosDb-deployment'), '2022-09-01').outputs.cosmosDbEndpoint.value]"
+    },
+    "AZURE_SERVICE_BUS_NAMESPACE": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Service Bus namespace"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'serviceBus-deployment'), '2022-09-01').outputs.serviceBusNamespaceName.value]"
+    },
+    "AZURE_SERVICE_BUS_FQDN": {
+      "type": "string",
+      "metadata": {
+        "description": "The FQDN of the Service Bus namespace"
+      },
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, variables('resourceGroupName')), 'Microsoft.Resources/deployments', 'serviceBus-deployment'), '2022-09-01').outputs.serviceBusNamespaceFqdn.value]"
+    }
+  }
+}

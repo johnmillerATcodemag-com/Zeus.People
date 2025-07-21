@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Zeus.People.Application.Interfaces;
 using Zeus.People.Infrastructure.Configuration;
 using Zeus.People.Infrastructure.EventStore;
@@ -119,25 +121,36 @@ public static class DependencyInjection
                 options.MaxRetryWaitTimeInSeconds = maxRetryWait;
         });
 
-        services.AddSingleton(serviceProvider =>
+        services.AddSingleton<CosmosClient>(serviceProvider =>
         {
-            var connectionString = configuration.GetConnectionString("CosmosDb");
+            var cosmosDbConfig = serviceProvider.GetRequiredService<IOptions<CosmosDbConfiguration>>().Value;
             var cosmosClientOptions = new CosmosClientOptions
             {
-                MaxRetryAttemptsOnRateLimitedRequests = 3,
-                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(30),
-                ConnectionMode = ConnectionMode.Direct
+                MaxRetryAttemptsOnRateLimitedRequests = cosmosDbConfig.MaxRetryAttemptsOnRateLimitedRequests,
+                MaxRetryWaitTimeOnRateLimitedRequests = TimeSpan.FromSeconds(cosmosDbConfig.MaxRetryWaitTimeInSeconds),
+                ConnectionMode = ConnectionMode.Direct,
+                RequestTimeout = TimeSpan.FromSeconds(cosmosDbConfig.RequestTimeoutInSeconds)
             };
 
-            // Use Managed Identity in production, connection string in development
-            if (string.IsNullOrEmpty(connectionString))
+            // Prefer managed identity when configured, fall back to connection string
+            if (cosmosDbConfig.UseManagedIdentity && !string.IsNullOrEmpty(cosmosDbConfig.Endpoint))
             {
-                var cosmosDbEndpoint = configuration["CosmosDb:Endpoint"];
-                return new CosmosClient(cosmosDbEndpoint, new DefaultAzureCredential(), cosmosClientOptions);
+                return new CosmosClient(cosmosDbConfig.Endpoint, new DefaultAzureCredential(), cosmosClientOptions);
+            }
+            else if (!string.IsNullOrEmpty(cosmosDbConfig.AuthKey) && !string.IsNullOrEmpty(cosmosDbConfig.Endpoint))
+            {
+                return new CosmosClient(cosmosDbConfig.Endpoint, cosmosDbConfig.AuthKey, cosmosClientOptions);
             }
             else
             {
-                return new CosmosClient(connectionString, cosmosClientOptions);
+                // Fall back to connection string if available
+                var connectionString = configuration.GetConnectionString("CosmosDbConnection");
+                if (!string.IsNullOrEmpty(connectionString))
+                {
+                    return new CosmosClient(connectionString, cosmosClientOptions);
+                }
+
+                throw new InvalidOperationException("Cosmos DB configuration is invalid. Either provide endpoint with managed identity/auth key, or a valid connection string.");
             }
         });
 
@@ -169,52 +182,78 @@ public static class DependencyInjection
     }
 
     /// <summary>
-    /// Ensures databases are created and migrated
+    /// Ensures databases are created and migrated (optional - call manually)
     /// </summary>
     public static async Task<IServiceProvider> EnsureDatabasesCreatedAsync(this IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
 
-        // Ensure Academic database is created and migrated
-        var academicContext = scope.ServiceProvider.GetRequiredService<AcademicContext>();
-        await academicContext.Database.MigrateAsync();
+        try
+        {
+            // Ensure Academic database is created and migrated
+            var academicContext = scope.ServiceProvider.GetRequiredService<AcademicContext>();
+            if (await academicContext.Database.CanConnectAsync())
+            {
+                await academicContext.Database.MigrateAsync();
+            }
 
-        // Ensure Event Store database is created and migrated
-        var eventStoreContext = scope.ServiceProvider.GetRequiredService<EventStoreContext>();
-        await eventStoreContext.Database.MigrateAsync();
+            // Ensure Event Store database is created and migrated
+            var eventStoreContext = scope.ServiceProvider.GetRequiredService<EventStoreContext>();
+            if (await eventStoreContext.Database.CanConnectAsync())
+            {
+                await eventStoreContext.Database.MigrateAsync();
+            }
 
-        // Ensure Cosmos DB containers are created
-        await EnsureCosmosDbContainersAsync(scope.ServiceProvider);
+            // Ensure Cosmos DB containers are created
+            await EnsureCosmosDbContainersAsync(scope.ServiceProvider);
+        }
+        catch (Exception ex)
+        {
+            // Log the exception but don't fail startup
+            var loggerFactory = scope.ServiceProvider.GetService<Microsoft.Extensions.Logging.ILoggerFactory>();
+            var logger = loggerFactory?.CreateLogger("DatabaseMigration");
+            logger?.LogWarning(ex, "Failed to ensure databases are created during startup");
+        }
 
         return serviceProvider;
     }
 
     private static async Task EnsureCosmosDbContainersAsync(IServiceProvider serviceProvider)
     {
-        var cosmosClient = serviceProvider.GetRequiredService<CosmosClient>();
-        var configuration = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<CosmosDbConfiguration>>();
-
-        var databaseName = configuration.Value.DatabaseName;
-
-        // Create database if it doesn't exist
-        var databaseResponse = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
-        var database = databaseResponse.Database;
-
-        // Create containers for read models
-        var containers = new[]
+        try
         {
-            new { Name = "academics", PartitionKey = "/id" },
-            new { Name = "departments", PartitionKey = "/id" },
-            new { Name = "rooms", PartitionKey = "/id" },
-            new { Name = "extensions", PartitionKey = "/id" }
-        };
+            var cosmosClient = serviceProvider.GetRequiredService<CosmosClient>();
+            var configuration = serviceProvider.GetRequiredService<Microsoft.Extensions.Options.IOptions<CosmosDbConfiguration>>();
 
-        foreach (var container in containers)
+            var databaseName = configuration.Value.DatabaseName;
+
+            // Create database if it doesn't exist
+            var databaseResponse = await cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName);
+            var database = databaseResponse.Database;
+
+            // Create containers for read models
+            var containers = new[]
+            {
+                new { Name = "academics", PartitionKey = "/id" },
+                new { Name = "departments", PartitionKey = "/id" },
+                new { Name = "rooms", PartitionKey = "/id" },
+                new { Name = "extensions", PartitionKey = "/id" }
+            };
+
+            foreach (var container in containers)
+            {
+                await database.CreateContainerIfNotExistsAsync(
+                    container.Name,
+                    container.PartitionKey,
+                    400); // Request Units per second
+            }
+        }
+        catch (Exception ex)
         {
-            await database.CreateContainerIfNotExistsAsync(
-                container.Name,
-                container.PartitionKey,
-                400); // Request Units per second
+            // Log the exception but don't fail startup
+            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
+            var logger = loggerFactory?.CreateLogger("CosmosDbSetup");
+            logger?.LogWarning(ex, "Failed to ensure Cosmos DB containers are created during startup");
         }
     }
 }

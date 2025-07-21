@@ -22,10 +22,19 @@ public class DatabaseHealthCheck : IHealthCheck
     {
         try
         {
-            // Try to execute a simple query to check database connectivity
-            await _context.Database.ExecuteSqlRawAsync("SELECT 1", cancellationToken);
+            // Try to check if we can connect to the database
+            var canConnect = await _context.Database.CanConnectAsync(cancellationToken);
 
-            return HealthCheckResult.Healthy("Database connection is healthy");
+            if (canConnect)
+            {
+                // If we can connect, try a simple query
+                await _context.Database.ExecuteSqlRawAsync("SELECT 1", cancellationToken);
+                return HealthCheckResult.Healthy("Database connection is healthy");
+            }
+            else
+            {
+                return HealthCheckResult.Unhealthy("Database connection failed");
+            }
         }
         catch (Exception ex)
         {

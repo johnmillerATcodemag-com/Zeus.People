@@ -85,7 +85,7 @@ app.MapHealthChecks("/health", new Microsoft.AspNetCore.Diagnostics.HealthChecks
                 {
                     status = kvp.Value.Status.ToString(),
                     duration = kvp.Value.Duration.ToString(),
-                    description = kvp.Value.Description,
+                    description = kvp.Value.Description ?? (kvp.Value.Exception?.Message ?? "No description"),
                     tags = kvp.Value.Tags
                 }
             )
