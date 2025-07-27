@@ -134,6 +134,13 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore Zeus.People.sln
 
+      - name: Build solution
+        run: |
+          dotnet build Zeus.People.sln \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --no-restore \
+            --verbosity normal
+
       - name: Run ${{ matrix.test-project }} tests
         run: |
           dotnet test tests/${{ matrix.test-project }}/${{ matrix.test-project }}.csproj \
