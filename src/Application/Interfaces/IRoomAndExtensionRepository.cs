@@ -21,8 +21,8 @@ public interface IRoomRepository
 /// </summary>
 public interface IRoomReadRepository
 {
-    Task<Result<RoomDto?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<Result<RoomDto?>> GetByRoomNumberAsync(string roomNumber, CancellationToken cancellationToken = default);
+    Task<Result<RoomDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<RoomDto>> GetByRoomNumberAsync(string roomNumber, CancellationToken cancellationToken = default);
     Task<Result<PagedResult<RoomDto>>> GetAllAsync(
         int pageNumber,
         int pageSize,
@@ -54,8 +54,8 @@ public interface IExtensionRepository
 /// </summary>
 public interface IExtensionReadRepository
 {
-    Task<Result<ExtensionDto?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<Result<ExtensionDto?>> GetByExtensionNumberAsync(string extensionNumber, CancellationToken cancellationToken = default);
+    Task<Result<ExtensionDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<ExtensionDto>> GetByExtensionNumberAsync(string extensionNumber, CancellationToken cancellationToken = default);
     Task<Result<PagedResult<ExtensionDto>>> GetAllAsync(
         int pageNumber,
         int pageSize,

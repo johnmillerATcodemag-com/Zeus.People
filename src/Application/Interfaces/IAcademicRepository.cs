@@ -30,8 +30,8 @@ public interface IAcademicRepository
 /// </summary>
 public interface IAcademicReadRepository
 {
-    Task<Result<AcademicDto?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<Result<AcademicDto?>> GetByEmpNrAsync(string empNr, CancellationToken cancellationToken = default);
+    Task<Result<AcademicDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<AcademicDto>> GetByEmpNrAsync(string empNr, CancellationToken cancellationToken = default);
     Task<Result<PagedResult<AcademicSummaryDto>>> GetAllAsync(
         int pageNumber,
         int pageSize,

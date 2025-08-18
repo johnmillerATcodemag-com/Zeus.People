@@ -27,14 +27,14 @@ public interface IDepartmentRepository
 /// </summary>
 public interface IDepartmentReadRepository
 {
-    Task<Result<DepartmentDto?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<Result<DepartmentDto?>> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    Task<Result<DepartmentDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<DepartmentDto>> GetByNameAsync(string name, CancellationToken cancellationToken = default);
     Task<Result<PagedResult<DepartmentSummaryDto>>> GetAllAsync(
         int pageNumber,
         int pageSize,
         string? nameFilter = null,
         CancellationToken cancellationToken = default);
-    Task<Result<DepartmentStaffCountDto?>> GetStaffCountAsync(Guid departmentId, CancellationToken cancellationToken = default);
+    Task<Result<DepartmentStaffCountDto>> GetStaffCountAsync(Guid departmentId, CancellationToken cancellationToken = default);
     Task<Result<List<DepartmentStaffCountDto>>> GetAllStaffCountsAsync(CancellationToken cancellationToken = default);
     Task<Result<List<DepartmentSummaryDto>>> GetWithBudgetAsync(
         decimal? minResearchBudget = null,

@@ -1,13 +1,13 @@
 # azure.yaml - Azure Developer CLI configuration for Zeus.People
-name: zeus-people
+name: academic-staging
 metadata:
-  template: zeus-people@0.0.1-beta
+  template: academic-staging@0.0.1-beta
 infra:
   provider: bicep
   path: infra
   module: main
 services:
-  zeus-people-api:
+  api:
     project: src/API
     host: appservice
     language: dotnet

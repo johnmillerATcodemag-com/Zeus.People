@@ -55,7 +55,7 @@ public class QueryHandlerDataTests
         };
 
         _mockAcademicReadRepository.Setup(x => x.GetByIdAsync(academicId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<AcademicDto?>(expectedAcademic));
+            .ReturnsAsync(Result.Success(expectedAcademic));
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -84,7 +84,7 @@ public class QueryHandlerDataTests
         var query = new GetAcademicQuery(academicId);
 
         _mockAcademicReadRepository.Setup(x => x.GetByIdAsync(academicId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<AcademicDto?>(null));
+            .ReturnsAsync(Result.Failure<AcademicDto>(new Error("Academic.NotFound", $"Academic with ID {academicId} not found")));
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -124,7 +124,7 @@ public class QueryHandlerDataTests
         };
 
         _mockDepartmentReadRepository.Setup(x => x.GetByIdAsync(departmentId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<DepartmentDto?>(expectedDepartment));
+            .ReturnsAsync(Result.Success(expectedDepartment));
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -151,7 +151,7 @@ public class QueryHandlerDataTests
         var query = new GetDepartmentQuery(departmentId);
 
         _mockDepartmentReadRepository.Setup(x => x.GetByIdAsync(departmentId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<DepartmentDto?>(null));
+            .ReturnsAsync(Result.Failure<DepartmentDto>(new Error("Department.NotFound", $"Department with ID {departmentId} not found")));
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -185,7 +185,7 @@ public class QueryHandlerDataTests
         };
 
         _mockAcademicReadRepository.Setup(x => x.GetByEmpNrAsync(empNr, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<AcademicDto?>(expectedAcademic));
+            .ReturnsAsync(Result.Success(expectedAcademic));
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -324,7 +324,7 @@ public class QueryHandlerDataTests
         };
 
         _mockDepartmentReadRepository.Setup(x => x.GetByNameAsync(departmentName, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<DepartmentDto?>(expectedDepartment));
+            .ReturnsAsync(Result.Success(expectedDepartment));
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -347,7 +347,7 @@ public class QueryHandlerDataTests
 
         var repositoryError = new Error("Repository.ConnectionFailed", "Database connection failed");
         _mockAcademicReadRepository.Setup(x => x.GetByIdAsync(academicId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Failure<AcademicDto?>(repositoryError));
+            .ReturnsAsync(Result.Failure<AcademicDto>(repositoryError));
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);
@@ -381,7 +381,7 @@ public class QueryHandlerDataTests
         };
 
         _mockAcademicReadRepository.Setup(x => x.GetByIdAsync(academicId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Result.Success<AcademicDto?>(academicWithIncompleteData));
+            .ReturnsAsync(Result.Success(academicWithIncompleteData));
 
         // Act
         var result = await handler.Handle(query, CancellationToken.None);

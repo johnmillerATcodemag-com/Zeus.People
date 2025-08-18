@@ -9,29 +9,13 @@
       "value": "academic"
     },
     "primaryLocation": {
-      "value": "eastus2"
+      "value": "westus2"
     },
     "secondaryLocation": {
       "value": "westus2"
     },
-    "sqlAdminLogin": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.KeyVault/vaults/{kv-name}"
-        },
-        "secretName": "sqlAdminLogin"
-      }
-    },
-    "sqlAdminPassword": {
-      "reference": {
-        "keyVault": {
-          "id": "/subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.KeyVault/vaults/{kv-name}"
-        },
-        "secretName": "sqlAdminPassword"
-      }
-    },
     "keyVaultAccessPrincipalId": {
-      "value": "{your-principal-id}"
+      "value": "a94c0fd7-fc44-41aa-b98e-a75a19412723"
     }
   }
 }

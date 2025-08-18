@@ -40,7 +40,7 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
 
     #region Academic Read Operations
 
-    public async Task<Result<AcademicDto?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<AcademicDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -49,20 +49,20 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
                 new PartitionKey(id.ToString()),
                 cancellationToken: cancellationToken);
 
-            return Result.Success<AcademicDto?>(response.Resource);
+            return Result.Success(response.Resource);
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return Result.Success<AcademicDto?>(null);
+            return Result.Failure<AcademicDto>(new Error("Academic.NotFound", $"Academic with ID {id} not found"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get academic by ID {AcademicId}", id);
-            return Result.Failure<AcademicDto?>(new Error("AcademicReadModel.RetrievalError", $"Failed to get academic: {ex.Message}"));
+            return Result.Failure<AcademicDto>(new Error("AcademicReadModel.RetrievalError", $"Failed to get academic: {ex.Message}"));
         }
     }
 
-    public async Task<Result<AcademicDto?>> GetByEmpNrAsync(string empNr, CancellationToken cancellationToken = default)
+    public async Task<Result<AcademicDto>> GetByEmpNrAsync(string empNr, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -72,12 +72,16 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
             var response = await _academicsContainer.GetItemQueryIterator<AcademicDto>(query)
                 .ReadNextAsync(cancellationToken);
 
-            return Result.Success<AcademicDto?>(response.FirstOrDefault());
+            var result = response.FirstOrDefault();
+            if (result != null)
+                return Result.Success(result);
+            else
+                return Result.Failure<AcademicDto>(new Error("Academic.NotFound", $"Academic with employee number {empNr} not found"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get academic by employee number {EmpNr}", empNr);
-            return Result.Failure<AcademicDto?>(new Error("AcademicReadModel.EmpNrRetrievalError", $"Failed to get academic: {ex.Message}"));
+            return Result.Failure<AcademicDto>(new Error("AcademicReadModel.EmpNrRetrievalError", $"Failed to get academic: {ex.Message}"));
         }
     }
 
@@ -312,7 +316,7 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
 
     #region Department Read Operations
 
-    async Task<Result<DepartmentDto?>> IDepartmentReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    async Task<Result<DepartmentDto>> IDepartmentReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         try
         {
@@ -321,20 +325,20 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
                 new PartitionKey(id.ToString()),
                 cancellationToken: cancellationToken);
 
-            return Result.Success<DepartmentDto?>(response.Resource);
+            return Result.Success(response.Resource);
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return Result.Success<DepartmentDto?>(null);
+            return Result.Failure<DepartmentDto>(new Error("Department.NotFound", $"Department with ID {id} not found"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get department by ID {DepartmentId}", id);
-            return Result.Failure<DepartmentDto?>(new Error("ReadModel.Error", $"Failed to get department: {ex.Message}"));
+            return Result.Failure<DepartmentDto>(new Error("ReadModel.Error", $"Failed to get department: {ex.Message}"));
         }
     }
 
-    public async Task<Result<DepartmentDto?>> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+    public async Task<Result<DepartmentDto>> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -344,12 +348,18 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
             var response = await _departmentsContainer.GetItemQueryIterator<DepartmentDto>(query)
                 .ReadNextAsync(cancellationToken);
 
-            return Result.Success(response.FirstOrDefault());
+            var department = response.FirstOrDefault();
+            if (department == null)
+            {
+                return Result.Failure<DepartmentDto>(new Error("Department.NotFound", $"Department with name '{name}' not found"));
+            }
+
+            return Result.Success(department);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get department by name {Name}", name);
-            return Result.Failure<DepartmentDto?>(new Error("Department.GetByNameFailed", $"Failed to get department: {ex.Message}"));
+            return Result.Failure<DepartmentDto>(new Error("Department.GetByNameFailed", $"Failed to get department: {ex.Message}"));
         }
     }
 
@@ -399,7 +409,7 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
         }
     }
 
-    public async Task<Result<DepartmentStaffCountDto?>> GetStaffCountAsync(Guid departmentId, CancellationToken cancellationToken = default)
+    public async Task<Result<DepartmentStaffCountDto>> GetStaffCountAsync(Guid departmentId, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -410,12 +420,17 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
                 .ReadNextAsync(cancellationToken);
 
             var result = response.FirstOrDefault();
+            if (result == null)
+            {
+                return Result.Failure<DepartmentStaffCountDto>(new Error("Department.NotFound", $"Department with ID {departmentId} not found"));
+            }
+
             return Result.Success(result);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get staff count for department {DepartmentId}", departmentId);
-            return Result.Failure<DepartmentStaffCountDto?>(new Error("Department.StaffCountFailed", $"Failed to get staff count: {ex.Message}"));
+            return Result.Failure<DepartmentStaffCountDto>(new Error("Department.StaffCountFailed", $"Failed to get staff count: {ex.Message}"));
         }
     }
 
@@ -502,12 +517,12 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
 
     #region Room Read Operations
 
-    Task<Result<RoomDto?>> IRoomReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    Task<Result<RoomDto>> IRoomReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return GetRoomByIdAsync(id, cancellationToken);
     }
 
-    public async Task<Result<RoomDto?>> GetRoomByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<RoomDto>> GetRoomByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -516,20 +531,20 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
                 new PartitionKey(id.ToString()),
                 cancellationToken: cancellationToken);
 
-            return Result.Success<RoomDto?>(response.Resource);
+            return Result.Success(response.Resource);
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return Result.Success<RoomDto?>(null);
+            return Result.Failure<RoomDto>(new Error("Room.NotFound", $"Room with ID {id} not found"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get room by ID {RoomId}", id);
-            return Result.Failure<RoomDto?>(new Error("Room.GetByIdFailed", $"Failed to get room: {ex.Message}"));
+            return Result.Failure<RoomDto>(new Error("Room.GetByIdFailed", $"Failed to get room: {ex.Message}"));
         }
     }
 
-    public async Task<Result<RoomDto?>> GetByRoomNumberAsync(string roomNumber, CancellationToken cancellationToken = default)
+    public async Task<Result<RoomDto>> GetByRoomNumberAsync(string roomNumber, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -539,12 +554,18 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
             var response = await _roomsContainer.GetItemQueryIterator<RoomDto>(query)
                 .ReadNextAsync(cancellationToken);
 
-            return Result.Success<RoomDto?>(response.FirstOrDefault());
+            var room = response.FirstOrDefault();
+            if (room == null)
+            {
+                return Result.Failure<RoomDto>(new Error("Room.NotFound", $"Room with number '{roomNumber}' not found"));
+            }
+
+            return Result.Success(room);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get room by number {RoomNumber}", roomNumber);
-            return Result.Failure<RoomDto?>(new Error("ReadModel.Error", $"Failed to get room: {ex.Message}"));
+            return Result.Failure<RoomDto>(new Error("ReadModel.Error", $"Failed to get room: {ex.Message}"));
         }
     }
 
@@ -716,12 +737,12 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
 
     #region Extension Read Operations
 
-    Task<Result<ExtensionDto?>> IExtensionReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    Task<Result<ExtensionDto>> IExtensionReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return GetExtensionByIdAsync(id, cancellationToken);
     }
 
-    public async Task<Result<ExtensionDto?>> GetExtensionByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<ExtensionDto>> GetExtensionByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -730,20 +751,20 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
                 new PartitionKey(id.ToString()),
                 cancellationToken: cancellationToken);
 
-            return Result.Success<ExtensionDto?>(response.Resource);
+            return Result.Success(response.Resource);
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
-            return Result.Success<ExtensionDto?>(null);
+            return Result.Failure<ExtensionDto>(new Error("Extension.NotFound", $"Extension with ID {id} not found"));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get extension by ID {ExtensionId}", id);
-            return Result.Failure<ExtensionDto?>(new Error("ReadModel.Error", $"Failed to get extension: {ex.Message}"));
+            return Result.Failure<ExtensionDto>(new Error("ReadModel.Error", $"Failed to get extension: {ex.Message}"));
         }
     }
 
-    public async Task<Result<ExtensionDto?>> GetByExtensionNumberAsync(string extensionNumber, CancellationToken cancellationToken = default)
+    public async Task<Result<ExtensionDto>> GetByExtensionNumberAsync(string extensionNumber, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -753,12 +774,18 @@ public class CosmosDbReadModelRepository : IAcademicReadRepository, IDepartmentR
             var response = await _extensionsContainer.GetItemQueryIterator<ExtensionDto>(query)
                 .ReadNextAsync(cancellationToken);
 
-            return Result.Success<ExtensionDto?>(response.FirstOrDefault());
+            var extension = response.FirstOrDefault();
+            if (extension == null)
+            {
+                return Result.Failure<ExtensionDto>(new Error("Extension.NotFound", $"Extension with number '{extensionNumber}' not found"));
+            }
+
+            return Result.Success(extension);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to get extension by number {ExtensionNumber}", extensionNumber);
-            return Result.Failure<ExtensionDto?>(new Error("ReadModel.Error", $"Failed to get extension: {ex.Message}"));
+            return Result.Failure<ExtensionDto>(new Error("ReadModel.Error", $"Failed to get extension: {ex.Message}"));
         }
     }
 

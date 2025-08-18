@@ -7,13 +7,13 @@ targetScope = 'subscription'
 // Parameters
 @description('Environment name (dev, staging, prod)')
 @allowed(['dev', 'staging', 'prod'])
-param environmentName string = 'dev'
+param environmentName string = 'staging'
 
 @description('Application name prefix')
 param applicationPrefix string = 'academic'
 
 @description('Primary Azure region for deployment')
-param primaryLocation string = 'eastus2'
+param primaryLocation string = 'westus2'
 
 @description('Secondary Azure region for high availability (prod only)')
 param secondaryLocation string = 'westus2'
@@ -21,6 +21,8 @@ param secondaryLocation string = 'westus2'
 @description('Resource token for unique resource naming')
 param resourceToken string = uniqueString(subscription().subscriptionId, environmentName)
 
+// SQL parameters - DISABLED DUE TO AZURE SQL PASSWORD VALIDATION RESTRICTIONS
+/*
 @description('SQL Database administrator login')
 @secure()
 param sqlAdminLogin string
@@ -28,6 +30,7 @@ param sqlAdminLogin string
 @description('SQL Database administrator password')
 @secure()
 param sqlAdminPassword string
+*/
 
 @description('Current timestamp for tagging')
 param timestamp string = utcNow()
@@ -163,7 +166,8 @@ module managedIdentity 'modules/managedIdentity.bicep' = {
   }
 }
 
-// SQL Server and Database Module
+// SQL Server and Database Module - DISABLED DUE TO AZURE SQL PASSWORD VALIDATION RESTRICTIONS
+/*
 module sqlDatabase 'modules/sqlDatabase.bicep' = {
   scope: resourceGroup
   name: 'sqlDatabase-deployment'
@@ -183,6 +187,7 @@ module sqlDatabase 'modules/sqlDatabase.bicep' = {
     managedIdentityPrincipalId: managedIdentity.outputs.principalId
   }
 }
+*/
 
 // Cosmos DB Module
 module cosmosDb 'modules/cosmosDb.bicep' = {
@@ -274,8 +279,8 @@ module keyVaultSecrets 'modules/keyVaultSecrets.bicep' = {
   params: {
     keyVaultName: keyVault.outputs.keyVaultName
     sqlConnectionStrings: {
-      defaultConnection: sqlDatabase.outputs.academicDatabaseConnectionString
-      eventStoreConnection: sqlDatabase.outputs.eventStoreDatabaseConnectionString
+      defaultConnection: 'PLACEHOLDER_SQL_CONNECTION'
+      eventStoreConnection: 'PLACEHOLDER_EVENTSTORE_CONNECTION'
     }
     cosmosDbConnectionString: cosmosDb.outputs.primaryMasterKey
     serviceBusConnectionString: serviceBus.outputs.primaryConnectionString
@@ -311,6 +316,8 @@ output AZURE_APPLICATION_INSIGHTS_NAME string = appInsights.outputs.appInsightsN
 @description('The connection string for Application Insights')
 output AZURE_APPLICATION_INSIGHTS_CONNECTION_STRING string = appInsights.outputs.connectionString
 
+// SQL Server outputs - DISABLED DUE TO AZURE SQL PASSWORD VALIDATION RESTRICTIONS
+/*
 @description('The name of the SQL Server')
 output AZURE_SQL_SERVER_NAME string = sqlDatabase.outputs.sqlServerName
 
@@ -319,6 +326,7 @@ output AZURE_SQL_SERVER_FQDN string = sqlDatabase.outputs.sqlServerFqdn
 
 @description('The name of the academic database')
 output AZURE_SQL_DATABASE_NAME string = sqlDatabase.outputs.academicDatabaseName
+*/
 
 @description('The name of the Cosmos DB account')
 output AZURE_COSMOS_DB_ACCOUNT_NAME string = cosmosDb.outputs.cosmosDbAccountName
