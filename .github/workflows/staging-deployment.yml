@@ -160,7 +160,26 @@ jobs:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
       - name: ⚙️ Setup Azure Developer CLI
-        uses: Azure/setup-azd@v1.0.0
+        run: |
+          # Install Azure Developer CLI using PowerShell (alternative to problematic action)
+          if (!(Get-Command azd -ErrorAction SilentlyContinue)) {
+            Write-Host "Installing Azure Developer CLI..."
+            Invoke-RestMethod 'https://aka.ms/install-azd.ps1' | Invoke-Expression
+            # Refresh environment variables to get updated PATH
+            $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("PATH","User")
+            # Add specific AZD path if needed
+            if ($env:USERPROFILE) {
+              $azdPath = "$env:USERPROFILE\.azd\bin"
+              if (Test-Path $azdPath) {
+                $env:PATH = "$azdPath;$env:PATH"
+              }
+            }
+          } else {
+            Write-Host "Azure Developer CLI already installed: $(azd version)"
+          }
+          # Verify installation
+          azd version
+        shell: pwsh
 
       - name: 🏗️ Deploy infrastructure (dry-run)
         if: ${{ !inputs.skip_infrastructure }}
