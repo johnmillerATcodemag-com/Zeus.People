@@ -5,7 +5,9 @@
 Go to: https://github.com/johnmillerATcodemag-com/Zeus.People/settings/secrets/actions
 
 ### 1. AZURE_CREDENTIALS
+
 **Value (JSON):**
+
 ```json
 {
   "clientId": "a90252fe-4d36-4e18-8a85-7e8ecbf04ed0",
@@ -22,31 +24,41 @@ Go to: https://github.com/johnmillerATcodemag-com/Zeus.People/settings/secrets/a
 ```
 
 ### 2. AZURE_CLIENT_ID
+
 **Value:**
+
 ```
 a90252fe-4d36-4e18-8a85-7e8ecbf04ed0
 ```
 
-### 3. AZURE_CLIENT_SECRET  
+### 3. AZURE_CLIENT_SECRET
+
 **Value:**
+
 ```
 [REDACTED - Use value from service principal creation output]
 ```
 
 ### 4. AZURE_TENANT_ID
+
 **Value:**
+
 ```
 24db396b-b795-45c9-bcfa-d3559193f2f7
 ```
 
 ### 5. MANAGED_IDENTITY_CLIENT_ID
+
 **Value:** (Will be populated after first successful infrastructure deployment)
+
 ```
 TO_BE_ADDED_AFTER_INFRASTRUCTURE_DEPLOYMENT
 ```
 
 ### 6. APP_INSIGHTS_CONNECTION_STRING
+
 **Value:** (Will be populated after first successful infrastructure deployment)
+
 ```
 TO_BE_ADDED_AFTER_INFRASTRUCTURE_DEPLOYMENT
 ```
@@ -75,11 +87,12 @@ After the infrastructure is deployed, run this command to get the missing values
 # Get Managed Identity Client ID
 az identity show --resource-group rg-academic-staging-westus2 --name managed-identity-academic-staging-2ymnmfmrvsb3w --query clientId --output tsv
 
-# Get Application Insights Connection String  
+# Get Application Insights Connection String
 az monitor app-insights component show --app app-insights-academic-staging-2ymnmfmrvsb3w --resource-group rg-academic-staging-westus2 --query connectionString --output tsv
 ```
 
 Then update these two GitHub secrets:
+
 - **MANAGED_IDENTITY_CLIENT_ID**: Replace with the actual managed identity client ID
 - **APP_INSIGHTS_CONNECTION_STRING**: Replace with the actual connection string
 

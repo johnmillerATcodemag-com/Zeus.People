@@ -2,16 +2,16 @@
 # Run this script after creating the service principal to collect all required values
 
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$SubscriptionId,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$ResourceGroupName = "rg-academic-staging-westus2",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$ManagedIdentityName = "managed-identity-academic-staging-2ymnmfmrvsb3w",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$AppInsightsName = "app-insights-academic-staging-2ymnmfmrvsb3w"
 )
 
@@ -25,7 +25,8 @@ try {
         throw "Not logged in"
     }
     Write-Host "✅ Logged in as: $currentAccount" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "❌ Please login to Azure CLI first: az login" -ForegroundColor Red
     exit 1
 }
@@ -52,11 +53,13 @@ try {
     $managedIdentityClientId = az identity show --resource-group $ResourceGroupName --name $ManagedIdentityName --query clientId --output tsv 2>$null
     if ($managedIdentityClientId) {
         Write-Host "✅ Managed Identity Client ID: $managedIdentityClientId" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "⚠️ Managed Identity not found. You may need to deploy infrastructure first." -ForegroundColor Yellow
         $managedIdentityClientId = "DEPLOY_INFRASTRUCTURE_FIRST"
     }
-} catch {
+}
+catch {
     Write-Host "⚠️ Could not retrieve Managed Identity Client ID" -ForegroundColor Yellow
     $managedIdentityClientId = "DEPLOY_INFRASTRUCTURE_FIRST"
 }
@@ -66,11 +69,13 @@ try {
     $appInsightsConnectionString = az monitor app-insights component show --app $AppInsightsName --resource-group $ResourceGroupName --query connectionString --output tsv 2>$null
     if ($appInsightsConnectionString) {
         Write-Host "✅ Application Insights Connection String: $($appInsightsConnectionString.Substring(0,50))..." -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "⚠️ Application Insights not found. You may need to deploy infrastructure first." -ForegroundColor Yellow
         $appInsightsConnectionString = "DEPLOY_INFRASTRUCTURE_FIRST"
     }
-} catch {
+}
+catch {
     Write-Host "⚠️ Could not retrieve Application Insights Connection String" -ForegroundColor Yellow
     $appInsightsConnectionString = "DEPLOY_INFRASTRUCTURE_FIRST"
 }
@@ -89,7 +94,8 @@ Write-Host $tenantId -ForegroundColor Gray
 if ($managedIdentityClientId -ne "DEPLOY_INFRASTRUCTURE_FIRST") {
     Write-Host "`nMANAGED_IDENTITY_CLIENT_ID:" -ForegroundColor White
     Write-Host $managedIdentityClientId -ForegroundColor Gray
-} else {
+}
+else {
     Write-Host "`nMANAGED_IDENTITY_CLIENT_ID:" -ForegroundColor White
     Write-Host "⚠️ Deploy infrastructure first, then run this script again" -ForegroundColor Yellow
 }
@@ -97,7 +103,8 @@ if ($managedIdentityClientId -ne "DEPLOY_INFRASTRUCTURE_FIRST") {
 if ($appInsightsConnectionString -ne "DEPLOY_INFRASTRUCTURE_FIRST") {
     Write-Host "`nAPP_INSIGHTS_CONNECTION_STRING:" -ForegroundColor White
     Write-Host $appInsightsConnectionString -ForegroundColor Gray
-} else {
+}
+else {
     Write-Host "`nAPP_INSIGHTS_CONNECTION_STRING:" -ForegroundColor White
     Write-Host "⚠️ Deploy infrastructure first, then run this script again" -ForegroundColor Yellow
 }
@@ -113,8 +120,8 @@ Write-Host "az ad sp create-for-rbac --name `"GitHub-Actions-Zeus-People`" --rol
 
 Write-Host "`n📋 Summary of values collected:" -ForegroundColor Green
 Write-Host "- Tenant ID: ✅" -ForegroundColor Green
-Write-Host "- Managed Identity Client ID: $(if($managedIdentityClientId -ne 'DEPLOY_INFRASTRUCTURE_FIRST'){'✅'}else{'⚠️'})" -ForegroundColor $(if($managedIdentityClientId -ne 'DEPLOY_INFRASTRUCTURE_FIRST'){'Green'}else{'Yellow'})
-Write-Host "- App Insights Connection String: $(if($appInsightsConnectionString -ne 'DEPLOY_INFRASTRUCTURE_FIRST'){'✅'}else{'⚠️'})" -ForegroundColor $(if($appInsightsConnectionString -ne 'DEPLOY_INFRASTRUCTURE_FIRST'){'Green'}else{'Yellow'})
+Write-Host "- Managed Identity Client ID: $(if($managedIdentityClientId -ne 'DEPLOY_INFRASTRUCTURE_FIRST'){'✅'}else{'⚠️'})" -ForegroundColor $(if ($managedIdentityClientId -ne 'DEPLOY_INFRASTRUCTURE_FIRST') { 'Green' }else { 'Yellow' })
+Write-Host "- App Insights Connection String: $(if($appInsightsConnectionString -ne 'DEPLOY_INFRASTRUCTURE_FIRST'){'✅'}else{'⚠️'})" -ForegroundColor $(if ($appInsightsConnectionString -ne 'DEPLOY_INFRASTRUCTURE_FIRST') { 'Green' }else { 'Yellow' })
 
 # Save to file for reference
 $outputFile = "azure-credentials-$(Get-Date -Format 'yyyyMMdd-HHmmss').txt"

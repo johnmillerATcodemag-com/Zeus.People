@@ -7,7 +7,7 @@ Write-Host "=============================" -ForegroundColor Green
 Write-Host "`n📋 Required GitHub Secrets:" -ForegroundColor Yellow
 
 $secrets = @{
-    "AZURE_CREDENTIALS" = @'
+    "AZURE_CREDENTIALS"              = @'
 {
   "clientId": "a90252fe-4d36-4e18-8a85-7e8ecbf04ed0",
   "clientSecret": "[REDACTED]",
@@ -21,10 +21,10 @@ $secrets = @{
   "managementEndpointUrl": "https://management.core.windows.net/"
 }
 '@
-    "AZURE_CLIENT_ID" = "a90252fe-4d36-4e18-8a85-7e8ecbf04ed0"
-    "AZURE_CLIENT_SECRET" = "[REDACTED]"
-    "AZURE_TENANT_ID" = "24db396b-b795-45c9-bcfa-d3559193f2f7"
-    "MANAGED_IDENTITY_CLIENT_ID" = "PLACEHOLDER_UPDATE_AFTER_INFRASTRUCTURE_DEPLOYMENT"
+    "AZURE_CLIENT_ID"                = "a90252fe-4d36-4e18-8a85-7e8ecbf04ed0"
+    "AZURE_CLIENT_SECRET"            = "[REDACTED]"
+    "AZURE_TENANT_ID"                = "24db396b-b795-45c9-bcfa-d3559193f2f7"
+    "MANAGED_IDENTITY_CLIENT_ID"     = "PLACEHOLDER_UPDATE_AFTER_INFRASTRUCTURE_DEPLOYMENT"
     "APP_INSIGHTS_CONNECTION_STRING" = "PLACEHOLDER_UPDATE_AFTER_INFRASTRUCTURE_DEPLOYMENT"
 }
 
@@ -35,7 +35,8 @@ foreach ($secretName in $secrets.Keys) {
     
     if ($secretName -eq "AZURE_CREDENTIALS") {
         Write-Host $secretValue -ForegroundColor DarkGray
-    } else {
+    }
+    else {
         Write-Host $secretValue -ForegroundColor DarkGray
     }
     

@@ -2,16 +2,16 @@
 # Run this script to verify the service principal works correctly
 
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$ClientId = "a90252fe-4d36-4e18-8a85-7e8ecbf04ed0",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$ClientSecret = "[REDACTED]",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$TenantId = "24db396b-b795-45c9-bcfa-d3559193f2f7",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [string]$ResourceGroup = "rg-academic-staging-westus2"
 )
 
@@ -23,7 +23,8 @@ Write-Host "🔐 Testing service principal login..." -ForegroundColor Yellow
 try {
     az login --service-principal --username $ClientId --password $ClientSecret --tenant $TenantId --output none
     Write-Host "✅ Service principal login successful!" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "❌ Service principal login failed!" -ForegroundColor Red
     Write-Host "Error: $_" -ForegroundColor Red
     exit 1
@@ -34,7 +35,8 @@ Write-Host "📋 Testing subscription access..." -ForegroundColor Yellow
 try {
     $subscription = az account show --query "{name:name, id:id}" --output json | ConvertFrom-Json
     Write-Host "✅ Subscription access successful: $($subscription.name)" -ForegroundColor Green
-} catch {
+}
+catch {
     Write-Host "❌ Subscription access failed!" -ForegroundColor Red
     exit 1
 }
@@ -49,10 +51,12 @@ try {
         # List resources in the group
         Write-Host "📦 Resources in the group:" -ForegroundColor Cyan
         az resource list --resource-group $ResourceGroup --query "[].{Name:name, Type:type, Location:location}" --output table
-    } else {
+    }
+    else {
         Write-Host "ℹ️ Resource group '$ResourceGroup' does not exist yet (will be created during deployment)" -ForegroundColor Blue
     }
-} catch {
+}
+catch {
     Write-Host "❌ Resource group access test failed!" -ForegroundColor Red
     Write-Host "This might indicate insufficient permissions" -ForegroundColor Yellow
 }
@@ -63,10 +67,12 @@ try {
     $deployments = az deployment group list --resource-group $ResourceGroup --output json 2>$null
     if ($LASTEXITCODE -eq 0) {
         Write-Host "✅ Deployment permissions verified" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "ℹ️ Resource group doesn't exist yet, but permission structure looks correct" -ForegroundColor Blue
     }
-} catch {
+}
+catch {
     Write-Host "⚠️ Could not test deployment permissions (resource group may not exist yet)" -ForegroundColor Yellow
 }
 

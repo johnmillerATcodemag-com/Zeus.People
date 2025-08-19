@@ -74,11 +74,12 @@ jobs:
 
       - name: 🧪 Run unit tests
         run: |
-          dotnet test tests/Zeus.People.API.Tests/Zeus.People.API.Tests.csproj \
+          dotnet test Zeus.People.sln \
             --no-build --configuration Release \
             --logger "trx;LogFileName=test-results.trx" \
             --collect:"XPlat Code Coverage" \
-            --results-directory ./test-results
+            --results-directory ./test-results \
+            --settings coverlet.runsettings
 
       - name: 📊 Publish test results
         uses: dorny/test-reporter@v1

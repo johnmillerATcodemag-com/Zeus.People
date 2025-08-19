@@ -5,12 +5,14 @@
 Your staging deployment pipeline requires the following GitHub repository secrets:
 
 ### 1. Core Azure Service Principal Secrets
+
 - `AZURE_CREDENTIALS` - JSON object with service principal credentials
 - `AZURE_CLIENT_ID` - Service principal client ID
 - `AZURE_CLIENT_SECRET` - Service principal client secret
 - `AZURE_TENANT_ID` - Azure tenant ID
 
 ### 2. Application-Specific Secrets
+
 - `MANAGED_IDENTITY_CLIENT_ID` - Managed identity client ID for the web app
 - `APP_INSIGHTS_CONNECTION_STRING` - Application Insights connection string
 
@@ -35,6 +37,7 @@ az ad sp create-for-rbac --name "GitHub-Actions-Zeus-People" \
 ```
 
 The output will look like this:
+
 ```json
 {
   "clientId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -53,6 +56,7 @@ The output will look like this:
 ## Step 2: Get Application-Specific Values
 
 ### Managed Identity Client ID
+
 ```bash
 # Get the managed identity client ID (replace with your resource group name)
 az identity show --resource-group rg-academic-staging-westus2 \
@@ -61,6 +65,7 @@ az identity show --resource-group rg-academic-staging-westus2 \
 ```
 
 ### Application Insights Connection String
+
 ```bash
 # Get Application Insights connection string (replace with your resource group name)
 az monitor app-insights component show \
@@ -76,6 +81,7 @@ az monitor app-insights component show \
 3. Click **New repository secret** for each of the following:
 
 ### AZURE_CREDENTIALS
+
 ```json
 {
   "clientId": "your-service-principal-client-id",
@@ -92,26 +98,31 @@ az monitor app-insights component show \
 ```
 
 ### AZURE_CLIENT_ID
+
 ```
 your-service-principal-client-id
 ```
 
 ### AZURE_CLIENT_SECRET
+
 ```
 your-service-principal-client-secret
 ```
 
 ### AZURE_TENANT_ID
+
 ```
 your-tenant-id
 ```
 
 ### MANAGED_IDENTITY_CLIENT_ID
+
 ```
 your-managed-identity-client-id
 ```
 
 ### APP_INSIGHTS_CONNECTION_STRING
+
 ```
 InstrumentationKey=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx;IngestionEndpoint=https://westus2-1.in.applicationinsights.azure.com/;LiveEndpoint=https://westus2.livediagnostics.monitor.azure.com/;ApplicationId=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
@@ -137,12 +148,15 @@ az deployment group list --resource-group rg-academic-staging-westus2
 ## Troubleshooting
 
 ### Common Issues:
+
 1. **Insufficient permissions**: Ensure the service principal has "Contributor" role on the subscription or resource group
 2. **Resource not found**: Verify resource names match what exists in Azure
 3. **Authentication failed**: Double-check client ID, secret, and tenant ID are correct
 
 ### Additional Permissions Needed:
+
 If you encounter permission issues, you may need to add these roles to the service principal:
+
 ```bash
 # Add Key Vault access (if using Key Vault)
 az role assignment create \
