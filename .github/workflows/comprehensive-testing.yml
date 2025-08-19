@@ -184,6 +184,12 @@ jobs:
       - name: Start API for testing
         run: |
           cd src/API
+          # Set test environment variables to allow API startup
+          export ASPNETCORE_ENVIRONMENT=Test
+          export AzureAd__TenantId=test-tenant-id
+          export AzureAd__ClientId=test-client-id
+          export AzureAd__Audience=test-audience
+          export ServiceBus__ConnectionString=test-connection-string
           dotnet run --urls http://localhost:5000 &
           API_PID=$!
           echo "API_PID=$API_PID" >> $GITHUB_ENV
@@ -246,6 +252,12 @@ jobs:
       - name: Start API for performance testing
         run: |
           cd src/API
+          # Set test environment variables to allow API startup
+          export ASPNETCORE_ENVIRONMENT=Test
+          export AzureAd__TenantId=test-tenant-id
+          export AzureAd__ClientId=test-client-id
+          export AzureAd__Audience=test-audience
+          export ServiceBus__ConnectionString=test-connection-string
           dotnet run --urls http://localhost:5000 --configuration Release &
           API_PID=$!
           echo "API_PID=$API_PID" >> $GITHUB_ENV
