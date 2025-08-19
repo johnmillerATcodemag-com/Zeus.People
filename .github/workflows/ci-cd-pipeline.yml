@@ -302,15 +302,21 @@ jobs:
           path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       - name: Deploy infrastructure
+        env:
+          AZURE_DEV_COLLECT_TELEMETRY: 'no'
         run: |
           azd auth login --client-id ${{ secrets.AZURE_CLIENT_ID }} \
             --client-secret ${{ secrets.AZURE_CLIENT_SECRET }} \
             --tenant-id ${{ secrets.AZURE_TENANT_ID }}
 
-          azd env set AZURE_ENV_NAME zeus-people-staging
+          # Initialize AZD environment with non-interactive mode
+          azd env new academic-staging --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }} --location eastus2 || azd env select academic-staging
+          
+          # Set environment variables
           azd env set AZURE_LOCATION eastus2
           azd env set AZURE_SUBSCRIPTION_ID ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+          # Deploy infrastructure
           azd provision --preview
           azd provision
 
