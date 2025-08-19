@@ -120,7 +120,10 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: 🔍 Run security audit
+      - name: � Restore dependencies
+        run: dotnet restore Zeus.People.sln
+
+      - name: �🔍 Run security audit
         run: dotnet list package --vulnerable --include-transitive
 
       - name: 🛡️ CodeQL Analysis
