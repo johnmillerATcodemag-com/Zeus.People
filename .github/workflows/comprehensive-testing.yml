@@ -238,9 +238,6 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Install NBomber
-        run: dotnet tool install --global NBomber.Runner
-
       - name: Setup Node.js for Artillery
         uses: actions/setup-node@v4
         with:
@@ -286,7 +283,7 @@ jobs:
             - name: "API Load Test"
               requests:
                 - get:
-                    url: "/api/people"
+                    url: "/api/academics"
                     headers:
                       Authorization: "Bearer dummy-token"
           EOF
