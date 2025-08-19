@@ -1,0 +1,634 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="2dc02f5e-2da6-4989-a79f-84fd50a513c0" name="JohnM@PLATO-SP9 2025-08-19 09:50:31" runUser="PLATO-SP9\JohnM" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2025-08-19T09:50:31.3178331-07:00" queuing="2025-08-19T09:50:31.3178337-07:00" start="2025-08-19T09:50:22.1039077-07:00" finish="2025-08-19T09:50:48.0820131-07:00" />
+  <TestSettings name="default" id="eaec59a1-44c4-48eb-94a2-66f8703103ea">
+    <Deployment runDeploymentRoot="JohnM_PLATO-SP9_2025-08-19_09_50_31" />
+  </TestSettings>
+  <Results>
+    <UnitTestResult executionId="e644e7c1-0bd4-444b-899e-0aa6624e4864" testId="0568fb09-0af0-0439-0f10-4c672b1fc8c0" testName="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenAllConfigurationsValid_ShouldReturnHealthy" computerName="PLATO-SP9" duration="00:00:00.0031762" startTime="2025-08-19T09:50:31.3522474-07:00" endTime="2025-08-19T09:50:31.3522485-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e644e7c1-0bd4-444b-899e-0aa6624e4864" />
+    <UnitTestResult executionId="cbb65631-919e-4613-aaec-322471a14578" testId="f4d2da15-ad5a-8a97-58eb-53f7c2a35b27" testName="Zeus.People.API.Tests.ApplicationStartupTests.ApplicationStartup_WithInvalidConfiguration_ShouldHandleGracefully" computerName="PLATO-SP9" duration="00:00:00.0503560" startTime="2025-08-19T09:50:45.5251876-07:00" endTime="2025-08-19T09:50:45.5251882-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cbb65631-919e-4613-aaec-322471a14578">
+      <Output>
+        <StdOut>Application handled missing configuration gracefully</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="944aadc3-e241-4bbb-9558-e4b1e4033508" testId="79d6d7e2-cd28-b77f-805a-6a0b947dae4d" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_Swagger_ReturnsSuccessfully" computerName="PLATO-SP9" duration="00:00:00.2114862" startTime="2025-08-19T09:50:32.7146632-07:00" endTime="2025-08-19T09:50:32.7146634-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="944aadc3-e241-4bbb-9558-e4b1e4033508" />
+    <UnitTestResult executionId="56e3d00b-be5d-40be-85a6-281968c4cc52" testId="83410235-1173-86ed-b861-81c2e8167776" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithMissingNamespaceWhenUsingManagedIdentity_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0004807" startTime="2025-08-19T09:50:31.2902689-07:00" endTime="2025-08-19T09:50:31.2902691-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="56e3d00b-be5d-40be-85a6-281968c4cc52" />
+    <UnitTestResult executionId="bbfa4cac-d3d0-4432-b61a-15a793ebe838" testId="4fe02c3e-d83b-2fd7-5e89-2ad5813b952f" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken(endpoint: &quot;/api/extensions&quot;)" computerName="PLATO-SP9" duration="00:00:00.0496106" startTime="2025-08-19T09:50:32.3511586-07:00" endTime="2025-08-19T09:50:32.3511589-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="bbfa4cac-d3d0-4432-b61a-15a793ebe838" />
+    <UnitTestResult executionId="a827d738-50e2-4545-b673-579090fbe10e" testId="d152a48f-f957-9919-9d27-5b1c4819ca3b" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/academics&quot;)" computerName="PLATO-SP9" duration="00:00:00.0014251" startTime="2025-08-19T09:50:32.4395561-07:00" endTime="2025-08-19T09:50:32.4395563-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a827d738-50e2-4545-b673-579090fbe10e" />
+    <UnitTestResult executionId="5b8f0aaf-550d-4fae-84d8-ddba552e40d4" testId="98f51616-9a3f-5136-5b74-140e58699844" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ApplicationConfiguration_WithMissingRequiredFields_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0009139" startTime="2025-08-19T09:50:31.2448208-07:00" endTime="2025-08-19T09:50:31.2448209-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5b8f0aaf-550d-4fae-84d8-ddba552e40d4" />
+    <UnitTestResult executionId="46d28dac-7ce4-440c-b913-f46e594a665d" testId="7d800c93-bc1b-7e32-05b2-9586a0834c8b" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/extensions&quot;)" computerName="PLATO-SP9" duration="00:00:00.0079057" startTime="2025-08-19T09:50:32.4315840-07:00" endTime="2025-08-19T09:50:32.4315842-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="46d28dac-7ce4-440c-b913-f46e594a665d" />
+    <UnitTestResult executionId="0ecf4f38-6255-4bec-9d29-31e672784bbb" testId="d5f780fd-0bfb-31dd-61b3-a93df5ced1ec" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithInvalidTimeoutRange_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0004118" startTime="2025-08-19T09:50:31.2937672-07:00" endTime="2025-08-19T09:50:31.2937672-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0ecf4f38-6255-4bec-9d29-31e672784bbb" />
+    <UnitTestResult executionId="f7ffa28e-078c-40a5-90c2-54b543283166" testId="0e33839e-bad3-a5b3-a213-676469ed6f6e" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/rooms&quot;)" computerName="PLATO-SP9" duration="00:00:00.0021157" startTime="2025-08-19T09:50:32.4379939-07:00" endTime="2025-08-19T09:50:32.4379941-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f7ffa28e-078c-40a5-90c2-54b543283166" />
+    <UnitTestResult executionId="a19a9df3-1739-4f4a-99b4-2ec948ef3ef8" testId="6024fe61-034f-aec2-43cd-4ece634cb481" testName="Zeus.People.API.Tests.ApiIntegrationTests.Post_Academic_WithInvalidData_ReturnsBadRequest" computerName="PLATO-SP9" duration="00:00:00.0081762" startTime="2025-08-19T09:50:32.7922586-07:00" endTime="2025-08-19T09:50:32.7922590-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a19a9df3-1739-4f4a-99b4-2ec948ef3ef8" />
+    <UnitTestResult executionId="397431b0-b72d-4257-ae63-642025466a25" testId="7b57890c-cfd5-15f9-e6ec-a1b204bfce67" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithShortMessageTimeout_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0014193" startTime="2025-08-19T09:50:31.2443015-07:00" endTime="2025-08-19T09:50:31.2443016-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="397431b0-b72d-4257-ae63-642025466a25" />
+    <UnitTestResult executionId="5479da49-1a9e-48fb-b23c-1b465c092ad4" testId="1c269229-17c8-1e8e-0e17-0efabce183f9" testName="Zeus.People.API.Tests.ApplicationStartupTests.HealthCheck_Endpoint_ShouldBeAccessible" computerName="PLATO-SP9" duration="00:00:14.1285198" startTime="2025-08-19T09:50:45.3372680-07:00" endTime="2025-08-19T09:50:45.3372683-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5479da49-1a9e-48fb-b23c-1b465c092ad4">
+      <Output>
+        <StdOut>Health check endpoint returned: ServiceUnavailable</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="3aeff5c6-0727-42e8-b1f4-1385293fb89b" testId="e09f355c-fc92-bcd2-5160-10ba962dca50" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithInvalidUrlFormat_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0015459" startTime="2025-08-19T09:50:31.2863892-07:00" endTime="2025-08-19T09:50:31.2863894-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="3aeff5c6-0727-42e8-b1f4-1385293fb89b" />
+    <UnitTestResult executionId="7ccb9818-361f-451b-8bef-3d74c4c6b8c7" testId="cc386495-e346-9e04-2bfe-10570952e07a" testName="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_ShouldIncludeDetailedConfigurationInfo" computerName="PLATO-SP9" duration="00:00:00.0033233" startTime="2025-08-19T09:50:31.3595872-07:00" endTime="2025-08-19T09:50:31.3595875-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7ccb9818-361f-451b-8bef-3d74c4c6b8c7" />
+    <UnitTestResult executionId="6e1c6b9e-e9d5-4496-b4a2-92b896ba2cf7" testId="7d774d02-38ea-536a-d1f6-eecc2025cc0b" testName="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenApplicationConfigInvalid_ShouldReturnUnhealthy" computerName="PLATO-SP9" duration="00:00:00.0035083" startTime="2025-08-19T09:50:31.3559946-07:00" endTime="2025-08-19T09:50:31.3559954-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6e1c6b9e-e9d5-4496-b4a2-92b896ba2cf7" />
+    <UnitTestResult executionId="0d60958c-6cd2-417f-a3d9-bd6287f0739d" testId="3cb8d8e1-1889-386b-1784-2a4416a380d3" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithEmptyRequiredFields_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0007383" startTime="2025-08-19T09:50:31.2853329-07:00" endTime="2025-08-19T09:50:31.2853332-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="0d60958c-6cd2-417f-a3d9-bd6287f0739d" />
+    <UnitTestResult executionId="01141bc9-3bac-48f8-9cc8-0e1f47690442" testId="70cc89b1-4ca9-46a1-53b2-1ec130dd2108" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithInvalidPoolSizeRelationship_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0008546" startTime="2025-08-19T09:50:31.2432366-07:00" endTime="2025-08-19T09:50:31.2432368-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="01141bc9-3bac-48f8-9cc8-0e1f47690442" />
+    <UnitTestResult executionId="34e4a3a1-2a4a-40f3-a6c0-2317e2b0b2bb" testId="ea4db4f8-5ade-fe6e-0c84-35d63f7512a4" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_Reports_Dashboard_ReturnsValidStructure" computerName="PLATO-SP9" duration="00:00:00.0690775" startTime="2025-08-19T09:50:32.7838844-07:00" endTime="2025-08-19T09:50:32.7838848-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="34e4a3a1-2a4a-40f3-a6c0-2317e2b0b2bb" />
+    <UnitTestResult executionId="aaf8aa74-b5f7-43a2-9d63-1cc72f300b6b" testId="1e42e1fb-ed85-1f56-1da0-243f551f59a0" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithInvalidDomainFormat_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0004985" startTime="2025-08-19T09:50:31.2878093-07:00" endTime="2025-08-19T09:50:31.2878094-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="aaf8aa74-b5f7-43a2-9d63-1cc72f300b6b" />
+    <UnitTestResult executionId="d2f082c6-f5ba-404c-8ab5-8c54edbff8cf" testId="b3b6f64c-a088-2054-a14e-66c446213141" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithInvalidValidIssuers_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0004272" startTime="2025-08-19T09:50:31.2950664-07:00" endTime="2025-08-19T09:50:31.2950665-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d2f082c6-f5ba-404c-8ab5-8c54edbff8cf" />
+    <UnitTestResult executionId="5a233501-6311-43eb-87a1-9530865b28c9" testId="ee2aae1b-fda0-e0fc-b064-00daba617b77" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken(endpoint: &quot;/api/rooms&quot;)" computerName="PLATO-SP9" duration="00:00:00.0541176" startTime="2025-08-19T09:50:32.3013063-07:00" endTime="2025-08-19T09:50:32.3013066-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="5a233501-6311-43eb-87a1-9530865b28c9" />
+    <UnitTestResult executionId="c3a77f27-03e4-4e02-b685-bef2e791300f" testId="32a7fadc-c0fe-c78c-aa73-ce52a151cbb4" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ApplicationConfiguration_WithInvalidEmailAddress_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0017692" startTime="2025-08-19T09:50:31.2437855-07:00" endTime="2025-08-19T09:50:31.2437856-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c3a77f27-03e4-4e02-b685-bef2e791300f" />
+    <UnitTestResult executionId="672f2de4-df9a-4fd3-a983-b6208976ca19" testId="f896deea-d0fc-af8a-5a90-c2bb7b313a2d" testName="Zeus.People.API.Tests.ApplicationStartupTests.ApplicationStartup_InDevelopmentEnvironment_ShouldUseLocalSettings" computerName="PLATO-SP9" duration="00:00:00.0659448" startTime="2025-08-19T09:50:45.4034382-07:00" endTime="2025-08-19T09:50:45.4034395-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="672f2de4-df9a-4fd3-a983-b6208976ca19">
+      <Output>
+        <StdOut>Development environment configuration validated</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="73026061-726a-4d77-ba61-98f3dc3ff743" testId="d476e8ce-24d9-304f-6fde-1f7e4b0a5136" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithTooShortTimeoutForProduction_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0004439" startTime="2025-08-19T09:50:31.2944080-07:00" endTime="2025-08-19T09:50:31.2944081-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="73026061-726a-4d77-ba61-98f3dc3ff743" />
+    <UnitTestResult executionId="8593c1c1-1eec-4727-8681-35bf61036efb" testId="626ffc5b-cb30-7d71-3bcc-4b80930ce594" testName="Zeus.People.API.Tests.ApplicationStartupTests.ApplicationStartup_WithAzureConfiguration_ShouldLoadSettings" computerName="PLATO-SP9" duration="00:00:00.0687814" startTime="2025-08-19T09:50:45.5943095-07:00" endTime="2025-08-19T09:50:45.5943106-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="8593c1c1-1eec-4727-8681-35bf61036efb">
+      <Output>
+        <StdOut>Azure configuration loaded successfully</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="d98acb49-4305-414f-b9e9-081a260a351c" testId="2faebd2a-40eb-1a3c-0c85-449528508ee4" testName="Zeus.People.API.Tests.ApiIntegrationTests.Post_Academic_WithoutAdminRole_ReturnsForbidden" computerName="PLATO-SP9" duration="00:00:00.9224850" startTime="2025-08-19T09:50:32.1256850-07:00" endTime="2025-08-19T09:50:32.1256855-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d98acb49-4305-414f-b9e9-081a260a351c" />
+    <UnitTestResult executionId="fb65c900-24bb-464c-9e6d-8933abee2e1e" testId="a7789efe-0e38-d17e-a0ba-96311229ff91" testName="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenServiceBusConfigInvalid_ShouldReturnUnhealthy" computerName="PLATO-SP9" duration="00:00:00.1349158" startTime="2025-08-19T09:50:31.3416112-07:00" endTime="2025-08-19T09:50:31.3416117-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="fb65c900-24bb-464c-9e6d-8933abee2e1e" />
+    <UnitTestResult executionId="cc605c2c-9ddf-459b-8525-80629b28dfc1" testId="a22403b2-6d25-3fe2-c780-b0df98a4263b" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithValidValues_ShouldPassValidation" computerName="PLATO-SP9" duration="00:00:00.0002249" startTime="2025-08-19T09:50:31.2946189-07:00" endTime="2025-08-19T09:50:31.2946190-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cc605c2c-9ddf-459b-8525-80629b28dfc1" />
+    <UnitTestResult executionId="145bd1d7-de88-4b52-8ed6-5265412c1828" testId="89b35721-f597-8838-6f8c-13de0d7ef554" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithMissingConnectionStringWhenNotUsingManagedIdentity_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0004562" startTime="2025-08-19T09:50:31.2948410-07:00" endTime="2025-08-19T09:50:31.2948411-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="145bd1d7-de88-4b52-8ed6-5265412c1828" />
+    <UnitTestResult executionId="58a63e28-b5fd-43e6-9cae-b101ae68a691" testId="8e815b9f-435c-47b1-a287-6c556f55cd41" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithEmptyConnectionStrings_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0005308" startTime="2025-08-19T09:50:31.2935817-07:00" endTime="2025-08-19T09:50:31.2935818-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="58a63e28-b5fd-43e6-9cae-b101ae68a691" />
+    <UnitTestResult executionId="9ad6a534-5feb-44eb-b042-1a71b50d2023" testId="bcc10fee-5cdf-2622-9f5a-8492267669aa" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithInvalidRangeValues_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0005019" startTime="2025-08-19T09:50:31.2883499-07:00" endTime="2025-08-19T09:50:31.2883500-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="9ad6a534-5feb-44eb-b042-1a71b50d2023" />
+    <UnitTestResult executionId="1ad239b2-e788-498c-a626-86db72a46b5a" testId="d6c9d643-3fc7-d42a-329f-6f0c950c9696" testName="Zeus.People.API.Tests.ApplicationStartupTests.ConfigurationServices_ShouldBeRegistered" computerName="PLATO-SP9" duration="00:00:00.0711502" startTime="2025-08-19T09:50:45.4746210-07:00" endTime="2025-08-19T09:50:45.4746212-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="1ad239b2-e788-498c-a626-86db72a46b5a">
+      <Output>
+        <StdOut>All required services are registered</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="acbfbc0f-a796-4551-a59a-925ae2cb1e2e" testId="33435f3a-bdfb-3ae9-e315-6e828ad24330" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ConfigurationValidation_WithMultipleErrors_ShouldCombineAllErrorMessages" computerName="PLATO-SP9" duration="00:00:00.0018401" startTime="2025-08-19T09:50:31.2898336-07:00" endTime="2025-08-19T09:50:31.2898337-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="acbfbc0f-a796-4551-a59a-925ae2cb1e2e" />
+    <UnitTestResult executionId="a33de0dd-5086-453a-a232-421638282ff7" testId="82e2bff4-b429-cc3c-93dc-6b38d4dca47c" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithMissingRequiredFields_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0007314" startTime="2025-08-19T09:50:31.2870967-07:00" endTime="2025-08-19T09:50:31.2870975-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="a33de0dd-5086-453a-a232-421638282ff7" />
+    <UnitTestResult executionId="c0943cc8-5779-4dc1-8d5e-56d20cb220f7" testId="2fa9cdc3-37e5-2e46-15d1-11b982d8a4aa" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/departments&quot;)" computerName="PLATO-SP9" duration="00:00:00.0016511" startTime="2025-08-19T09:50:32.4356931-07:00" endTime="2025-08-19T09:50:32.4356935-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c0943cc8-5779-4dc1-8d5e-56d20cb220f7" />
+    <UnitTestResult executionId="adbccb59-b425-4129-86f9-814623890239" testId="8d471280-252f-112e-249b-6ad5956b4a50" testName="Zeus.People.API.Tests.ApplicationStartupTests.ApplicationStartup_WithDefaultConfiguration_ShouldSucceed" computerName="PLATO-SP9" duration="00:00:00.0559178" startTime="2025-08-19T09:50:45.6505095-07:00" endTime="2025-08-19T09:50:45.6505100-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="adbccb59-b425-4129-86f9-814623890239">
+      <Output>
+        <StdOut>Application started successfully with test configuration</StdOut>
+      </Output>
+    </UnitTestResult>
+    <UnitTestResult executionId="4d872101-c05a-4eb4-85bf-03b13431e037" testId="6c17d7bd-1a1d-eb22-ddab-e685ec0108d9" testName="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenDatabaseConfigInvalid_ShouldReturnUnhealthy" computerName="PLATO-SP9" duration="00:00:00.0025795" startTime="2025-08-19T09:50:31.3488354-07:00" endTime="2025-08-19T09:50:31.3488359-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="4d872101-c05a-4eb4-85bf-03b13431e037" />
+    <UnitTestResult executionId="cf8d9f46-97a9-4bd8-9314-6044feb6fa55" testId="7842e91c-e928-1d68-35bf-798510b791aa" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithValidValues_ShouldPassValidation" computerName="PLATO-SP9" duration="00:00:00.0006202" startTime="2025-08-19T09:50:31.2933370-07:00" endTime="2025-08-19T09:50:31.2933372-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="cf8d9f46-97a9-4bd8-9314-6044feb6fa55" />
+    <UnitTestResult executionId="f74d10c8-7c3d-48f0-a7a8-303d99b81267" testId="dea8b70e-1a9f-d980-dcca-5b937de9b994" testName="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenAzureAdConfigInvalid_ShouldReturnUnhealthy" computerName="PLATO-SP9" duration="00:00:00.0031369" startTime="2025-08-19T09:50:31.3460621-07:00" endTime="2025-08-19T09:50:31.3460624-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f74d10c8-7c3d-48f0-a7a8-303d99b81267" />
+    <UnitTestResult executionId="518f205c-bf22-46e5-8646-2e6bb6a450cb" testId="29517f29-5d45-9e51-9397-76108c5dbc79" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/reports/dashboard&quot;)" computerName="PLATO-SP9" duration="00:00:00.0021121" startTime="2025-08-19T09:50:32.4338595-07:00" endTime="2025-08-19T09:50:32.4338597-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="518f205c-bf22-46e5-8646-2e6bb6a450cb" />
+    <UnitTestResult executionId="d4879ebd-d858-4a33-8367-6b0935628eed" testId="90eb59ad-99b0-342b-c18f-2f430b5e3b66" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken(endpoint: &quot;/api/academics&quot;)" computerName="PLATO-SP9" duration="00:00:00.0851172" startTime="2025-08-19T09:50:32.2469770-07:00" endTime="2025-08-19T09:50:32.2469773-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d4879ebd-d858-4a33-8367-6b0935628eed" />
+    <UnitTestResult executionId="d0f5a5c5-c2f5-46e5-9a22-50e72caf8cc0" testId="1aac3139-cd46-2ccf-a57f-7028611c99d1" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_HealthCheck_ReturnsHealthy" computerName="PLATO-SP9" duration="00:00:00.0356908" startTime="2025-08-19T09:50:32.1616824-07:00" endTime="2025-08-19T09:50:32.1616828-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="d0f5a5c5-c2f5-46e5-9a22-50e72caf8cc0" />
+    <UnitTestResult executionId="e3a4c0a5-5263-4e97-836b-b5fbe80e6d1a" testId="41e4218a-133d-e9b1-2479-ee9e393650f2" testName="Zeus.People.API.Tests.ApiIntegrationTests.Post_Academic_WithInvalidModel_ReturnsBadRequest" computerName="PLATO-SP9" duration="00:00:00.0189473" startTime="2025-08-19T09:50:32.4234353-07:00" endTime="2025-08-19T09:50:32.4234355-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="e3a4c0a5-5263-4e97-836b-b5fbe80e6d1a" />
+    <UnitTestResult executionId="2ca0669b-d0c8-4408-8429-59261b0ed6a5" testId="1426fbd4-6beb-3a90-7524-b4f56b7e6907" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithValidValues_ShouldPassValidation" computerName="PLATO-SP9" duration="00:00:00.0012774" startTime="2025-08-19T09:50:31.2414509-07:00" endTime="2025-08-19T09:50:31.2414513-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ca0669b-d0c8-4408-8429-59261b0ed6a5" />
+    <UnitTestResult executionId="523efa48-1afa-426a-9af0-c0f71356d1eb" testId="a65d1850-c6a7-6cd3-f359-51fc5d6d15cb" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_Academic_Stats_ReturnsValidStructure" computerName="PLATO-SP9" duration="00:00:00.0631592" startTime="2025-08-19T09:50:32.5029335-07:00" endTime="2025-08-19T09:50:32.5029339-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="523efa48-1afa-426a-9af0-c0f71356d1eb" />
+    <UnitTestResult executionId="428c8344-91d6-4981-9e0f-d82a377cd97a" testId="d93e842c-c928-8d0c-31ec-065b1e49c29a" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithExcessiveMaxWaitTime_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0005331" startTime="2025-08-19T09:50:31.2888571-07:00" endTime="2025-08-19T09:50:31.2888572-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="428c8344-91d6-4981-9e0f-d82a377cd97a" />
+    <UnitTestResult executionId="7c827024-11f3-4b1b-bf36-f21db01e461c" testId="975507e9-a50b-195f-901a-0a25c30387d0" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithInvalidTokenCacheDuration_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0003970" startTime="2025-08-19T09:50:31.2893387-07:00" endTime="2025-08-19T09:50:31.2893390-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="7c827024-11f3-4b1b-bf36-f21db01e461c" />
+    <UnitTestResult executionId="2ea76e95-0ce3-4a1c-8535-d6922e422aea" testId="7076fd60-bf55-6e71-4980-2f41cdb629b2" testName="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken(endpoint: &quot;/api/departments&quot;)" computerName="PLATO-SP9" duration="00:00:00.0528964" startTime="2025-08-19T09:50:32.4042544-07:00" endTime="2025-08-19T09:50:32.4042546-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="2ea76e95-0ce3-4a1c-8535-d6922e422aea" />
+    <UnitTestResult executionId="6973d843-6abd-4e2a-8587-a89013ed0e9e" testId="e3da12c8-1bb9-42df-95ae-4f5aabe94045" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithInvalidRetryCount_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0003972" startTime="2025-08-19T09:50:31.3047012-07:00" endTime="2025-08-19T09:50:31.3047013-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="6973d843-6abd-4e2a-8587-a89013ed0e9e" />
+    <UnitTestResult executionId="c57f9a68-ba4b-4fb1-beef-027431fea377" testId="e2db9306-efc5-19ea-7c22-d092d33d5e6c" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ApplicationConfiguration_WithInvalidEnvironment_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0034703" startTime="2025-08-19T09:50:31.2940168-07:00" endTime="2025-08-19T09:50:31.2940169-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="c57f9a68-ba4b-4fb1-beef-027431fea377" />
+    <UnitTestResult executionId="f6ef4d1d-62a2-450e-a223-253962c948b7" testId="73f6a8bc-22fa-d8e2-3deb-347d75e6f70c" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ApplicationConfiguration_WithValidValues_ShouldPassValidation" computerName="PLATO-SP9" duration="00:00:00.0013831" startTime="2025-08-19T09:50:31.2942276-07:00" endTime="2025-08-19T09:50:31.2942277-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="f6ef4d1d-62a2-450e-a223-253962c948b7" />
+    <UnitTestResult executionId="246f41b3-a525-4f7a-9c42-c9c3cacda6ae" testId="0e0973b2-e11b-50a5-e596-3b2987947588" testName="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithExcessiveClockSkew_ShouldFailValidation" computerName="PLATO-SP9" duration="00:00:00.0172861" startTime="2025-08-19T09:50:31.2289482-07:00" endTime="2025-08-19T09:50:31.2289836-07:00" testType="13cdc9d9-ddb5-4fa4-a97d-d965ccfc6d4b" outcome="Passed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" relativeResultsDirectory="246f41b3-a525-4f7a-9c42-c9c3cacda6ae" />
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/extensions&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="7d800c93-bc1b-7e32-05b2-9586a0834c8b">
+      <Execution id="46d28dac-7ce4-440c-b913-f46e594a665d" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenDatabaseConfigInvalid_ShouldReturnUnhealthy" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="6c17d7bd-1a1d-eb22-ddab-e685ec0108d9">
+      <Execution id="4d872101-c05a-4eb4-85bf-03b13431e037" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests" name="ConfigurationStatusHealthCheck_WhenDatabaseConfigInvalid_ShouldReturnUnhealthy" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ConfigurationValidation_WithMultipleErrors_ShouldCombineAllErrorMessages" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="33435f3a-bdfb-3ae9-e315-6e828ad24330">
+      <Execution id="acbfbc0f-a796-4551-a59a-925ae2cb1e2e" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ConfigurationValidation_WithMultipleErrors_ShouldCombineAllErrorMessages" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenAzureAdConfigInvalid_ShouldReturnUnhealthy" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="dea8b70e-1a9f-d980-dcca-5b937de9b994">
+      <Execution id="f74d10c8-7c3d-48f0-a7a8-303d99b81267" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests" name="ConfigurationStatusHealthCheck_WhenAzureAdConfigInvalid_ShouldReturnUnhealthy" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithEmptyRequiredFields_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="3cb8d8e1-1889-386b-1784-2a4416a380d3">
+      <Execution id="0d60958c-6cd2-417f-a3d9-bd6287f0739d" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ServiceBusConfiguration_WithEmptyRequiredFields_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApplicationStartupTests.ConfigurationServices_ShouldBeRegistered" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="d6c9d643-3fc7-d42a-329f-6f0c950c9696">
+      <Execution id="1ad239b2-e788-498c-a626-86db72a46b5a" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApplicationStartupTests" name="ConfigurationServices_ShouldBeRegistered" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithMissingConnectionStringWhenNotUsingManagedIdentity_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="89b35721-f597-8838-6f8c-13de0d7ef554">
+      <Execution id="145bd1d7-de88-4b52-8ed6-5265412c1828" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ServiceBusConfiguration_WithMissingConnectionStringWhenNotUsingManagedIdentity_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApplicationStartupTests.HealthCheck_Endpoint_ShouldBeAccessible" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="1c269229-17c8-1e8e-0e17-0efabce183f9">
+      <Execution id="5479da49-1a9e-48fb-b23c-1b465c092ad4" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApplicationStartupTests" name="HealthCheck_Endpoint_ShouldBeAccessible" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/rooms&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="0e33839e-bad3-a5b3-a213-676469ed6f6e">
+      <Execution id="f7ffa28e-078c-40a5-90c2-54b543283166" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Post_Academic_WithInvalidModel_ReturnsBadRequest" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="41e4218a-133d-e9b1-2479-ee9e393650f2">
+      <Execution id="e3a4c0a5-5263-4e97-836b-b5fbe80e6d1a" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Post_Academic_WithInvalidModel_ReturnsBadRequest" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenApplicationConfigInvalid_ShouldReturnUnhealthy" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="7d774d02-38ea-536a-d1f6-eecc2025cc0b">
+      <Execution id="6e1c6b9e-e9d5-4496-b4a2-92b896ba2cf7" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests" name="ConfigurationStatusHealthCheck_WhenApplicationConfigInvalid_ShouldReturnUnhealthy" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithInvalidValidIssuers_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="b3b6f64c-a088-2054-a14e-66c446213141">
+      <Execution id="d2f082c6-f5ba-404c-8ab5-8c54edbff8cf" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="AzureAdConfiguration_WithInvalidValidIssuers_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithValidValues_ShouldPassValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="a22403b2-6d25-3fe2-c780-b0df98a4263b">
+      <Execution id="cc605c2c-9ddf-459b-8525-80629b28dfc1" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="DatabaseConfiguration_WithValidValues_ShouldPassValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken(endpoint: &quot;/api/extensions&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="4fe02c3e-d83b-2fd7-5e89-2ad5813b952f">
+      <Execution id="bbfa4cac-d3d0-4432-b61a-15a793ebe838" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApplicationStartupTests.ApplicationStartup_WithInvalidConfiguration_ShouldHandleGracefully" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="f4d2da15-ad5a-8a97-58eb-53f7c2a35b27">
+      <Execution id="cbb65631-919e-4613-aaec-322471a14578" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApplicationStartupTests" name="ApplicationStartup_WithInvalidConfiguration_ShouldHandleGracefully" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApplicationStartupTests.ApplicationStartup_InDevelopmentEnvironment_ShouldUseLocalSettings" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="f896deea-d0fc-af8a-5a90-c2bb7b313a2d">
+      <Execution id="672f2de4-df9a-4fd3-a983-b6208976ca19" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApplicationStartupTests" name="ApplicationStartup_InDevelopmentEnvironment_ShouldUseLocalSettings" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ApplicationConfiguration_WithInvalidEmailAddress_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="32a7fadc-c0fe-c78c-aa73-ce52a151cbb4">
+      <Execution id="c3a77f27-03e4-4e02-b685-bef2e791300f" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ApplicationConfiguration_WithInvalidEmailAddress_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Post_Academic_WithoutAdminRole_ReturnsForbidden" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="2faebd2a-40eb-1a3c-0c85-449528508ee4">
+      <Execution id="d98acb49-4305-414f-b9e9-081a260a351c" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Post_Academic_WithoutAdminRole_ReturnsForbidden" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_HealthCheck_ReturnsHealthy" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="1aac3139-cd46-2ccf-a57f-7028611c99d1">
+      <Execution id="d0f5a5c5-c2f5-46e5-9a22-50e72caf8cc0" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_HealthCheck_ReturnsHealthy" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenAllConfigurationsValid_ShouldReturnHealthy" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="0568fb09-0af0-0439-0f10-4c672b1fc8c0">
+      <Execution id="e644e7c1-0bd4-444b-899e-0aa6624e4864" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests" name="ConfigurationStatusHealthCheck_WhenAllConfigurationsValid_ShouldReturnHealthy" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ApplicationConfiguration_WithMissingRequiredFields_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="98f51616-9a3f-5136-5b74-140e58699844">
+      <Execution id="5b8f0aaf-550d-4fae-84d8-ddba552e40d4" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ApplicationConfiguration_WithMissingRequiredFields_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithInvalidPoolSizeRelationship_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="70cc89b1-4ca9-46a1-53b2-1ec130dd2108">
+      <Execution id="01141bc9-3bac-48f8-9cc8-0e1f47690442" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="DatabaseConfiguration_WithInvalidPoolSizeRelationship_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_Reports_Dashboard_ReturnsValidStructure" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="ea4db4f8-5ade-fe6e-0c84-35d63f7512a4">
+      <Execution id="34e4a3a1-2a4a-40f3-a6c0-2317e2b0b2bb" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_Reports_Dashboard_ReturnsValidStructure" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken(endpoint: &quot;/api/rooms&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="ee2aae1b-fda0-e0fc-b064-00daba617b77">
+      <Execution id="5a233501-6311-43eb-87a1-9530865b28c9" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithInvalidDomainFormat_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="1e42e1fb-ed85-1f56-1da0-243f551f59a0">
+      <Execution id="aaf8aa74-b5f7-43a2-9d63-1cc72f300b6b" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="AzureAdConfiguration_WithInvalidDomainFormat_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithInvalidRangeValues_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="bcc10fee-5cdf-2622-9f5a-8492267669aa">
+      <Execution id="9ad6a534-5feb-44eb-b042-1a71b50d2023" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ServiceBusConfiguration_WithInvalidRangeValues_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_ShouldIncludeDetailedConfigurationInfo" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="cc386495-e346-9e04-2bfe-10570952e07a">
+      <Execution id="7ccb9818-361f-451b-8bef-3d74c4c6b8c7" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests" name="ConfigurationStatusHealthCheck_ShouldIncludeDetailedConfigurationInfo" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithExcessiveClockSkew_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="0e0973b2-e11b-50a5-e596-3b2987947588">
+      <Execution id="246f41b3-a525-4f7a-9c42-c9c3cacda6ae" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="AzureAdConfiguration_WithExcessiveClockSkew_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithEmptyConnectionStrings_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="8e815b9f-435c-47b1-a287-6c556f55cd41">
+      <Execution id="58a63e28-b5fd-43e6-9cae-b101ae68a691" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="DatabaseConfiguration_WithEmptyConnectionStrings_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/departments&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="2fa9cdc3-37e5-2e46-15d1-11b982d8a4aa">
+      <Execution id="c0943cc8-5779-4dc1-8d5e-56d20cb220f7" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithShortMessageTimeout_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="7b57890c-cfd5-15f9-e6ec-a1b204bfce67">
+      <Execution id="397431b0-b72d-4257-ae63-642025466a25" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ServiceBusConfiguration_WithShortMessageTimeout_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithInvalidTimeoutRange_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="d5f780fd-0bfb-31dd-61b3-a93df5ced1ec">
+      <Execution id="0ecf4f38-6255-4bec-9d29-31e672784bbb" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="DatabaseConfiguration_WithInvalidTimeoutRange_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithValidValues_ShouldPassValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="1426fbd4-6beb-3a90-7524-b4f56b7e6907">
+      <Execution id="2ca0669b-d0c8-4408-8429-59261b0ed6a5" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ServiceBusConfiguration_WithValidValues_ShouldPassValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken(endpoint: &quot;/api/departments&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="7076fd60-bf55-6e71-4980-2f41cdb629b2">
+      <Execution id="2ea76e95-0ce3-4a1c-8535-d6922e422aea" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithMissingNamespaceWhenUsingManagedIdentity_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="83410235-1173-86ed-b861-81c2e8167776">
+      <Execution id="56e3d00b-be5d-40be-85a6-281968c4cc52" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ServiceBusConfiguration_WithMissingNamespaceWhenUsingManagedIdentity_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Post_Academic_WithInvalidData_ReturnsBadRequest" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="6024fe61-034f-aec2-43cd-4ece634cb481">
+      <Execution id="a19a9df3-1739-4f4a-99b4-2ec948ef3ef8" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Post_Academic_WithInvalidData_ReturnsBadRequest" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_Academic_Stats_ReturnsValidStructure" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="a65d1850-c6a7-6cd3-f359-51fc5d6d15cb">
+      <Execution id="523efa48-1afa-426a-9af0-c0f71356d1eb" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_Academic_Stats_ReturnsValidStructure" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithInvalidRetryCount_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="e3da12c8-1bb9-42df-95ae-4f5aabe94045">
+      <Execution id="6973d843-6abd-4e2a-8587-a89013ed0e9e" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="DatabaseConfiguration_WithInvalidRetryCount_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/reports/dashboard&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="29517f29-5d45-9e51-9397-76108c5dbc79">
+      <Execution id="518f205c-bf22-46e5-8646-2e6bb6a450cb" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApplicationStartupTests.ApplicationStartup_WithAzureConfiguration_ShouldLoadSettings" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="626ffc5b-cb30-7d71-3bcc-4b80930ce594">
+      <Execution id="8593c1c1-1eec-4727-8681-35bf61036efb" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApplicationStartupTests" name="ApplicationStartup_WithAzureConfiguration_ShouldLoadSettings" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ApplicationConfiguration_WithValidValues_ShouldPassValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="73f6a8bc-22fa-d8e2-3deb-347d75e6f70c">
+      <Execution id="f6ef4d1d-62a2-450e-a223-253962c948b7" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ApplicationConfiguration_WithValidValues_ShouldPassValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithInvalidUrlFormat_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="e09f355c-fc92-bcd2-5160-10ba962dca50">
+      <Execution id="3aeff5c6-0727-42e8-b1f4-1385293fb89b" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="AzureAdConfiguration_WithInvalidUrlFormat_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithMissingRequiredFields_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="82e2bff4-b429-cc3c-93dc-6b38d4dca47c">
+      <Execution id="a33de0dd-5086-453a-a232-421638282ff7" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="AzureAdConfiguration_WithMissingRequiredFields_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ApplicationConfiguration_WithInvalidEnvironment_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="e2db9306-efc5-19ea-7c22-d092d33d5e6c">
+      <Execution id="c57f9a68-ba4b-4fb1-beef-027431fea377" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ApplicationConfiguration_WithInvalidEnvironment_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.DatabaseConfiguration_WithTooShortTimeoutForProduction_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="d476e8ce-24d9-304f-6fde-1f7e4b0a5136">
+      <Execution id="73026061-726a-4d77-ba61-98f3dc3ff743" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="DatabaseConfiguration_WithTooShortTimeoutForProduction_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithValidValues_ShouldPassValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="7842e91c-e928-1d68-35bf-798510b791aa">
+      <Execution id="cf8d9f46-97a9-4bd8-9314-6044feb6fa55" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="AzureAdConfiguration_WithValidValues_ShouldPassValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_Swagger_ReturnsSuccessfully" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="79d6d7e2-cd28-b77f-805a-6a0b947dae4d">
+      <Execution id="944aadc3-e241-4bbb-9558-e4b1e4033508" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_Swagger_ReturnsSuccessfully" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.AzureAdConfiguration_WithInvalidTokenCacheDuration_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="975507e9-a50b-195f-901a-0a25c30387d0">
+      <Execution id="7c827024-11f3-4b1b-bf36-f21db01e461c" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="AzureAdConfiguration_WithInvalidTokenCacheDuration_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests.ConfigurationStatusHealthCheck_WhenServiceBusConfigInvalid_ShouldReturnUnhealthy" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="a7789efe-0e38-d17e-a0ba-96311229ff91">
+      <Execution id="fb65c900-24bb-464c-9e6d-8933abee2e1e" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.HealthChecks.ConfigurationStatusHealthCheckTests" name="ConfigurationStatusHealthCheck_WhenServiceBusConfigInvalid_ShouldReturnUnhealthy" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken(endpoint: &quot;/api/academics&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="d152a48f-f957-9919-9d27-5b1c4819ca3b">
+      <Execution id="a827d738-50e2-4545-b673-579090fbe10e" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsUnauthorized_WithoutToken" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests.ServiceBusConfiguration_WithExcessiveMaxWaitTime_ShouldFailValidation" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="d93e842c-c928-8d0c-31ec-065b1e49c29a">
+      <Execution id="428c8344-91d6-4981-9e0f-d82a377cd97a" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.Configuration.ConfigurationValidationTests" name="ServiceBusConfiguration_WithExcessiveMaxWaitTime_ShouldFailValidation" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApplicationStartupTests.ApplicationStartup_WithDefaultConfiguration_ShouldSucceed" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="8d471280-252f-112e-249b-6ad5956b4a50">
+      <Execution id="adbccb59-b425-4129-86f9-814623890239" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApplicationStartupTests" name="ApplicationStartup_WithDefaultConfiguration_ShouldSucceed" />
+    </UnitTest>
+    <UnitTest name="Zeus.People.API.Tests.ApiIntegrationTests.Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken(endpoint: &quot;/api/academics&quot;)" storage="c:\git\blogcode\zeus.people\tests\zeus.people.api.tests\bin\release\net8.0\zeus.people.api.tests.dll" id="90eb59ad-99b0-342b-c18f-2f430b5e3b66">
+      <Execution id="d4879ebd-d858-4a33-8367-6b0935628eed" />
+      <TestMethod codeBase="C:\git\blogcode\Zeus.People\tests\Zeus.People.API.Tests\bin\Release\net8.0\Zeus.People.API.Tests.dll" adapterTypeName="executor://xunit/VsTestRunner2/netcoreapp" className="Zeus.People.API.Tests.ApiIntegrationTests" name="Get_ProtectedEndpoints_ReturnsSuccess_WithValidToken" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="0568fb09-0af0-0439-0f10-4c672b1fc8c0" executionId="e644e7c1-0bd4-444b-899e-0aa6624e4864" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f4d2da15-ad5a-8a97-58eb-53f7c2a35b27" executionId="cbb65631-919e-4613-aaec-322471a14578" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="79d6d7e2-cd28-b77f-805a-6a0b947dae4d" executionId="944aadc3-e241-4bbb-9558-e4b1e4033508" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="83410235-1173-86ed-b861-81c2e8167776" executionId="56e3d00b-be5d-40be-85a6-281968c4cc52" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="4fe02c3e-d83b-2fd7-5e89-2ad5813b952f" executionId="bbfa4cac-d3d0-4432-b61a-15a793ebe838" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d152a48f-f957-9919-9d27-5b1c4819ca3b" executionId="a827d738-50e2-4545-b673-579090fbe10e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="98f51616-9a3f-5136-5b74-140e58699844" executionId="5b8f0aaf-550d-4fae-84d8-ddba552e40d4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7d800c93-bc1b-7e32-05b2-9586a0834c8b" executionId="46d28dac-7ce4-440c-b913-f46e594a665d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d5f780fd-0bfb-31dd-61b3-a93df5ced1ec" executionId="0ecf4f38-6255-4bec-9d29-31e672784bbb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0e33839e-bad3-a5b3-a213-676469ed6f6e" executionId="f7ffa28e-078c-40a5-90c2-54b543283166" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6024fe61-034f-aec2-43cd-4ece634cb481" executionId="a19a9df3-1739-4f4a-99b4-2ec948ef3ef8" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7b57890c-cfd5-15f9-e6ec-a1b204bfce67" executionId="397431b0-b72d-4257-ae63-642025466a25" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1c269229-17c8-1e8e-0e17-0efabce183f9" executionId="5479da49-1a9e-48fb-b23c-1b465c092ad4" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e09f355c-fc92-bcd2-5160-10ba962dca50" executionId="3aeff5c6-0727-42e8-b1f4-1385293fb89b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="cc386495-e346-9e04-2bfe-10570952e07a" executionId="7ccb9818-361f-451b-8bef-3d74c4c6b8c7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7d774d02-38ea-536a-d1f6-eecc2025cc0b" executionId="6e1c6b9e-e9d5-4496-b4a2-92b896ba2cf7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="3cb8d8e1-1889-386b-1784-2a4416a380d3" executionId="0d60958c-6cd2-417f-a3d9-bd6287f0739d" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="70cc89b1-4ca9-46a1-53b2-1ec130dd2108" executionId="01141bc9-3bac-48f8-9cc8-0e1f47690442" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ea4db4f8-5ade-fe6e-0c84-35d63f7512a4" executionId="34e4a3a1-2a4a-40f3-a6c0-2317e2b0b2bb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1e42e1fb-ed85-1f56-1da0-243f551f59a0" executionId="aaf8aa74-b5f7-43a2-9d63-1cc72f300b6b" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="b3b6f64c-a088-2054-a14e-66c446213141" executionId="d2f082c6-f5ba-404c-8ab5-8c54edbff8cf" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="ee2aae1b-fda0-e0fc-b064-00daba617b77" executionId="5a233501-6311-43eb-87a1-9530865b28c9" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="32a7fadc-c0fe-c78c-aa73-ce52a151cbb4" executionId="c3a77f27-03e4-4e02-b685-bef2e791300f" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="f896deea-d0fc-af8a-5a90-c2bb7b313a2d" executionId="672f2de4-df9a-4fd3-a983-b6208976ca19" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d476e8ce-24d9-304f-6fde-1f7e4b0a5136" executionId="73026061-726a-4d77-ba61-98f3dc3ff743" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="626ffc5b-cb30-7d71-3bcc-4b80930ce594" executionId="8593c1c1-1eec-4727-8681-35bf61036efb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2faebd2a-40eb-1a3c-0c85-449528508ee4" executionId="d98acb49-4305-414f-b9e9-081a260a351c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a7789efe-0e38-d17e-a0ba-96311229ff91" executionId="fb65c900-24bb-464c-9e6d-8933abee2e1e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a22403b2-6d25-3fe2-c780-b0df98a4263b" executionId="cc605c2c-9ddf-459b-8525-80629b28dfc1" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="89b35721-f597-8838-6f8c-13de0d7ef554" executionId="145bd1d7-de88-4b52-8ed6-5265412c1828" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8e815b9f-435c-47b1-a287-6c556f55cd41" executionId="58a63e28-b5fd-43e6-9cae-b101ae68a691" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="bcc10fee-5cdf-2622-9f5a-8492267669aa" executionId="9ad6a534-5feb-44eb-b042-1a71b50d2023" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d6c9d643-3fc7-d42a-329f-6f0c950c9696" executionId="1ad239b2-e788-498c-a626-86db72a46b5a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="33435f3a-bdfb-3ae9-e315-6e828ad24330" executionId="acbfbc0f-a796-4551-a59a-925ae2cb1e2e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="82e2bff4-b429-cc3c-93dc-6b38d4dca47c" executionId="a33de0dd-5086-453a-a232-421638282ff7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="2fa9cdc3-37e5-2e46-15d1-11b982d8a4aa" executionId="c0943cc8-5779-4dc1-8d5e-56d20cb220f7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="8d471280-252f-112e-249b-6ad5956b4a50" executionId="adbccb59-b425-4129-86f9-814623890239" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="6c17d7bd-1a1d-eb22-ddab-e685ec0108d9" executionId="4d872101-c05a-4eb4-85bf-03b13431e037" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7842e91c-e928-1d68-35bf-798510b791aa" executionId="cf8d9f46-97a9-4bd8-9314-6044feb6fa55" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="dea8b70e-1a9f-d980-dcca-5b937de9b994" executionId="f74d10c8-7c3d-48f0-a7a8-303d99b81267" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="29517f29-5d45-9e51-9397-76108c5dbc79" executionId="518f205c-bf22-46e5-8646-2e6bb6a450cb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="90eb59ad-99b0-342b-c18f-2f430b5e3b66" executionId="d4879ebd-d858-4a33-8367-6b0935628eed" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1aac3139-cd46-2ccf-a57f-7028611c99d1" executionId="d0f5a5c5-c2f5-46e5-9a22-50e72caf8cc0" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="41e4218a-133d-e9b1-2479-ee9e393650f2" executionId="e3a4c0a5-5263-4e97-836b-b5fbe80e6d1a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="1426fbd4-6beb-3a90-7524-b4f56b7e6907" executionId="2ca0669b-d0c8-4408-8429-59261b0ed6a5" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="a65d1850-c6a7-6cd3-f359-51fc5d6d15cb" executionId="523efa48-1afa-426a-9af0-c0f71356d1eb" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="d93e842c-c928-8d0c-31ec-065b1e49c29a" executionId="428c8344-91d6-4981-9e0f-d82a377cd97a" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="975507e9-a50b-195f-901a-0a25c30387d0" executionId="7c827024-11f3-4b1b-bf36-f21db01e461c" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="7076fd60-bf55-6e71-4980-2f41cdb629b2" executionId="2ea76e95-0ce3-4a1c-8535-d6922e422aea" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e3da12c8-1bb9-42df-95ae-4f5aabe94045" executionId="6973d843-6abd-4e2a-8587-a89013ed0e9e" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="e2db9306-efc5-19ea-7c22-d092d33d5e6c" executionId="c57f9a68-ba4b-4fb1-beef-027431fea377" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="73f6a8bc-22fa-d8e2-3deb-347d75e6f70c" executionId="f6ef4d1d-62a2-450e-a223-253962c948b7" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestEntry testId="0e0973b2-e11b-50a5-e596-3b2987947588" executionId="246f41b3-a525-4f7a-9c42-c9c3cacda6ae" testListId="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Results Not in a List" id="8c84fa94-04c1-424b-9868-57a2d4851a1d" />
+    <TestList name="All Loaded Results" id="19431567-8539-422a-85d7-44ee4e166bda" />
+  </TestLists>
+  <ResultSummary outcome="Completed">
+    <Counters total="53" executed="53" passed="53" failed="0" error="0" timeout="0" aborted="0" inconclusive="0" passedButRunAborted="0" notRunnable="0" notExecuted="0" disconnected="0" warning="0" completed="0" inProgress="0" pending="0" />
+    <Output>
+      <StdOut>[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.19)&#xD;
+[xUnit.net 00:00:00.13]   Discovering: Zeus.People.API.Tests&#xD;
+[xUnit.net 00:00:00.19]   Discovered:  Zeus.People.API.Tests&#xD;
+[xUnit.net 00:00:00.19]   Starting:    Zeus.People.API.Tests&#xD;
+2025-08-19 09:50:31.459 -07:00 [INF] Starting Zeus.People API configuration&#xD;
+2025-08-19 09:50:31.459 -07:00 [INF] Starting Zeus.People API configuration&#xD;
+Warning: KeyVault:VaultUrl not configured. Skipping Key Vault configuration.&#xD;
+2025-08-19 09:50:31.680 -07:00 [INF] Running in test environment - using basic JWT authentication configuration&#xD;
+2025-08-19 09:50:31.689 -07:00 [INF] JWT Authentication configured successfully&#xD;
+2025-08-19 09:50:31.689 -07:00 [INF] Test JWT Authentication configured successfully&#xD;
+2025-08-19 09:50:31.697 -07:00 [INF] Starting configuration validation...&#xD;
+2025-08-19 09:50:31.698 -07:00 [INF] Running in test environment - skipping strict configuration validation&#xD;
+2025-08-19 09:50:31.704 -07:00 [INF] Starting configuration validation...&#xD;
+2025-08-19 09:50:31.705 -07:00 [INF] Configuration validation completed successfully&#xD;
+2025-08-19 09:50:31.767 -07:00 [INF] Starting Zeus.People API&#xD;
+2025-08-19 09:50:31.767 -07:00 [INF] Starting Zeus.People API&#xD;
+2025-08-19 09:50:31.782 -07:00 [INF] User profile is available. Using 'C:\Users\JohnM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.&#xD;
+2025-08-19 09:50:31.782 -07:00 [INF] User profile is available. Using 'C:\Users\JohnM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.&#xD;
+2025-08-19 09:50:31.864 -07:00 [INF] Request starting HTTP/1.1 GET http://localhost/health - null null&#xD;
+2025-08-19 09:50:31.888 -07:00 [WRN] Failed to determine the https port for redirect.&#xD;
+2025-08-19 09:50:31.895 -07:00 [INF] Request starting HTTP/1.1 POST https://localhost:7001/api/academics - application/json; charset=utf-8 49&#xD;
+2025-08-19 09:50:31.903 -07:00 [INF] Executing endpoint 'Health checks'&#xD;
+2025-08-19 09:50:31.909 -07:00 [INF] Starting configuration status health check&#xD;
+2025-08-19 09:50:31.916 -07:00 [WRN] Configuration validation failed with 2 errors: Service Bus configuration validation failed: Service Bus connection string is required; Azure AD configuration validation failed: Audience is required&#xD;
+2025-08-19 09:50:31.922 -07:00 [ERR] Health check configuration with status Unhealthy completed after 8.3849ms with message 'Configuration validation failed: Service Bus configuration validation failed: Service Bus connection string is required; Azure AD configuration validation failed: Audience is required'&#xD;
+2025-08-19 09:50:31.959 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API)'&#xD;
+2025-08-19 09:50:31.982 -07:00 [INF] Route matched with {action = "CreateAcademic", controller = "Academics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Guid]] CreateAcademic(Zeus.People.Application.Commands.Academic.CreateAcademicCommand) on controller Zeus.People.API.Controllers.AcademicsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.070 -07:00 [INF] Handling CreateAcademicCommand: {"EmpNr": "12345", "EmpName": "John Doe", "Rank": "P", "$type": "CreateAcademicCommand"}&#xD;
+2025-08-19 09:50:32.079 -07:00 [INF] Creating academic with EmpNr: 12345&#xD;
+2025-08-19 09:50:32.093 -07:00 [INF] Successfully handled CreateAcademicCommand&#xD;
+2025-08-19 09:50:32.098 -07:00 [INF] Executing BadRequestObjectResult, writing value of type '&lt;&gt;f__AnonymousType2`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.&#xD;
+2025-08-19 09:50:32.114 -07:00 [INF] Executed action Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API) in 127.0783ms&#xD;
+2025-08-19 09:50:32.114 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.119 -07:00 [INF] Request finished HTTP/1.1 POST https://localhost:7001/api/academics - 400 null application/json; charset=utf-8 224.061ms&#xD;
+2025-08-19 09:50:32.127 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/health - null null&#xD;
+2025-08-19 09:50:32.130 -07:00 [INF] Executing endpoint 'Health checks'&#xD;
+2025-08-19 09:50:32.157 -07:00 [INF] Executed endpoint 'Health checks'&#xD;
+2025-08-19 09:50:32.159 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/health - 200 null application/json 31.6402ms&#xD;
+2025-08-19 09:50:32.163 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/academics - null null&#xD;
+2025-08-19 09:50:32.173 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.AcademicsController.GetAllAcademics (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.181 -07:00 [INF] Route matched with {action = "GetAllAcademics", controller = "Academics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Zeus.People.Application.Common.PagedResult`1[Zeus.People.Application.DTOs.AcademicSummaryDto]]] GetAllAcademics(Int32, Int32, System.String, System.String, System.Nullable`1[System.Boolean]) on controller Zeus.People.API.Controllers.AcademicsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.197 -07:00 [INF] Handling GetAllAcademicsQuery: {"PageNumber": 1, "PageSize": 10, "NameFilter": null, "RankFilter": null, "IsTenuredFilter": null, "$type": "GetAllAcademicsQuery"}&#xD;
+2025-08-19 09:50:32.200 -07:00 [INF] Getting all academics - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.218 -07:00 [INF] Successfully handled GetAllAcademicsQuery&#xD;
+2025-08-19 09:50:32.223 -07:00 [INF] Executing OkObjectResult, writing value of type 'Zeus.People.Application.Common.PagedResult`1[[Zeus.People.Application.DTOs.AcademicSummaryDto, Zeus.People.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.&#xD;
+2025-08-19 09:50:32.245 -07:00 [INF] Executed action Zeus.People.API.Controllers.AcademicsController.GetAllAcademics (Zeus.People.API) in 63.8827ms&#xD;
+2025-08-19 09:50:32.245 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.AcademicsController.GetAllAcademics (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.246 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/academics - 200 null application/json; charset=utf-8 82.4939ms&#xD;
+2025-08-19 09:50:32.247 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/rooms - null null&#xD;
+2025-08-19 09:50:32.249 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.RoomsController.GetRooms (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.255 -07:00 [INF] Route matched with {action = "GetRooms", controller = "Rooms"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetRooms() on controller Zeus.People.API.Controllers.RoomsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.262 -07:00 [INF] Handling GetAllRoomsQuery: {"PageNumber": 1, "PageSize": 10, "RoomNumberFilter": null, "IsOccupiedFilter": null, "$type": "GetAllRoomsQuery"}&#xD;
+2025-08-19 09:50:32.264 -07:00 [INF] Getting all rooms - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.286 -07:00 [INF] Successfully handled GetAllRoomsQuery&#xD;
+2025-08-19 09:50:32.289 -07:00 [INF] Executing OkObjectResult, writing value of type 'Zeus.People.Application.Common.PagedResult`1[[Zeus.People.Application.DTOs.RoomDto, Zeus.People.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.&#xD;
+2025-08-19 09:50:32.300 -07:00 [INF] Executed action Zeus.People.API.Controllers.RoomsController.GetRooms (Zeus.People.API) in 45.0268ms&#xD;
+2025-08-19 09:50:32.300 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.RoomsController.GetRooms (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.301 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/rooms - 200 null application/json; charset=utf-8 53.1847ms&#xD;
+2025-08-19 09:50:32.302 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/extensions - null null&#xD;
+2025-08-19 09:50:32.303 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.ExtensionsController.GetAllExtensions (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.310 -07:00 [INF] Route matched with {action = "GetAllExtensions", controller = "Extensions"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Zeus.People.Application.Common.PagedResult`1[Zeus.People.Application.DTOs.ExtensionDto]]] GetAllExtensions(Int32, Int32) on controller Zeus.People.API.Controllers.ExtensionsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.313 -07:00 [INF] Handling GetAllExtensionsQuery: {"PageNumber": 1, "PageSize": 10, "ExtensionNumberFilter": null, "AccessLevelFilter": null, "IsInUseFilter": null, "$type": "GetAllExtensionsQuery"}&#xD;
+2025-08-19 09:50:32.315 -07:00 [INF] Getting all extensions - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.334 -07:00 [INF] Successfully handled GetAllExtensionsQuery&#xD;
+2025-08-19 09:50:32.346 -07:00 [INF] Executing OkObjectResult, writing value of type 'Zeus.People.Application.Common.PagedResult`1[[Zeus.People.Application.DTOs.ExtensionDto, Zeus.People.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.&#xD;
+2025-08-19 09:50:32.350 -07:00 [INF] Executed action Zeus.People.API.Controllers.ExtensionsController.GetAllExtensions (Zeus.People.API) in 39.7899ms&#xD;
+2025-08-19 09:50:32.350 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.ExtensionsController.GetAllExtensions (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.350 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/extensions - 200 null application/json; charset=utf-8 48.6371ms&#xD;
+2025-08-19 09:50:32.351 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/departments - null null&#xD;
+2025-08-19 09:50:32.352 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.DepartmentsController.GetAllDepartments (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.359 -07:00 [INF] Route matched with {action = "GetAllDepartments", controller = "Departments"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[Zeus.People.Application.Common.PagedResult`1[Zeus.People.Application.DTOs.DepartmentSummaryDto]]] GetAllDepartments(Int32, Int32) on controller Zeus.People.API.Controllers.DepartmentsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.364 -07:00 [INF] Handling GetAllDepartmentsQuery: {"PageNumber": 1, "PageSize": 10, "NameFilter": null, "$type": "GetAllDepartmentsQuery"}&#xD;
+2025-08-19 09:50:32.365 -07:00 [INF] Getting all departments - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.390 -07:00 [INF] Successfully handled GetAllDepartmentsQuery&#xD;
+2025-08-19 09:50:32.391 -07:00 [INF] Executing OkObjectResult, writing value of type 'Zeus.People.Application.Common.PagedResult`1[[Zeus.People.Application.DTOs.DepartmentSummaryDto, Zeus.People.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]'.&#xD;
+2025-08-19 09:50:32.403 -07:00 [INF] Executed action Zeus.People.API.Controllers.DepartmentsController.GetAllDepartments (Zeus.People.API) in 44.0536ms&#xD;
+2025-08-19 09:50:32.403 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.DepartmentsController.GetAllDepartments (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.403 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/departments - 200 null application/json; charset=utf-8 51.8731ms&#xD;
+2025-08-19 09:50:32.414 -07:00 [INF] Request starting HTTP/1.1 POST https://localhost:7001/api/academics - application/json; charset=utf-8 439&#xD;
+2025-08-19 09:50:32.415 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.416 -07:00 [INF] Route matched with {action = "CreateAcademic", controller = "Academics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Guid]] CreateAcademic(Zeus.People.Application.Commands.Academic.CreateAcademicCommand) on controller Zeus.People.API.Controllers.AcademicsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.421 -07:00 [INF] Executing BadRequestObjectResult, writing value of type '&lt;&gt;f__AnonymousType2`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.&#xD;
+2025-08-19 09:50:32.422 -07:00 [INF] Executed action Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API) in 5.7874ms&#xD;
+2025-08-19 09:50:32.422 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.422 -07:00 [INF] Request finished HTTP/1.1 POST https://localhost:7001/api/academics - 400 null application/json; charset=utf-8 7.7051ms&#xD;
+2025-08-19 09:50:32.424 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/extensions - null null&#xD;
+2025-08-19 09:50:32.425 -07:00 [INF] Authorization failed. These requirements were not met:&#xD;
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.&#xD;
+2025-08-19 09:50:32.429 -07:00 [WRN] JWT Challenge triggered: null&#xD;
+2025-08-19 09:50:32.430 -07:00 [INF] AuthenticationScheme: Bearer was challenged.&#xD;
+2025-08-19 09:50:32.430 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/extensions - 401 null null 6.1449ms&#xD;
+2025-08-19 09:50:32.432 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/reports/dashboard - null null&#xD;
+2025-08-19 09:50:32.432 -07:00 [INF] Authorization failed. These requirements were not met:&#xD;
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.&#xD;
+2025-08-19 09:50:32.433 -07:00 [WRN] JWT Challenge triggered: null&#xD;
+2025-08-19 09:50:32.433 -07:00 [INF] AuthenticationScheme: Bearer was challenged.&#xD;
+2025-08-19 09:50:32.433 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/reports/dashboard - 401 null null 1.18ms&#xD;
+2025-08-19 09:50:32.434 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/departments - null null&#xD;
+2025-08-19 09:50:32.434 -07:00 [INF] Authorization failed. These requirements were not met:&#xD;
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.&#xD;
+2025-08-19 09:50:32.434 -07:00 [WRN] JWT Challenge triggered: null&#xD;
+2025-08-19 09:50:32.435 -07:00 [INF] AuthenticationScheme: Bearer was challenged.&#xD;
+2025-08-19 09:50:32.435 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/departments - 401 null null 1.0215ms&#xD;
+2025-08-19 09:50:32.436 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/rooms - null null&#xD;
+2025-08-19 09:50:32.436 -07:00 [INF] Authorization failed. These requirements were not met:&#xD;
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.&#xD;
+2025-08-19 09:50:32.436 -07:00 [WRN] JWT Challenge triggered: null&#xD;
+2025-08-19 09:50:32.437 -07:00 [INF] AuthenticationScheme: Bearer was challenged.&#xD;
+2025-08-19 09:50:32.437 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/rooms - 401 null null 1.4755ms&#xD;
+2025-08-19 09:50:32.438 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/academics - null null&#xD;
+2025-08-19 09:50:32.438 -07:00 [INF] Authorization failed. These requirements were not met:&#xD;
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.&#xD;
+2025-08-19 09:50:32.438 -07:00 [WRN] JWT Challenge triggered: null&#xD;
+2025-08-19 09:50:32.439 -07:00 [INF] AuthenticationScheme: Bearer was challenged.&#xD;
+2025-08-19 09:50:32.439 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/academics - 401 null null 0.9354ms&#xD;
+2025-08-19 09:50:32.441 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/reports/academics/stats - null null&#xD;
+2025-08-19 09:50:32.444 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.ReportsController.GetAcademicStats (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.448 -07:00 [INF] Route matched with {action = "GetAcademicStats", controller = "Reports"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetAcademicStats() on controller Zeus.People.API.Controllers.ReportsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.456 -07:00 [INF] Handling GetTenuredAcademicsQuery: {"PageNumber": 1, "PageSize": 10, "$type": "GetTenuredAcademicsQuery"}&#xD;
+2025-08-19 09:50:32.457 -07:00 [INF] Getting tenured academics - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.470 -07:00 [INF] Successfully handled GetTenuredAcademicsQuery&#xD;
+2025-08-19 09:50:32.472 -07:00 [INF] Handling GetAcademicCountByDepartmentQuery: {"$type": "GetAcademicCountByDepartmentQuery"}&#xD;
+2025-08-19 09:50:32.474 -07:00 [INF] Getting academic count by department&#xD;
+2025-08-19 09:50:32.490 -07:00 [INF] Successfully handled GetAcademicCountByDepartmentQuery&#xD;
+2025-08-19 09:50:32.492 -07:00 [INF] Handling GetAllAcademicsQuery: {"PageNumber": 1, "PageSize": 10, "NameFilter": null, "RankFilter": null, "IsTenuredFilter": null, "$type": "GetAllAcademicsQuery"}&#xD;
+2025-08-19 09:50:32.492 -07:00 [INF] Getting all academics - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.498 -07:00 [INF] Successfully handled GetAllAcademicsQuery&#xD;
+2025-08-19 09:50:32.498 -07:00 [INF] Executing OkObjectResult, writing value of type '&lt;&gt;f__AnonymousType13`4[[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Int32, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Collections.Generic.List`1[[Zeus.People.Application.DTOs.AcademicCountByDepartmentDto, Zeus.People.Application, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]], System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.&#xD;
+2025-08-19 09:50:32.501 -07:00 [INF] Executed action Zeus.People.API.Controllers.ReportsController.GetAcademicStats (Zeus.People.API) in 52.8101ms&#xD;
+2025-08-19 09:50:32.501 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.ReportsController.GetAcademicStats (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.502 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/reports/academics/stats - 200 null application/json; charset=utf-8 60.9619ms&#xD;
+2025-08-19 09:50:32.504 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/swagger/v1/swagger.json - null null&#xD;
+2025-08-19 09:50:32.713 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 209.3213ms&#xD;
+2025-08-19 09:50:32.715 -07:00 [INF] Request starting HTTP/1.1 GET https://localhost:7001/api/reports/dashboard - null null&#xD;
+2025-08-19 09:50:32.716 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.ReportsController.GetDashboard (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.719 -07:00 [INF] Route matched with {action = "GetDashboard", controller = "Reports"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.IActionResult] GetDashboard() on controller Zeus.People.API.Controllers.ReportsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.722 -07:00 [INF] Handling GetTenuredAcademicsQuery: {"PageNumber": 1, "PageSize": 10, "$type": "GetTenuredAcademicsQuery"}&#xD;
+2025-08-19 09:50:32.722 -07:00 [INF] Getting tenured academics - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.724 -07:00 [INF] Handling GetAllRoomsQuery: {"PageNumber": 1, "PageSize": 10, "RoomNumberFilter": null, "IsOccupiedFilter": null, "$type": "GetAllRoomsQuery"}&#xD;
+2025-08-19 09:50:32.725 -07:00 [INF] Getting all rooms - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.726 -07:00 [INF] Handling GetAllExtensionsQuery: {"PageNumber": 1, "PageSize": 10, "ExtensionNumberFilter": null, "AccessLevelFilter": null, "IsInUseFilter": null, "$type": "GetAllExtensionsQuery"}&#xD;
+2025-08-19 09:50:32.727 -07:00 [INF] Getting all extensions - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.744 -07:00 [INF] Successfully handled GetTenuredAcademicsQuery&#xD;
+2025-08-19 09:50:32.745 -07:00 [INF] Handling GetAcademicCountByDepartmentQuery: {"$type": "GetAcademicCountByDepartmentQuery"}&#xD;
+2025-08-19 09:50:32.745 -07:00 [INF] Successfully handled GetAllRoomsQuery&#xD;
+2025-08-19 09:50:32.745 -07:00 [INF] Successfully handled GetAllExtensionsQuery&#xD;
+2025-08-19 09:50:32.745 -07:00 [INF] Getting academic count by department&#xD;
+2025-08-19 09:50:32.748 -07:00 [INF] Handling GetAvailableRoomsQuery: {"PageNumber": 1, "PageSize": 10, "$type": "GetAvailableRoomsQuery"}&#xD;
+2025-08-19 09:50:32.748 -07:00 [INF] Handling GetAvailableExtensionsQuery: {"AccessLevelFilter": null, "PageNumber": 1, "PageSize": 10, "$type": "GetAvailableExtensionsQuery"}&#xD;
+2025-08-19 09:50:32.749 -07:00 [INF] Getting available rooms&#xD;
+2025-08-19 09:50:32.749 -07:00 [INF] Getting available extensions&#xD;
+2025-08-19 09:50:32.750 -07:00 [INF] Successfully handled GetAcademicCountByDepartmentQuery&#xD;
+2025-08-19 09:50:32.753 -07:00 [INF] Handling GetAllAcademicsQuery: {"PageNumber": 1, "PageSize": 10, "NameFilter": null, "RankFilter": null, "IsTenuredFilter": null, "$type": "GetAllAcademicsQuery"}&#xD;
+2025-08-19 09:50:32.753 -07:00 [INF] Getting all academics - Page: 1, Size: 10&#xD;
+2025-08-19 09:50:32.755 -07:00 [INF] Successfully handled GetAvailableRoomsQuery&#xD;
+2025-08-19 09:50:32.755 -07:00 [INF] Successfully handled GetAvailableExtensionsQuery&#xD;
+2025-08-19 09:50:32.772 -07:00 [INF] Successfully handled GetAllAcademicsQuery&#xD;
+2025-08-19 09:50:32.773 -07:00 [INF] Executing OkObjectResult, writing value of type '&lt;&gt;f__AnonymousType17`4[[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.Object, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.&#xD;
+2025-08-19 09:50:32.782 -07:00 [INF] Executed action Zeus.People.API.Controllers.ReportsController.GetDashboard (Zeus.People.API) in 62.7954ms&#xD;
+2025-08-19 09:50:32.782 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.ReportsController.GetDashboard (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.783 -07:00 [INF] Request finished HTTP/1.1 GET https://localhost:7001/api/reports/dashboard - 200 null application/json; charset=utf-8 67.244ms&#xD;
+2025-08-19 09:50:32.785 -07:00 [INF] Request starting HTTP/1.1 POST https://localhost:7001/api/academics - application/json; charset=utf-8 416&#xD;
+2025-08-19 09:50:32.786 -07:00 [INF] Executing endpoint 'Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.786 -07:00 [INF] Route matched with {action = "CreateAcademic", controller = "Academics"}. Executing controller action with signature System.Threading.Tasks.Task`1[Microsoft.AspNetCore.Mvc.ActionResult`1[System.Guid]] CreateAcademic(Zeus.People.Application.Commands.Academic.CreateAcademicCommand) on controller Zeus.People.API.Controllers.AcademicsController (Zeus.People.API).&#xD;
+2025-08-19 09:50:32.790 -07:00 [INF] Executing BadRequestObjectResult, writing value of type '&lt;&gt;f__AnonymousType2`1[[System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]'.&#xD;
+2025-08-19 09:50:32.791 -07:00 [INF] Executed action Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API) in 4.5085ms&#xD;
+2025-08-19 09:50:32.791 -07:00 [INF] Executed endpoint 'Zeus.People.API.Controllers.AcademicsController.CreateAcademic (Zeus.People.API)'&#xD;
+2025-08-19 09:50:32.791 -07:00 [INF] Request finished HTTP/1.1 POST https://localhost:7001/api/academics - 400 null application/json; charset=utf-8 5.9851ms&#xD;
+2025-08-19 09:50:33.428 -07:00 [INF] Executed DbCommand (24ms) [Parameters=[], CommandType='Text', CommandTimeout='30']&#xD;
+SELECT 1&#xD;
+2025-08-19 09:50:33.428 -07:00 [INF] Executed DbCommand (24ms) [Parameters=[], CommandType='Text', CommandTimeout='30']&#xD;
+SELECT 1&#xD;
+2025-08-19 09:50:33.441 -07:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']&#xD;
+SELECT 1&#xD;
+2025-08-19 09:50:45.312 -07:00 [ERR] Health check cosmosdb with status Unhealthy completed after 13229.8166ms with message 'Cosmos DB connection failed'&#xD;
+System.Net.Http.HttpRequestException: No connection could be made because the target machine actively refused it. (localhost:8081)&#xD;
+ ---&gt; System.Net.Sockets.SocketException (10061): No connection could be made because the target machine actively refused it.&#xD;
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.ThrowException(SocketError error, CancellationToken cancellationToken)&#xD;
+   at System.Net.Sockets.Socket.AwaitableSocketAsyncEventArgs.System.Threading.Tasks.Sources.IValueTaskSource.GetResult(Int16 token)&#xD;
+   at System.Net.Sockets.Socket.&lt;ConnectAsync&gt;g__WaitForConnectWithCancellation|285_0(AwaitableSocketAsyncEventArgs saea, ValueTask connectTask, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)&#xD;
+   --- End of inner exception stack trace ---&#xD;
+   at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpConnectionPool.AddHttp11ConnectionAsync(QueueItem queueItem)&#xD;
+   at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.DiagnosticsHandler.SendAsyncCore(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)&#xD;
+   at System.Net.Http.HttpClient.&lt;SendAsync&gt;g__Core|83_0(HttpRequestMessage request, HttpCompletionOption completionOption, CancellationTokenSource cts, Boolean disposeCts, CancellationTokenSource pendingRequestsCts, CancellationToken originalCancellationToken)&#xD;
+   at Microsoft.Azure.Cosmos.CosmosHttpClientCore.ExecuteHttpHelperAsync(HttpRequestMessage requestMessage, ResourceType resourceType, CancellationToken cancellationToken)&#xD;
+   at Microsoft.Azure.Cosmos.CosmosHttpClientCore.SendHttpHelperAsync(Func`1 createRequestMessageAsync, ResourceType resourceType, HttpTimeoutPolicy timeoutPolicy, IClientSideRequestStatistics clientSideRequestStatistics, CancellationToken cancellationToken)&#xD;
+   at Microsoft.Azure.Cosmos.GatewayAccountReader.GetDatabaseAccountAsync(Uri serviceEndpoint)&#xD;
+   at Microsoft.Azure.Cosmos.Routing.GlobalEndpointManager.GetAccountPropertiesHelper.GetAndUpdateAccountPropertiesAsync(Uri endpoint)&#xD;
+   at Microsoft.Azure.Cosmos.Routing.GlobalEndpointManager.GetAccountPropertiesHelper.GetAccountPropertiesAsync()&#xD;
+   at Microsoft.Azure.Cosmos.GatewayAccountReader.InitializeReaderAsync()&#xD;
+   at Microsoft.Azure.Cosmos.CosmosAccountServiceConfiguration.InitializeAsync()&#xD;
+   at Microsoft.Azure.Cosmos.DocumentClient.InitializeGatewayConfigurationReaderAsync()&#xD;
+   at Microsoft.Azure.Cosmos.DocumentClient.GetInitializationTaskAsync(IStoreClientFactory storeClientFactory)&#xD;
+   at Microsoft.Azure.Documents.BackoffRetryUtility`1.ExecuteRetryAsync[TParam,TPolicy](Func`1 callbackMethod, Func`3 callbackMethodWithParam, Func`2 callbackMethodWithPolicy, TParam param, IRetryPolicy retryPolicy, IRetryPolicy`1 retryPolicyWithArg, Func`1 inBackoffAlternateCallbackMethod, Func`2 inBackoffAlternateCallbackMethodWithPolicy, TimeSpan minBackoffForInBackoffCallback, CancellationToken cancellationToken, Action`1 preRetryCallback)&#xD;
+   at Microsoft.Azure.Documents.ShouldRetryResult.ThrowIfDoneTrying(ExceptionDispatchInfo capturedException)&#xD;
+   at Microsoft.Azure.Documents.BackoffRetryUtility`1.ExecuteRetryAsync[TParam,TPolicy](Func`1 callbackMethod, Func`3 callbackMethodWithParam, Func`2 callbackMethodWithPolicy, TParam param, IRetryPolicy retryPolicy, IRetryPolicy`1 retryPolicyWithArg, Func`1 inBackoffAlternateCallbackMethod, Func`2 inBackoffAlternateCallbackMethodWithPolicy, TimeSpan minBackoffForInBackoffCallback, CancellationToken cancellationToken, Action`1 preRetryCallback)&#xD;
+   at Microsoft.Azure.Cosmos.AsyncCacheNonBlocking`2.GetAsync(TKey key, Func`2 singleValueInitFunc, Func`2 forceRefresh)&#xD;
+   at Microsoft.Azure.Cosmos.DocumentClient.EnsureValidClientAsync(ITrace trace)&#xD;
+   at Microsoft.Azure.Cosmos.Handlers.RequestInvokerHandler.EnsureValidClientAsync(RequestMessage request, ITrace trace)&#xD;
+   at Microsoft.Azure.Cosmos.Handlers.RequestInvokerHandler.SendAsync(RequestMessage request, CancellationToken cancellationToken)&#xD;
+   at Microsoft.Azure.Cosmos.Handlers.RequestInvokerHandler.SendAsync(String resourceUriString, ResourceType resourceType, OperationType operationType, RequestOptions requestOptions, ContainerInternal cosmosContainerCore, FeedRange feedRange, Stream streamPayload, Action`1 requestEnricher, ITrace trace, CancellationToken cancellationToken)&#xD;
+   at Microsoft.Azure.Cosmos.DatabaseCore.ReadAsync(RequestOptions requestOptions, ITrace trace, CancellationToken cancellationToken)&#xD;
+   at Microsoft.Azure.Cosmos.ClientContextCore.RunWithDiagnosticsHelperAsync[TResult](String containerName, String databaseName, OperationType operationType, ITrace trace, Func`2 task, Func`2 openTelemetry, String operationName, RequestOptions requestOptions)&#xD;
+   at Microsoft.Azure.Cosmos.ClientContextCore.OperationHelperWithRootTraceAsync[TResult](String operationName, String containerName, String databaseName, OperationType operationType, RequestOptions requestOptions, Func`2 task, Func`2 openTelemetry, TraceComponent traceComponent, TraceLevel traceLevel)&#xD;
+   at Zeus.People.Infrastructure.HealthChecks.CosmosDbHealthCheck.CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken) in C:\git\blogcode\Zeus.People\src\Infrastructure\HealthChecks\CosmosDbHealthCheck.cs:line 32&#xD;
+2025-08-19 09:50:45.330 -07:00 [INF] Executed endpoint 'Health checks'&#xD;
+2025-08-19 09:50:45.331 -07:00 [INF] Request finished HTTP/1.1 GET http://localhost/health - 503 null application/json 13468.3511ms&#xD;
+2025-08-19 09:50:45.365 -07:00 [INF] Starting Zeus.People API configuration&#xD;
+2025-08-19 09:50:45.379 -07:00 [INF] JWT Authentication configured successfully&#xD;
+2025-08-19 09:50:45.388 -07:00 [INF] Starting configuration validation...&#xD;
+2025-08-19 09:50:45.396 -07:00 [ERR] Configuration validation failed&#xD;
+System.InvalidOperationException: Azure AD configuration is invalid: Azure AD configuration validation failed: Audience is required&#xD;
+   at Zeus.People.API.Configuration.ConfigurationExtensions.ValidateConfigurationAsync(WebApplication app) in C:\git\blogcode\Zeus.People\src\API\Configuration\ConfigurationExtensions.cs:line 203&#xD;
+2025-08-19 09:50:45.398 -07:00 [FTL] Zeus.People API terminated unexpectedly&#xD;
+System.InvalidOperationException: Azure AD configuration is invalid: Azure AD configuration validation failed: Audience is required&#xD;
+   at Zeus.People.API.Configuration.ConfigurationExtensions.ValidateConfigurationAsync(WebApplication app) in C:\git\blogcode\Zeus.People\src\API\Configuration\ConfigurationExtensions.cs:line 203&#xD;
+   at Program.&lt;Main&gt;$(String[] args) in C:\git\blogcode\Zeus.People\src\API\Program.cs:line 57&#xD;
+2025-08-19 09:50:45.413 -07:00 [INF] Starting Zeus.People API configuration&#xD;
+Warning: KeyVault:VaultUrl not configured. Skipping Key Vault configuration.&#xD;
+2025-08-19 09:50:45.425 -07:00 [INF] Running in test environment - using basic JWT authentication configuration&#xD;
+2025-08-19 09:50:45.426 -07:00 [INF] Test JWT Authentication configured successfully&#xD;
+2025-08-19 09:50:45.428 -07:00 [INF] Starting configuration validation...&#xD;
+2025-08-19 09:50:45.428 -07:00 [INF] Running in test environment - skipping strict configuration validation&#xD;
+2025-08-19 09:50:45.458 -07:00 [INF] Starting Zeus.People API&#xD;
+2025-08-19 09:50:45.463 -07:00 [INF] User profile is available. Using 'C:\Users\JohnM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.&#xD;
+2025-08-19 09:50:45.483 -07:00 [INF] Starting Zeus.People API configuration&#xD;
+Warning: KeyVault:VaultUrl not configured. Skipping Key Vault configuration.&#xD;
+2025-08-19 09:50:45.496 -07:00 [INF] Running in test environment - using basic JWT authentication configuration&#xD;
+2025-08-19 09:50:45.497 -07:00 [INF] Test JWT Authentication configured successfully&#xD;
+2025-08-19 09:50:45.499 -07:00 [INF] Starting configuration validation...&#xD;
+2025-08-19 09:50:45.499 -07:00 [INF] Running in test environment - skipping strict configuration validation&#xD;
+2025-08-19 09:50:45.512 -07:00 [INF] Starting Zeus.People API&#xD;
+2025-08-19 09:50:45.514 -07:00 [INF] User profile is available. Using 'C:\Users\JohnM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.&#xD;
+2025-08-19 09:50:45.534 -07:00 [INF] Starting Zeus.People API configuration&#xD;
+Warning: KeyVault:VaultUrl not configured. Skipping Key Vault configuration.&#xD;
+2025-08-19 09:50:45.565 -07:00 [INF] Running in test environment - using basic JWT authentication configuration&#xD;
+2025-08-19 09:50:45.566 -07:00 [INF] Test JWT Authentication configured successfully&#xD;
+2025-08-19 09:50:45.568 -07:00 [INF] Starting configuration validation...&#xD;
+2025-08-19 09:50:45.568 -07:00 [INF] Running in test environment - skipping strict configuration validation&#xD;
+2025-08-19 09:50:45.581 -07:00 [INF] Starting Zeus.People API&#xD;
+2025-08-19 09:50:45.585 -07:00 [INF] User profile is available. Using 'C:\Users\JohnM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.&#xD;
+2025-08-19 09:50:45.604 -07:00 [INF] Starting Zeus.People API configuration&#xD;
+Warning: KeyVault:VaultUrl not configured. Skipping Key Vault configuration.&#xD;
+2025-08-19 09:50:45.615 -07:00 [INF] Running in test environment - using basic JWT authentication configuration&#xD;
+2025-08-19 09:50:45.616 -07:00 [INF] Test JWT Authentication configured successfully&#xD;
+2025-08-19 09:50:45.618 -07:00 [INF] Starting configuration validation...&#xD;
+2025-08-19 09:50:45.618 -07:00 [INF] Running in test environment - skipping strict configuration validation&#xD;
+2025-08-19 09:50:45.637 -07:00 [INF] Starting Zeus.People API&#xD;
+2025-08-19 09:50:45.639 -07:00 [INF] User profile is available. Using 'C:\Users\JohnM\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.&#xD;
+[xUnit.net 00:00:14.70]   Finished:    Zeus.People.API.Tests&#xD;
+</StdOut>
+    </Output>
+    <CollectorDataEntries>
+      <Collector agentName="PLATO-SP9" uri="datacollector://microsoft/CoverletCodeCoverage/1.0" collectorDisplayName="XPlat code coverage">
+        <UriAttachments>
+          <UriAttachment>
+            <A href="PLATO-SP9\coverage.cobertura.xml"></A>
+          </UriAttachment>
+          <UriAttachment>
+            <A href="PLATO-SP9\coverage.opencover.xml"></A>
+          </UriAttachment>
+        </UriAttachments>
+      </Collector>
+    </CollectorDataEntries>
+  </ResultSummary>
+</TestRun>
