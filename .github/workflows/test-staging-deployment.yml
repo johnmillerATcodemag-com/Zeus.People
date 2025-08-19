@@ -1,0 +1,308 @@
+name: Test Staging Deployment
+# GitHub Actions Workflow for Staging Deployment Testing
+# Comprehensive testing of staging environment deployment and validation
+# Duration: Complete staging deployment test cycle
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment for testing"
+        required: true
+        default: "staging"
+        type: choice
+        options:
+          - staging
+          - dev
+      skip_infrastructure:
+        description: "Skip infrastructure deployment"
+        required: false
+        default: false
+        type: boolean
+      skip_tests:
+        description: "Skip endpoint and performance tests"
+        required: false
+        default: false
+        type: boolean
+      cleanup_after_test:
+        description: "Cleanup resources after testing"
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    # Run staging deployment test daily at 2 AM UTC
+    - cron: "0 2 * * *"
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  AZURE_WEBAPP_NAME: "zeus-people-api"
+  BUILD_CONFIGURATION: "Release"
+  ENVIRONMENT_NAME: ${{ inputs.environment || 'staging' }}
+
+permissions:
+  contents: read
+  id-token: write
+  issues: write
+
+jobs:
+  staging-deployment-test:
+    name: Test Staging Deployment
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'staging' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Azure Developer CLI
+        uses: azure/setup-azd@v0.1.0
+
+      - name: Setup PowerShell
+        uses: azure/powershell@v2
+        with:
+          azPSVersion: "latest"
+          inlineScript: |
+            Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore Zeus.People.sln
+
+      - name: Build solution for staging
+        run: |
+          dotnet build Zeus.People.sln \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --no-restore \
+            --verbosity normal
+
+      - name: Run unit tests before deployment
+        if: ${{ !inputs.skip_tests }}
+        run: |
+          dotnet test Zeus.People.sln \
+            --configuration ${{ env.BUILD_CONFIGURATION }} \
+            --no-build \
+            --verbosity normal \
+            --logger trx \
+            --collect:"XPlat Code Coverage" \
+            --results-directory ./test-results
+
+      - name: Upload unit test results
+        uses: actions/upload-artifact@v4
+        if: ${{ !inputs.skip_tests && always() }}
+        with:
+          name: unit-test-results-${{ github.run_number }}
+          path: ./test-results
+          retention-days: 30
+
+      - name: Setup AZD environment
+        run: |
+          azd auth login --client-id ${{ secrets.AZURE_CLIENT_ID }} \
+            --client-secret ${{ secrets.AZURE_CLIENT_SECRET }} \
+            --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+
+          azd env set AZURE_ENV_NAME "zeus-people-${{ env.ENVIRONMENT_NAME }}"
+          azd env set AZURE_LOCATION "eastus2"
+          azd env set AZURE_SUBSCRIPTION_ID "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+
+      - name: Run staging deployment test
+        id: deployment-test
+        shell: pwsh
+        run: |
+          # Set execution policy for the session
+          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
+
+          # Build parameters for the test script
+          $params = @{
+            EnvironmentName = "${{ env.ENVIRONMENT_NAME }}"
+            SubscriptionId = "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            Location = "eastus2"
+          }
+
+          if ("${{ inputs.skip_infrastructure }}" -eq "true") {
+            $params.SkipInfrastructure = $true
+          }
+
+          if ("${{ inputs.skip_tests }}" -eq "true") {
+            $params.SkipTests = $true
+          }
+
+          if ("${{ inputs.cleanup_after_test }}" -eq "true") {
+            $params.CleanupAfterTest = $true
+          }
+
+          # Run the staging deployment test
+          try {
+            .\test-staging-deployment.ps1 @params
+            echo "deployment-success=true" >> $env:GITHUB_OUTPUT
+          }
+          catch {
+            echo "deployment-success=false" >> $env:GITHUB_OUTPUT
+            Write-Error "Staging deployment test failed: $_"
+            throw
+          }
+
+      - name: Upload deployment test logs
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: staging-deployment-logs-${{ github.run_number }}
+          path: |
+            staging-deployment-test-*.log
+            staging-deployment-report-*.json
+            staging-api-test-results-*.json
+            staging-performance-results-*.json
+          retention-days: 30
+
+      - name: Parse test results for summary
+        if: always()
+        shell: pwsh
+        run: |
+          # Find the most recent deployment report
+          $reportFiles = Get-ChildItem -Path "." -Name "staging-deployment-report-*.json" | Sort-Object Name -Descending
+
+          if ($reportFiles) {
+            $reportFile = $reportFiles[0]
+            $report = Get-Content $reportFile | ConvertFrom-Json
+            
+            # Create GitHub step summary
+            $summary = @"
+          # Staging Deployment Test Results
+
+          **Environment:** ${{ env.ENVIRONMENT_NAME }}
+          **Duration:** $($report.TestRun.Duration) minutes
+          **Overall Result:** $(if($report.Summary.OverallSuccess){'✅ SUCCESS'}else{'❌ FAILED'})
+
+          ## Test Results
+          | Component | Status |
+          |-----------|--------|
+          | Infrastructure | $(if($report.Results.Infrastructure){'✅ PASS'}else{'❌ FAIL'}) |
+          | Application | $(if($report.Results.Application){'✅ PASS'}else{'❌ FAIL'}) |
+          | Health Check | $(if($report.Results.Health){'✅ PASS'}else{'❌ FAIL'}) |
+          | API Endpoints | $(if($report.Results.ApiEndpoints){'✅ PASS'}else{'❌ FAIL'}) |
+          | Database | $(if($report.Results.Database){'✅ PASS'}else{'❌ FAIL'}) |
+          | Performance | $(if($report.Results.Performance){'✅ PASS'}else{'❌ FAIL'}) |
+
+          **Application URL:** $($report.Summary.ApplicationUrl)
+
+          ## Test Configuration
+          - Skip Infrastructure: $(if($report.Summary.TestsSkipped.Infrastructure){'Yes'}else{'No'})
+          - Skip Application: $(if($report.Summary.TestsSkipped.Application){'Yes'}else{'No'})
+          - Skip Tests: $(if($report.Summary.TestsSkipped.Tests){'Yes'}else{'No'})
+          "@
+            
+            echo $summary >> $env:GITHUB_STEP_SUMMARY
+            
+            # Set output variables
+            echo "overall-success=$($report.Summary.OverallSuccess)" >> $env:GITHUB_OUTPUT
+            echo "app-url=$($report.Summary.ApplicationUrl)" >> $env:GITHUB_OUTPUT
+          }
+          else {
+            echo "No deployment report found" >> $env:GITHUB_STEP_SUMMARY
+            echo "overall-success=false" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Create GitHub issue on failure
+        if: ${{ failure() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = `Staging Deployment Test Failed - Run #${{ github.run_number }}`;
+            const body = `
+            ## Staging Deployment Test Failure
+
+            **Workflow Run:** [${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Environment:** ${{ env.ENVIRONMENT_NAME }}
+            **Triggered by:** ${{ github.actor }}
+            **Run ID:** ${{ github.run_id }}
+
+            ### Test Configuration
+            - Skip Infrastructure: ${{ inputs.skip_infrastructure || 'false' }}
+            - Skip Tests: ${{ inputs.skip_tests || 'false' }}
+            - Cleanup After Test: ${{ inputs.cleanup_after_test || 'false' }}
+
+            ### Action Required
+            Please review the deployment logs and test results to identify the failure cause.
+
+            **Artifacts:**
+            - [Deployment Logs](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - Test results and performance data available in workflow artifacts
+
+            ### Next Steps
+            1. Review the deployment logs in the workflow artifacts
+            2. Check Azure portal for resource status
+            3. Validate infrastructure configuration
+            4. Re-run the test after addressing any issues
+
+            ---
+            *This issue was automatically created by the staging deployment test workflow.*
+            `;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['deployment', 'staging', 'test-failure', 'automated']
+            });
+
+      - name: Post-deployment validation
+        if: ${{ steps.deployment-test.outputs.deployment-success == 'true' }}
+        shell: pwsh
+        run: |
+          Write-Host "✅ Staging deployment test completed successfully!"
+          Write-Host "Environment: ${{ env.ENVIRONMENT_NAME }}"
+          Write-Host "All validation tests passed."
+
+          # Additional post-deployment checks can be added here
+          # For example: smoke tests, security scans, etc.
+
+      - name: Cleanup on failure
+        if: ${{ failure() && inputs.cleanup_after_test }}
+        run: |
+          echo "Cleaning up resources after test failure..."
+          azd down --force --purge || echo "Cleanup completed or no resources to clean"
+
+  notification:
+    name: Send Notifications
+    runs-on: ubuntu-latest
+    needs: [staging-deployment-test]
+    if: always()
+
+    steps:
+      - name: Send success notification
+        if: ${{ needs.staging-deployment-test.result == 'success' }}
+        run: |
+          echo "📢 Staging deployment test completed successfully!"
+          echo "Environment: ${{ env.ENVIRONMENT_NAME }}"
+          echo "Workflow run: ${{ github.run_number }}"
+          # Add webhook/email notification here if needed
+
+      - name: Send failure notification
+        if: ${{ needs.staging-deployment-test.result == 'failure' }}
+        run: |
+          echo "🚨 Staging deployment test failed!"
+          echo "Environment: ${{ env.ENVIRONMENT_NAME }}"
+          echo "Workflow run: ${{ github.run_number }}"
+          echo "Please check the workflow logs and GitHub issues for details."
+          # Add webhook/email notification here if needed

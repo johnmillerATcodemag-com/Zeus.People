@@ -17,29 +17,29 @@ public class DepartmentRepository : IDepartmentRepository
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task<Result<Guid>> AddAsync(Department department, CancellationToken cancellationToken = default)
+    public Task<Result<Guid>> AddAsync(Department department, CancellationToken cancellationToken = default)
     {
         try
         {
             _context.Departments.Add(department);
-            return Result<Guid>.Success(department.Id);
+            return Task.FromResult(Result<Guid>.Success(department.Id));
         }
         catch (Exception ex)
         {
-            return Result.Failure<Guid>(new Error("Department.AddFailed", ex.Message));
+            return Task.FromResult(Result.Failure<Guid>(new Error("Department.AddFailed", ex.Message)));
         }
     }
 
-    public async Task<Result> UpdateAsync(Department department, CancellationToken cancellationToken = default)
+    public Task<Result> UpdateAsync(Department department, CancellationToken cancellationToken = default)
     {
         try
         {
             _context.Departments.Update(department);
-            return Result.Success();
+            return Task.FromResult(Result.Success());
         }
         catch (Exception ex)
         {
-            return Result.Failure(new Error("Department.UpdateFailed", ex.Message));
+            return Task.FromResult(Result.Failure(new Error("Department.UpdateFailed", ex.Message)));
         }
     }
 

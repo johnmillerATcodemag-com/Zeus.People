@@ -129,18 +129,18 @@ public class MockReadModelRepository : IAcademicReadRepository, IDepartmentReadR
     }
 
     // IAcademicReadRepository implementation
-    public async Task<Result<AcademicDto?>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<AcademicDto>> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await Task.Delay(1, cancellationToken);
         var academic = _academics.FirstOrDefault(a => a.Id == id);
-        return Result<AcademicDto?>.Success(academic);
+        return academic != null ? Result.Success(academic) : Result.Failure<AcademicDto>(new Error("Academic.NotFound", $"Academic with Id {id} not found"));
     }
 
-    public async Task<Result<AcademicDto?>> GetByEmpNrAsync(string empNr, CancellationToken cancellationToken = default)
+    public async Task<Result<AcademicDto>> GetByEmpNrAsync(string empNr, CancellationToken cancellationToken = default)
     {
         await Task.Delay(1, cancellationToken);
         var academic = _academics.FirstOrDefault(a => a.EmpNr == empNr);
-        return Result<AcademicDto?>.Success(academic);
+        return academic != null ? Result.Success(academic) : Result.Failure<AcademicDto>(new Error("Academic.NotFound", $"Academic with EmpNr {empNr} not found"));
     }
 
     public async Task<Result<PagedResult<AcademicSummaryDto>>> GetAllAsync(
@@ -355,18 +355,18 @@ public class MockReadModelRepository : IAcademicReadRepository, IDepartmentReadR
     }
 
     // IDepartmentReadRepository implementation - explicit interface implementation
-    async Task<Result<DepartmentDto?>> IDepartmentReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    async Task<Result<DepartmentDto>> IDepartmentReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         await Task.Delay(1, cancellationToken);
         var department = _departments.FirstOrDefault(d => d.Id == id);
-        return Result<DepartmentDto?>.Success(department);
+        return department != null ? Result.Success(department) : Result.Failure<DepartmentDto>(new Error("Department.NotFound", $"Department with Id {id} not found"));
     }
 
-    async Task<Result<DepartmentDto?>> IDepartmentReadRepository.GetByNameAsync(string name, CancellationToken cancellationToken)
+    async Task<Result<DepartmentDto>> IDepartmentReadRepository.GetByNameAsync(string name, CancellationToken cancellationToken)
     {
         await Task.Delay(1, cancellationToken);
         var department = _departments.FirstOrDefault(d => d.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-        return Result<DepartmentDto?>.Success(department);
+        return department != null ? Result.Success(department) : Result.Failure<DepartmentDto>(new Error("Department.NotFound", $"Department with Name {name} not found"));
     }
 
     async Task<Result<PagedResult<DepartmentSummaryDto>>> IDepartmentReadRepository.GetAllAsync(int pageNumber, int pageSize, string? nameFilter, CancellationToken cancellationToken)
@@ -403,12 +403,12 @@ public class MockReadModelRepository : IAcademicReadRepository, IDepartmentReadR
         return Result<PagedResult<DepartmentSummaryDto>>.Success(result);
     }
 
-    async Task<Result<DepartmentStaffCountDto?>> IDepartmentReadRepository.GetStaffCountAsync(Guid departmentId, CancellationToken cancellationToken)
+    async Task<Result<DepartmentStaffCountDto>> IDepartmentReadRepository.GetStaffCountAsync(Guid departmentId, CancellationToken cancellationToken)
     {
         await Task.Delay(1, cancellationToken);
         var department = _departments.FirstOrDefault(d => d.Id == departmentId);
         if (department == null)
-            return Result<DepartmentStaffCountDto?>.Success((DepartmentStaffCountDto?)null);
+            return Result.Failure<DepartmentStaffCountDto>(new Error("Department.NotFound", $"Department with Id {departmentId} not found"));
 
         var staffCount = new DepartmentStaffCountDto
         {
@@ -419,7 +419,7 @@ public class MockReadModelRepository : IAcademicReadRepository, IDepartmentReadR
             LecturerCount = _academics.Count(a => a.DepartmentId == department.Id && a.Rank == "Lecturer"),
             TotalStaffCount = _academics.Count(a => a.DepartmentId == department.Id)
         };
-        return Result<DepartmentStaffCountDto?>.Success((DepartmentStaffCountDto?)staffCount);
+        return Result.Success(staffCount);
     }
 
     async Task<Result<List<DepartmentStaffCountDto>>> IDepartmentReadRepository.GetAllStaffCountsAsync(CancellationToken cancellationToken)
@@ -478,18 +478,18 @@ public class MockReadModelRepository : IAcademicReadRepository, IDepartmentReadR
     }
 
     // IRoomReadRepository implementation - explicit interface implementation
-    async Task<Result<RoomDto?>> IRoomReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    async Task<Result<RoomDto>> IRoomReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         await Task.Delay(1, cancellationToken);
         var room = _rooms.FirstOrDefault(r => r.Id == id);
-        return Result<RoomDto?>.Success(room);
+        return room != null ? Result.Success(room) : Result.Failure<RoomDto>(new Error("Room.NotFound", $"Room with Id {id} not found"));
     }
 
-    async Task<Result<RoomDto?>> IRoomReadRepository.GetByRoomNumberAsync(string roomNumber, CancellationToken cancellationToken)
+    async Task<Result<RoomDto>> IRoomReadRepository.GetByRoomNumberAsync(string roomNumber, CancellationToken cancellationToken)
     {
         await Task.Delay(1, cancellationToken);
         var room = _rooms.FirstOrDefault(r => r.RoomNumber.Equals(roomNumber, StringComparison.OrdinalIgnoreCase));
-        return Result<RoomDto?>.Success(room);
+        return room != null ? Result.Success(room) : Result.Failure<RoomDto>(new Error("Room.NotFound", $"Room with Number {roomNumber} not found"));
     }
 
     async Task<Result<PagedResult<RoomDto>>> IRoomReadRepository.GetAllAsync(int pageNumber, int pageSize, string? roomNumberFilter, bool? isOccupiedFilter, CancellationToken cancellationToken)
@@ -576,18 +576,18 @@ public class MockReadModelRepository : IAcademicReadRepository, IDepartmentReadR
     }
 
     // IExtensionReadRepository implementation - explicit interface implementation
-    async Task<Result<ExtensionDto?>> IExtensionReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    async Task<Result<ExtensionDto>> IExtensionReadRepository.GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         await Task.Delay(1, cancellationToken);
         var extension = _extensions.FirstOrDefault(e => e.Id == id);
-        return Result<ExtensionDto?>.Success(extension);
+        return extension != null ? Result.Success(extension) : Result.Failure<ExtensionDto>(new Error("Extension.NotFound", $"Extension with Id {id} not found"));
     }
 
-    async Task<Result<ExtensionDto?>> IExtensionReadRepository.GetByExtensionNumberAsync(string extensionNumber, CancellationToken cancellationToken)
+    async Task<Result<ExtensionDto>> IExtensionReadRepository.GetByExtensionNumberAsync(string extensionNumber, CancellationToken cancellationToken)
     {
         await Task.Delay(1, cancellationToken);
         var extension = _extensions.FirstOrDefault(e => e.ExtensionNumber.Equals(extensionNumber, StringComparison.OrdinalIgnoreCase));
-        return Result<ExtensionDto?>.Success(extension);
+        return extension != null ? Result.Success(extension) : Result.Failure<ExtensionDto>(new Error("Extension.NotFound", $"Extension with Number {extensionNumber} not found"));
     }
 
     async Task<Result<PagedResult<ExtensionDto>>> IExtensionReadRepository.GetAllAsync(int pageNumber, int pageSize, string? extensionFilter, string? locationFilter, bool? isInUseFilter, CancellationToken cancellationToken)

@@ -18,29 +18,29 @@ public class AcademicRepository : IAcademicRepository
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task<Result<Guid>> AddAsync(Academic academic, CancellationToken cancellationToken = default)
+    public Task<Result<Guid>> AddAsync(Academic academic, CancellationToken cancellationToken = default)
     {
         try
         {
             _context.Academics.Add(academic);
-            return Result<Guid>.Success(academic.Id);
+            return Task.FromResult(Result<Guid>.Success(academic.Id));
         }
         catch (Exception ex)
         {
-            return Result.Failure<Guid>(new Error("Academic.AddFailed", ex.Message));
+            return Task.FromResult(Result.Failure<Guid>(new Error("Academic.AddFailed", ex.Message)));
         }
     }
 
-    public async Task<Result> UpdateAsync(Academic academic, CancellationToken cancellationToken = default)
+    public Task<Result> UpdateAsync(Academic academic, CancellationToken cancellationToken = default)
     {
         try
         {
             _context.Academics.Update(academic);
-            return Result.Success();
+            return Task.FromResult(Result.Success());
         }
         catch (Exception ex)
         {
-            return Result.Failure<Guid>(new Error("Academic.Error", new Error("Academic.UpdateFailed", ex.Message)));
+            return Task.FromResult(Result.Failure(new Error("Academic.UpdateFailed", ex.Message)));
         }
     }
 
