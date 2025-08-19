@@ -154,7 +154,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: 5232b409-b25e-441c-9951-16e69069f224
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         env:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
@@ -202,7 +202,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: 5232b409-b25e-441c-9951-16e69069f224
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         env:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
@@ -250,7 +250,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: 5232b409-b25e-441c-9951-16e69069f224
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         env:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
@@ -366,7 +366,7 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: 5232b409-b25e-441c-9951-16e69069f224
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         env:
           AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
 
