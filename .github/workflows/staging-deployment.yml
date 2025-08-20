@@ -36,7 +36,7 @@ permissions:
 
 env:
   DOTNET_VERSION: "8.0.x"
-  AZURE_WEBAPP_NAME: app-academic-staging-2ymnmfmrvsb3w
+  AZURE_WEBAPP_NAME: app-academic-staging-dvjm4oxxoy2g6
   AZURE_RESOURCE_GROUP: rg-academic-staging-westus2
   WORKING_DIRECTORY: "."
 
@@ -182,12 +182,12 @@ jobs:
           # Initialize AZD environment to avoid interactive prompts
           echo "Initializing AZD environment: academic-staging"
           azd env new academic-staging --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }} --location westus2 || echo "Environment may already exist"
-          
+
           # Set environment variables
           azd env set AZURE_ENV_NAME academic-staging
           azd env set AZURE_LOCATION westus2
           azd env set AZURE_SUBSCRIPTION_ID ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          
+
           # Login to AZD
           azd auth login --client-id ${{ secrets.AZURE_CLIENT_ID }} \
             --client-secret ${{ secrets.AZURE_CLIENT_SECRET }} \
