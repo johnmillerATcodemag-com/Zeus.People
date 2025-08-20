@@ -30,16 +30,16 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Check if SQL Database features are enabled (check both formats for compatibility)
-        var sqlDatabaseConfig = configuration["Features:EnableSqlDatabase"] ?? configuration["Features__EnableSqlDatabase"];
-        var eventStoreConfig = configuration["Features:EnableEventStore"] ?? configuration["Features__EnableEventStore"];
+        // Check if SQL Database features are enabled (explicit string checking for debugging)
+        var sqlDatabaseConfigValue = configuration["Features:EnableSqlDatabase"] ?? configuration["Features__EnableSqlDatabase"] ?? "true";
+        var eventStoreConfigValue = configuration["Features:EnableEventStore"] ?? configuration["Features__EnableEventStore"] ?? "true";
         
-        var enableSqlDatabase = bool.TryParse(sqlDatabaseConfig, out var sqlEnabled) ? sqlEnabled : true;
-        var enableEventStore = bool.TryParse(eventStoreConfig, out var eventStoreEnabled) ? eventStoreEnabled : true;
+        var enableSqlDatabase = !string.Equals(sqlDatabaseConfigValue, "false", StringComparison.OrdinalIgnoreCase);
+        var enableEventStore = !string.Equals(eventStoreConfigValue, "false", StringComparison.OrdinalIgnoreCase);
 
         // Debug logging for feature flag evaluation (will appear in app logs)
-        Console.WriteLine($"DEBUG: Features:EnableSqlDatabase config value: '{sqlDatabaseConfig}' -> parsed as: {enableSqlDatabase}");
-        Console.WriteLine($"DEBUG: Features:EnableEventStore config value: '{eventStoreConfig}' -> parsed as: {enableEventStore}");
+        Console.WriteLine($"DEBUG: Features:EnableSqlDatabase config value: '{sqlDatabaseConfigValue}' -> parsed as: {enableSqlDatabase}");
+        Console.WriteLine($"DEBUG: Features:EnableEventStore config value: '{eventStoreConfigValue}' -> parsed as: {enableEventStore}");
 
         // Only add Entity Framework if SQL Database is enabled (feature flag takes priority)
         if (enableSqlDatabase)
