@@ -1,12 +1,14 @@
 # Zeus.People API Endpoint Testing Guide
 
 ## API Base URLs
+
 - HTTPS: https://localhost:7001
 - HTTP: http://localhost:5001
 
 ## Testing Instructions
 
 ### 1. Health Check Endpoint ✅
+
 ```bash
 # Test health endpoint
 curl -k https://localhost:7001/health
@@ -15,6 +17,7 @@ curl -k https://localhost:7001/health
 ```
 
 ### 2. Swagger UI ✅
+
 ```bash
 # Access Swagger UI
 # Browser: https://localhost:7001/swagger/index.html
@@ -24,18 +27,21 @@ curl -k https://localhost:7001/health
 ### 3. Academics Controller Endpoints
 
 #### Get All Academics
+
 ```bash
 # GET /api/academics (with pagination)
 curl -k "https://localhost:7001/api/academics?pageNumber=1&pageSize=10"
 ```
 
 #### Get Academic by ID
+
 ```bash
 # GET /api/academics/{id}
 curl -k "https://localhost:7001/api/academics/00000000-0000-0000-0000-000000000001"
 ```
 
 #### Create Academic (Invalid Input Test)
+
 ```bash
 # POST /api/academics (Test error handling)
 curl -k -X POST "https://localhost:7001/api/academics" \
@@ -48,6 +54,7 @@ curl -k -X POST "https://localhost:7001/api/academics" \
 ```
 
 #### Create Academic (Valid Input)
+
 ```bash
 # POST /api/academics (Valid request)
 curl -k -X POST "https://localhost:7001/api/academics" \
@@ -62,12 +69,14 @@ curl -k -X POST "https://localhost:7001/api/academics" \
 ### 4. Departments Controller Endpoints
 
 #### Get All Departments
+
 ```bash
 # GET /api/departments
 curl -k "https://localhost:7001/api/departments?pageNumber=1&pageSize=10"
 ```
 
 #### Create Department
+
 ```bash
 # POST /api/departments
 curl -k -X POST "https://localhost:7001/api/departments" \
@@ -81,6 +90,7 @@ curl -k -X POST "https://localhost:7001/api/departments" \
 ### 5. Rooms Controller Endpoints
 
 #### Get All Rooms
+
 ```bash
 # GET /api/rooms
 curl -k "https://localhost:7001/api/rooms"
@@ -89,6 +99,7 @@ curl -k "https://localhost:7001/api/rooms"
 ### 6. Extensions Controller Endpoints
 
 #### Get All Extensions (May require authentication)
+
 ```bash
 # GET /api/extensions
 curl -k "https://localhost:7001/api/extensions"
@@ -97,12 +108,14 @@ curl -k "https://localhost:7001/api/extensions"
 ### 7. Reports Controller Endpoints
 
 #### Get Academic Stats
+
 ```bash
 # GET /api/reports/academics/stats
 curl -k "https://localhost:7001/api/reports/academics/stats"
 ```
 
 #### Get Dashboard Data
+
 ```bash
 # GET /api/reports/dashboard
 curl -k "https://localhost:7001/api/reports/dashboard"
@@ -111,6 +124,7 @@ curl -k "https://localhost:7001/api/reports/dashboard"
 ## Error Testing Scenarios
 
 ### 1. Invalid JSON Format
+
 ```bash
 curl -k -X POST "https://localhost:7001/api/academics" \
   -H "Content-Type: application/json" \
@@ -118,6 +132,7 @@ curl -k -X POST "https://localhost:7001/api/academics" \
 ```
 
 ### 2. Missing Required Fields
+
 ```bash
 curl -k -X POST "https://localhost:7001/api/academics" \
   -H "Content-Type: application/json" \
@@ -125,6 +140,7 @@ curl -k -X POST "https://localhost:7001/api/academics" \
 ```
 
 ### 3. Invalid Data Types
+
 ```bash
 curl -k -X POST "https://localhost:7001/api/academics" \
   -H "Content-Type: application/json" \
@@ -138,17 +154,20 @@ curl -k -X POST "https://localhost:7001/api/academics" \
 ## Authentication Testing
 
 ### Endpoints that may require authentication:
+
 - GET /api/extensions (Based on test logs showing 401)
-- GET /api/rooms (Based on test logs showing 401) 
+- GET /api/rooms (Based on test logs showing 401)
 - GET /api/reports/dashboard (Based on test logs showing 401)
 
 ### Test without authentication:
+
 ```bash
 curl -k "https://localhost:7001/api/extensions"
 # Expected: 401 Unauthorized
 ```
 
 ### Test with JWT token (if available):
+
 ```bash
 # First get a token (implementation specific)
 # Then test with Authorization header:
@@ -189,8 +208,9 @@ try {
 ## Expected Test Results
 
 ### ✅ Working Endpoints (Based on test execution):
+
 - `/health` - Health checks (some may be unhealthy due to missing services)
-- `/api/academics` - CRUD operations  
+- `/api/academics` - CRUD operations
 - `/api/departments` - Department management
 - `/api/rooms` - Room listings (may require auth)
 - `/api/extensions` - Extensions (may require auth)
@@ -198,10 +218,12 @@ try {
 - `/api/reports/dashboard` - Dashboard data (may require auth)
 
 ### 🔐 Authentication Required:
+
 - Some endpoints return 401 Unauthorized without proper JWT token
 - Test environment uses basic JWT authentication configuration
 
 ### 📋 Features Validated:
+
 - RESTful endpoints with proper HTTP verbs
 - Pagination support (pageNumber, pageSize parameters)
 - Input validation and error handling
