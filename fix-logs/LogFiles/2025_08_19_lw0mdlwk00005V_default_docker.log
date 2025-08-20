@@ -1,0 +1,72 @@
+2025-08-19T23:46:51.7520906Z    _____                               
+2025-08-19T23:46:51.7526558Z   /  _  \ __________ _________   ____  
+2025-08-19T23:46:51.7527028Z  /  /_\  \\___   /  |  \_  __ \_/ __ \ 
+2025-08-19T23:46:51.7527186Z /    |    \/    /|  |  /|  | \/\  ___/ 
+2025-08-19T23:46:51.7527282Z \____|__  /_____ \____/ |__|    \___  >
+2025-08-19T23:46:51.7527356Z         \/      \/                  \/ 
+2025-08-19T23:46:51.7527414Z A P P   S E R V I C E   O N   L I N U X
+2025-08-19T23:46:51.7527454Z 
+2025-08-19T23:46:51.7527551Z Documentation: http://aka.ms/webapp-linux
+2025-08-19T23:46:51.7527646Z Dotnet quickstart: https://aka.ms/dotnet-qs
+2025-08-19T23:46:51.7527719Z ASP .NETCore Version: 8.0.18
+2025-08-19T23:46:51.7527778Z Note: Any data outside '/home' is not persisted
+2025-08-19T23:46:55.1103607Z Starting OpenBSD Secure Shell server: sshd.
+2025-08-19T23:46:55.1203464Z WEBSITES_INCLUDE_CLOUD_CERTS is not set to true.
+2025-08-19T23:46:55.1510767Z Updating certificates in /etc/ssl/certs...
+2025-08-19T23:47:03.7437221Z rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+2025-08-19T23:47:03.7864946Z 4 added, 0 removed; done.
+2025-08-19T23:47:03.7865811Z Running hooks in /etc/ca-certificates/update.d...
+2025-08-19T23:47:03.7895969Z done.
+2025-08-19T23:47:03.8286974Z CA certificates copied and updated successfully.
+2025-08-19T23:47:04.1125617Z Starting periodic command scheduler: cron.
+2025-08-19T23:47:04.1253245Z Running oryx create-script -appPath /home/site/wwwroot -output /opt/startup/startup.sh -defaultAppFilePath /defaulthome/hostingstart/hostingstart.dll     -bindPort 8080 -bindPort2 '' -userStartupCommand '' 
+2025-08-19T23:47:04.2053395Z Could not find build manifest file at '/home/site/wwwroot/oryx-manifest.toml'
+2025-08-19T23:47:04.2063316Z Could not find operation ID in manifest. Generating an operation id...
+2025-08-19T23:47:04.2074426Z Build Operation ID: 677e90aa-2526-4269-bfdc-e8a79181e7c1
+2025-08-19T23:47:04.3971402Z 
+2025-08-19T23:47:04.3972630Z Agent extension 
+2025-08-19T23:47:04.3972912Z Before if loop >> DotNet Runtime 
+2025-08-19T23:47:04.4419652Z DotNet Runtime 8.0WARNING: Unable to find the startup DLL name. Could not find any files with extension '.runtimeconfig.json'
+2025-08-19T23:47:04.4551408Z Writing output script to '/opt/startup/startup.sh'
+2025-08-19T23:47:04.5101883Z Trying to find the startup DLL name...
+2025-08-19T23:47:04.5103616Z Running the default app using command: dotnet "/defaulthome/hostingstart/hostingstart.dll"
+2025-08-19T23:47:05.8425555Z Hosting environment: Staging
+2025-08-19T23:47:05.8552173Z Content root path: /defaulthome/hostingstart/
+2025-08-19T23:47:05.8655025Z Now listening on: http://[::]:8080
+2025-08-19T23:47:05.8655479Z Application started. Press Ctrl+C to shut down.
+2025-08-19T23:47:54.7198419Z    _____                               
+2025-08-19T23:47:54.7200373Z   /  _  \ __________ _________   ____  
+2025-08-19T23:47:54.7200459Z  /  /_\  \\___   /  |  \_  __ \_/ __ \ 
+2025-08-19T23:47:54.7200496Z /    |    \/    /|  |  /|  | \/\  ___/ 
+2025-08-19T23:47:54.7200530Z \____|__  /_____ \____/ |__|    \___  >
+2025-08-19T23:47:54.7200592Z         \/      \/                  \/ 
+2025-08-19T23:47:54.7200696Z A P P   S E R V I C E   O N   L I N U X
+2025-08-19T23:47:54.7200728Z 
+2025-08-19T23:47:54.7200769Z Documentation: http://aka.ms/webapp-linux
+2025-08-19T23:47:54.7200807Z Dotnet quickstart: https://aka.ms/dotnet-qs
+2025-08-19T23:47:54.7200839Z ASP .NETCore Version: 8.0.18
+2025-08-19T23:47:54.7200872Z Note: Any data outside '/home' is not persisted
+2025-08-19T23:47:57.2237119Z Starting OpenBSD Secure Shell server: sshd.
+2025-08-19T23:47:57.2396787Z WEBSITES_INCLUDE_CLOUD_CERTS is not set to true.
+2025-08-19T23:47:57.2706832Z Updating certificates in /etc/ssl/certs...
+2025-08-19T23:48:06.3567486Z rehash: warning: skipping ca-certificates.crt,it does not contain exactly one certificate or CRL
+2025-08-19T23:48:06.4383760Z 4 added, 0 removed; done.
+2025-08-19T23:48:06.4384355Z Running hooks in /etc/ca-certificates/update.d...
+2025-08-19T23:48:06.4734615Z done.
+2025-08-19T23:48:06.5094436Z CA certificates copied and updated successfully.
+2025-08-19T23:48:07.7238167Z Starting periodic command scheduler: cron.
+2025-08-19T23:48:07.7238781Z Running oryx create-script -appPath /home/site/wwwroot -output /opt/startup/startup.sh -defaultAppFilePath /defaulthome/hostingstart/hostingstart.dll     -bindPort 8080 -bindPort2 '' -userStartupCommand '' 
+2025-08-19T23:48:07.7238837Z Could not find build manifest file at '/home/site/wwwroot/oryx-manifest.toml'
+2025-08-19T23:48:07.7238872Z Could not find operation ID in manifest. Generating an operation id...
+2025-08-19T23:48:07.7238907Z Build Operation ID: 33351869-4f86-4de8-9c7e-8150578f9132
+2025-08-19T23:48:07.7238938Z 
+2025-08-19T23:48:07.7238976Z Agent extension 
+2025-08-19T23:48:07.7239035Z Before if loop >> DotNet Runtime 
+2025-08-19T23:48:07.7239073Z DotNet Runtime 8.0WARNING: Unable to find the startup DLL name. Could not find any files with extension '.runtimeconfig.json'
+2025-08-19T23:48:07.7239107Z Writing output script to '/opt/startup/startup.sh'
+2025-08-19T23:48:07.7239140Z Trying to find the startup DLL name...
+2025-08-19T23:48:07.7239174Z Running the default app using command: dotnet "/defaulthome/hostingstart/hostingstart.dll"
+2025-08-19T23:48:08.3071997Z Hosting environment: Staging
+2025-08-19T23:48:08.3094327Z Content root path: /defaulthome/hostingstart/
+2025-08-19T23:48:08.3160516Z Now listening on: http://[::]:8080
+2025-08-19T23:48:08.3162923Z Application started. Press Ctrl+C to shut down.

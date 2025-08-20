@@ -1,0 +1,42 @@
+2025-08-20T05:13:27.9474628Z Container start method called.
+2025-08-20T05:13:27.9810353Z Establishing network.
+2025-08-20T05:13:27.9816640Z Pulling image: appsvc/dotnetcore:8.0_20250709.6.tuxprod.
+2025-08-20T05:14:43.0487837Z Image appsvc/dotnetcore:8.0_20250709.6.tuxprod is pulled from registry 10.1.0.5:13209
+2025-08-20T05:14:43.0563509Z Container is starting.
+2025-08-20T05:14:43.0564733Z Establishing user namespace if not established already.
+2025-08-20T05:14:43.0654993Z Establishing network if not established already.
+2025-08-20T05:14:43.0703053Z Mounting volumes.
+2025-08-20T05:14:43.0709287Z Nested mountpoint 
+2025-08-20T05:14:43.0796605Z Nested mountpoint volatile/logs
+2025-08-20T05:14:43.0906019Z Nested mountpoint 
+2025-08-20T05:14:43.1958652Z Nested mountpoint 
+2025-08-20T05:14:43.2124763Z Nested mountpoint 
+2025-08-20T05:14:55.1256096Z Creating container.
+2025-08-20T05:14:55.1395024Z Creating pipes for streaming container io.
+2025-08-20T05:14:55.1396432Z Creating stdout named pipe at /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stdout_650a133f7b6d4dccabe044b867164cc1.
+2025-08-20T05:14:55.1398871Z Successfully created stdout named pipe at: /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stdout_650a133f7b6d4dccabe044b867164cc1.
+2025-08-20T05:14:55.1399795Z Opening named pipe /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stdout_650a133f7b6d4dccabe044b867164cc1 for reading in non-blocking mode.
+2025-08-20T05:14:55.1401037Z Successfully opened named pipe: /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stdout_650a133f7b6d4dccabe044b867164cc1.
+2025-08-20T05:14:55.1401906Z Successfully removed non-blocking flag from /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stdout_650a133f7b6d4dccabe044b867164cc1.
+2025-08-20T05:14:55.1402850Z Creating stderr named pipe at /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stderr_86448732556443059d12f2f18f254924.
+2025-08-20T05:14:55.1404282Z Successfully created stderr named pipe at: /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stderr_86448732556443059d12f2f18f254924.
+2025-08-20T05:14:55.1629481Z Opening named pipe /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stderr_86448732556443059d12f2f18f254924 for reading in non-blocking mode.
+2025-08-20T05:14:55.1642172Z Successfully opened named pipe: /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stderr_86448732556443059d12f2f18f254924.
+2025-08-20T05:14:55.1802343Z Successfully removed non-blocking flag from /podr/container/pipe/f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6/stderr_86448732556443059d12f2f18f254924.
+2025-08-20T05:14:55.1907208Z Creating container with image: appsvc/dotnetcore:8.0_20250709.6.tuxprod from registry: 10.1.0.5:13209 and fully qualified image name: 10.1.0.5:13209/appsvc/dotnetcore:8.0_20250709.6.tuxprod
+2025-08-20T05:14:56.4439451Z Starting container: f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6.
+2025-08-20T05:14:56.4926087Z Starting watchers and probes.
+2025-08-20T05:14:56.5009319Z Starting metrics collection.
+2025-08-20T05:14:56.5034290Z Container is running.
+2025-08-20T05:14:57.5437199Z Container start method finished after 89570 ms.
+2025-08-20T05:15:21.4026611Z Site startup probe succeeded after 23.8396541 seconds.
+2025-08-20T05:15:42.2238183Z Site is running with deployment version: 8de5139a-bc97-46f9-bf47-2a4e93bfe706
+2025-08-20T05:15:42.2249676Z Site started.
+2025-08-20T05:15:42.2829195Z Site is running with patch version: 8.0.18
+2025-08-20T06:31:35.6059736Z Container is terminating. Grace period: 5 seconds.
+2025-08-20T06:31:35.6644698Z Stop and delete container. Retry count = 0
+2025-08-20T06:31:35.6666641Z Stopping container: f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6.
+2025-08-20T06:31:40.9483810Z Deleting container: f2e9ce50874c_app-academic-staging-dvjm4oxxoy2g6. Retry count = 0
+2025-08-20T06:31:42.5745172Z Container spec TerminationMessagePolicy  path 
+2025-08-20T06:31:42.5912122Z Container is terminated. Total time elapsed: 6975 ms.
+2025-08-20T06:31:42.6003707Z Site: app-academic-staging-dvjm4oxxoy2g6 stopped.

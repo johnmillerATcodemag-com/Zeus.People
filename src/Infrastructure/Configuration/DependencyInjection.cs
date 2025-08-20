@@ -30,9 +30,9 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Check if SQL Database features are enabled
-        var enableSqlDatabase = bool.TryParse(configuration["Features:EnableSqlDatabase"], out var sqlEnabled) ? sqlEnabled : true;
-        var enableEventStore = bool.TryParse(configuration["Features:EnableEventStore"], out var eventStoreEnabled) ? eventStoreEnabled : true;
+        // Check if SQL Database features are enabled (check both formats for compatibility)
+        var enableSqlDatabase = bool.TryParse(configuration["Features:EnableSqlDatabase"] ?? configuration["Features__EnableSqlDatabase"], out var sqlEnabled) ? sqlEnabled : true;
+        var enableEventStore = bool.TryParse(configuration["Features:EnableEventStore"] ?? configuration["Features__EnableEventStore"], out var eventStoreEnabled) ? eventStoreEnabled : true;
 
         // Only add Entity Framework if SQL Database is enabled (feature flag takes priority)
         if (enableSqlDatabase)
