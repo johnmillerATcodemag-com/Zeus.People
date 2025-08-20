@@ -35,7 +35,7 @@ on:
 
 env:
   DOTNET_VERSION: "8.0.x"
-  AZURE_WEBAPP_NAME: "zeus-people-api"
+  AZURE_WEBAPP_NAME: "api"
   BUILD_CONFIGURATION: "Release"
   ENVIRONMENT_NAME: ${{ inputs.environment || 'staging' }}
 

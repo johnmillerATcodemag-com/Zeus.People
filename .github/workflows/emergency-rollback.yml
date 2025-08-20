@@ -39,7 +39,7 @@ on:
         default: false
 
 env:
-  AZURE_WEBAPP_NAME: "zeus-people-api"
+  AZURE_WEBAPP_NAME: "api"
 
 permissions:
   contents: read

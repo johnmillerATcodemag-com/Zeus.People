@@ -157,12 +157,12 @@ jobs:
           EOF
           fi
 
-          docker build -t zeus-people-api:latest .
+          docker build -t api:latest .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: "zeus-people-api:latest"
+          image-ref: "api:latest"
           format: "sarif"
           output: "trivy-results.sarif"
 

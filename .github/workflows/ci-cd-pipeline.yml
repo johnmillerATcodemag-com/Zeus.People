@@ -30,7 +30,7 @@ on:
 env:
   DOTNET_VERSION: "8.0.x"
   NODE_VERSION: "20.x"
-  AZURE_WEBAPP_NAME: "zeus-people-api"
+  AZURE_WEBAPP_NAME: "api"
   AZURE_WEBAPP_PACKAGE_PATH: "./publish"
   BUILD_CONFIGURATION: "Release"
 
@@ -329,7 +329,7 @@ jobs:
       - name: Deploy application
         id: deploy
         run: |
-          azd deploy zeus-people-api
+          azd deploy api
           WEBAPP_URL=$(azd env get-values | grep AZURE_APP_SERVICE_URL | cut -d'=' -f2)
           echo "webapp-url=$WEBAPP_URL" >> $GITHUB_OUTPUT
 
@@ -437,7 +437,7 @@ jobs:
 
           # Deploy to slot first (Blue-Green deployment)
           azd provision
-          azd deploy zeus-people-api --slot staging
+          azd deploy api --slot staging
 
           # Warm up staging slot
           sleep 60
