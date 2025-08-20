@@ -34,8 +34,8 @@ public static class DependencyInjection
         var enableSqlDatabase = bool.TryParse(configuration["Features:EnableSqlDatabase"], out var sqlEnabled) ? sqlEnabled : true;
         var enableEventStore = bool.TryParse(configuration["Features:EnableEventStore"], out var eventStoreEnabled) ? eventStoreEnabled : true;
 
-        // Only add Entity Framework if SQL Database is enabled and connection string exists
-        if (enableSqlDatabase && !string.IsNullOrEmpty(configuration.GetConnectionString("AcademicDatabase")))
+        // Only add Entity Framework if SQL Database is enabled (feature flag takes priority)
+        if (enableSqlDatabase)
         {
             services.AddDbContext<AcademicContext>(options =>
             {
@@ -56,8 +56,8 @@ public static class DependencyInjection
             });
         }
 
-        // Only add Event Store if enabled and connection string exists
-        if (enableEventStore && !string.IsNullOrEmpty(configuration.GetConnectionString("EventStoreDatabase")))
+        // Only add Event Store if enabled (feature flag takes priority)
+        if (enableEventStore)
         {
             services.AddDbContext<EventStoreContext>(options =>
             {
@@ -226,13 +226,13 @@ public static class DependencyInjection
         // Add health checks (conditionally based on available services)
         var healthChecksBuilder = services.AddHealthChecks();
 
-        // Only add SQL-based health checks if SQL services are enabled
-        if (enableSqlDatabase && !string.IsNullOrEmpty(configuration.GetConnectionString("AcademicDatabase")))
+        // Only add SQL-based health checks if SQL services are enabled (feature flag takes priority)
+        if (enableSqlDatabase)
         {
             healthChecksBuilder.AddCheck<DatabaseHealthCheck>("database", tags: new[] { "database", "sql" });
         }
 
-        if (enableEventStore && !string.IsNullOrEmpty(configuration.GetConnectionString("EventStoreDatabase")))
+        if (enableEventStore)
         {
             healthChecksBuilder.AddCheck<EventStoreHealthCheck>("eventstore", tags: new[] { "eventstore", "sql" });
         }
