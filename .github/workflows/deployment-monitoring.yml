@@ -1,0 +1,363 @@
+name: Deployment Monitoring
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to monitor'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      duration:
+        description: 'Monitoring duration (minutes)'
+        required: true
+        default: '30'
+      alert_threshold:
+        description: 'Alert threshold (milliseconds)'
+        required: true
+        default: '5000'
+  
+  # Auto-trigger after successful deployments
+  workflow_run:
+    workflows: ["Staging Deployment", "Production Deployment"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  deployment-monitoring:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    
+    environment: 
+      name: ${{ github.event.inputs.environment || 'staging' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup PowerShell
+      shell: pwsh
+      run: |
+        Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+        
+    - name: Azure CLI Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+        
+    - name: Determine Monitoring Parameters
+      id: params
+      shell: pwsh
+      run: |
+        # Determine environment from workflow trigger
+        if ("${{ github.event_name }}" -eq "workflow_run") {
+            $workflowName = "${{ github.event.workflow_run.name }}"
+            if ($workflowName -match "Staging") {
+                $environment = "staging"
+                Write-Host "Auto-monitoring triggered for staging deployment"
+            } elseif ($workflowName -match "Production") {
+                $environment = "production"  
+                Write-Host "Auto-monitoring triggered for production deployment"
+            } else {
+                $environment = "staging"
+                Write-Host "Default to staging environment"
+            }
+            $duration = "30"
+            $alertThreshold = "5000"
+        } else {
+            $environment = "${{ github.event.inputs.environment }}"
+            $duration = "${{ github.event.inputs.duration }}"
+            $alertThreshold = "${{ github.event.inputs.alert_threshold }}"
+            Write-Host "Manual monitoring triggered"
+        }
+        
+        echo "environment=$environment" >> $env:GITHUB_OUTPUT
+        echo "duration=$duration" >> $env:GITHUB_OUTPUT
+        echo "alert_threshold=$alertThreshold" >> $env:GITHUB_OUTPUT
+        
+        Write-Host "Monitoring Configuration:"
+        Write-Host "Environment: $environment"
+        Write-Host "Duration: $duration minutes"
+        Write-Host "Alert Threshold: $alertThreshold ms"
+        
+    - name: Pre-Deployment Health Check
+      id: pre_health
+      shell: pwsh
+      run: |
+        $env_name = "${{ steps.params.outputs.environment }}"
+        $app_name = if ($env_name -eq "staging") { "app-academic-staging-dvjm4oxxoy2g6" } else { "app-academic-production" }
+        
+        Write-Host "Performing pre-monitoring health check..."
+        
+        try {
+            $health = Invoke-RestMethod -Uri "https://$app_name.azurewebsites.net/health" -Method Get -TimeoutSec 30
+            Write-Host "✅ Application is reachable"
+            Write-Host "Status: $($health.status)"
+            
+            # Check all services
+            $allHealthy = $true
+            foreach ($service in $health.results.PSObject.Properties) {
+                $status = $service.Value.status
+                $emoji = if ($status -eq "Healthy") { "✅" } else { "❌"; $allHealthy = $false }
+                Write-Host "$emoji $($service.Name): $status"
+            }
+            
+            if ($allHealthy -and $health.status -eq "Healthy") {
+                echo "baseline_health=healthy" >> $env:GITHUB_OUTPUT
+                Write-Host "✅ All systems healthy - monitoring can proceed"
+            } else {
+                echo "baseline_health=degraded" >> $env:GITHUB_OUTPUT
+                Write-Host "⚠️ Some systems degraded - monitoring will track improvements"
+            }
+            
+        } catch {
+            echo "baseline_health=unavailable" >> $env:GITHUB_OUTPUT
+            Write-Host "❌ Application is not reachable: $($_.Exception.Message)"
+            throw "Application is not available for monitoring"
+        }
+        
+    - name: Execute Deployment Monitoring
+      id: monitoring
+      shell: pwsh
+      run: |
+        $environment = "${{ steps.params.outputs.environment }}"
+        $duration = [int]"${{ steps.params.outputs.duration }}"
+        $alertThreshold = [int]"${{ steps.params.outputs.alert_threshold }}"
+        
+        Write-Host "=== Starting Deployment Monitoring ==="
+        Write-Host "Environment: $environment"
+        Write-Host "Duration: $duration minutes"  
+        Write-Host "Alert Threshold: $alertThreshold ms"
+        Write-Host "Baseline Health: ${{ steps.pre_health.outputs.baseline_health }}"
+        Write-Host ""
+        
+        # Execute monitoring script
+        try {
+            & "./scripts/monitor-deployment.ps1" -Environment $environment -MonitoringDuration $duration -AlertThreshold $alertThreshold
+            $exitCode = $LASTEXITCODE
+            
+            if ($exitCode -eq 0) {
+                echo "monitoring_result=success" >> $env:GITHUB_OUTPUT
+                echo "monitoring_status=healthy" >> $env:GITHUB_OUTPUT
+                Write-Host "✅ Monitoring completed successfully - no issues detected"
+            } elseif ($exitCode -eq 2) {
+                echo "monitoring_result=warning" >> $env:GITHUB_OUTPUT  
+                echo "monitoring_status=degraded" >> $env:GITHUB_OUTPUT
+                Write-Host "⚠️ Monitoring completed with warnings - review recommended"
+            } else {
+                echo "monitoring_result=failure" >> $env:GITHUB_OUTPUT
+                echo "monitoring_status=critical" >> $env:GITHUB_OUTPUT
+                Write-Host "❌ Monitoring detected critical issues - immediate attention required"
+            }
+            
+        } catch {
+            echo "monitoring_result=error" >> $env:GITHUB_OUTPUT
+            echo "monitoring_status=error" >> $env:GITHUB_OUTPUT
+            Write-Host "❌ Monitoring script execution failed: $($_.Exception.Message)"
+            throw
+        }
+        
+    - name: Analyze Monitoring Results
+      shell: pwsh
+      run: |
+        Write-Host "=== Monitoring Results Analysis ==="
+        
+        $environment = "${{ steps.params.outputs.environment }}"
+        $monitoringResult = "${{ steps.monitoring.outputs.monitoring_result }}"
+        $monitoringStatus = "${{ steps.monitoring.outputs.monitoring_status }}"
+        $baselineHealth = "${{ steps.pre_health.outputs.baseline_health }}"
+        
+        Write-Host "Environment: $environment"
+        Write-Host "Baseline Health: $baselineHealth"
+        Write-Host "Monitoring Result: $monitoringResult"
+        Write-Host "Final Status: $monitoringStatus"
+        Write-Host ""
+        
+        # Load and analyze monitoring report if available
+        $reportFiles = Get-ChildItem -Path "." -Filter "monitoring-report-*.json"
+        if ($reportFiles) {
+            $latestReport = $reportFiles | Sort-Object LastWriteTime | Select-Object -Last 1
+            $report = Get-Content $latestReport.FullName | ConvertFrom-Json
+            
+            Write-Host "=== Detailed Analysis ==="
+            Write-Host "Monitoring Duration: $([math]::Round($report.monitoringPeriod.duration, 2)) minutes"
+            Write-Host "Health Checks Performed: $($report.summary.healthChecks)"
+            Write-Host "Performance Metrics Collected: $($report.summary.performanceMetrics)" 
+            Write-Host "Alerts Generated: $($report.summary.alerts)"
+            Write-Host "Average Response Time: $($report.healthStatus.avgResponseTime)ms"
+            Write-Host ""
+            
+            if ($report.alerts.Count -gt 0) {
+                Write-Host "=== Alerts Summary ==="
+                $criticalAlerts = ($report.alerts | Where-Object {$_.severity -eq "Critical"}).Count
+                $warningAlerts = ($report.alerts | Where-Object {$_.severity -eq "Warning"}).Count
+                $errorAlerts = ($report.alerts | Where-Object {$_.severity -eq "Error"}).Count
+                
+                Write-Host "Critical: $criticalAlerts"
+                Write-Host "Warnings: $warningAlerts"  
+                Write-Host "Errors: $errorAlerts"
+                Write-Host ""
+                
+                Write-Host "Alert Details:"
+                foreach ($alert in $report.alerts) {
+                    Write-Host "[$($alert.timestamp)] [$($alert.severity)] $($alert.type): $($alert.message)"
+                }
+                Write-Host ""
+            }
+            
+            Write-Host "=== Recommendations ==="
+            foreach ($recommendation in $report.recommendations) {
+                Write-Host "• $recommendation"
+            }
+        }
+        
+    - name: Post-Monitoring Health Validation
+      shell: pwsh
+      run: |
+        $env_name = "${{ steps.params.outputs.environment }}"
+        $app_name = if ($env_name -eq "staging") { "app-academic-staging-dvjm4oxxoy2g6" } else { "app-academic-production" }
+        
+        Write-Host "=== Post-Monitoring Health Validation ==="
+        
+        try {
+            $health = Invoke-RestMethod -Uri "https://$app_name.azurewebsites.net/health" -Method Get -TimeoutSec 30
+            
+            Write-Host "Overall Status: $($health.status)"
+            Write-Host "Timestamp: $($health.timestamp)"
+            Write-Host ""
+            
+            $healthySvcs = 0
+            $totalSvcs = 0
+            
+            foreach ($service in $health.results.PSObject.Properties) {
+                $totalSvcs++
+                $status = $service.Value.status
+                if ($status -eq "Healthy") { $healthySvcs++ }
+                
+                $emoji = if ($status -eq "Healthy") { "✅" } else { "❌" }
+                Write-Host "$emoji $($service.Name): $status"
+            }
+            
+            $healthPercentage = [math]::Round(($healthySvcs / $totalSvcs) * 100, 1)
+            Write-Host ""
+            Write-Host "Service Health: $healthySvcs/$totalSvcs ($healthPercentage%)"
+            
+            if ($health.status -eq "Healthy" -and $healthPercentage -eq 100) {
+                Write-Host "🎉 POST-MONITORING VALIDATION: PASSED"
+                Write-Host "All systems remain healthy after monitoring period"
+            } elseif ($healthPercentage -ge 80) {
+                Write-Host "⚠️ POST-MONITORING VALIDATION: DEGRADED"
+                Write-Host "Most systems healthy but some issues detected"
+            } else {
+                Write-Host "❌ POST-MONITORING VALIDATION: FAILED"
+                Write-Host "Significant health issues detected"
+                exit 1
+            }
+            
+        } catch {
+            Write-Host "❌ POST-MONITORING VALIDATION: ERROR"
+            Write-Host "Cannot reach application for final health check: $($_.Exception.Message)"
+            exit 1
+        }
+        
+    - name: Upload Monitoring Artifacts
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-monitoring-${{ steps.params.outputs.environment }}-${{ github.run_number }}
+        path: |
+          monitoring-report-*.json
+          deployment-monitoring-*.json
+          app-logs-*.zip
+        retention-days: 30
+        
+    - name: Generate Monitoring Summary
+      if: always()
+      shell: pwsh
+      run: |
+        $environment = "${{ steps.params.outputs.environment }}"
+        $duration = "${{ steps.params.outputs.duration }}"
+        $result = "${{ steps.monitoring.outputs.monitoring_result || 'unknown' }}"
+        $status = "${{ steps.monitoring.outputs.monitoring_status || 'unknown' }}"
+        
+        Write-Host "=== Deployment Monitoring Summary ==="
+        Write-Host ""
+        Write-Host "🎯 **Environment:** $environment"
+        Write-Host "⏱️ **Duration:** $duration minutes"
+        Write-Host "📊 **Result:** $result"
+        Write-Host "🔍 **Status:** $status"
+        Write-Host "🔗 **Run ID:** ${{ github.run_id }}"
+        Write-Host ""
+        
+        switch ($result) {
+            "success" {
+                Write-Host "✅ **MONITORING SUCCESSFUL**"
+                Write-Host "No issues detected during monitoring period"
+                Write-Host "Application is performing optimally"
+            }
+            "warning" {
+                Write-Host "⚠️ **MONITORING COMPLETED WITH WARNINGS**"
+                Write-Host "Some performance or reliability issues detected"
+                Write-Host "Review monitoring artifacts for details"
+            }
+            "failure" {
+                Write-Host "❌ **MONITORING DETECTED CRITICAL ISSUES**"
+                Write-Host "Immediate attention required"
+                Write-Host "Review alerts and consider rollback if necessary"
+            }
+            default {
+                Write-Host "❓ **MONITORING STATUS UNKNOWN**"
+                Write-Host "Review monitoring logs for details"
+            }
+        }
+        
+        Write-Host ""
+        Write-Host "📋 **Next Steps:**"
+        if ($result -eq "success") {
+            Write-Host "• Continue with normal operations"
+            Write-Host "• Archive monitoring reports"
+        } elseif ($result -eq "warning") {
+            Write-Host "• Review performance metrics"
+            Write-Host "• Consider optimization improvements"
+            Write-Host "• Monitor closely in next deployment"
+        } else {
+            Write-Host "• Review all alerts immediately"
+            Write-Host "• Consider triggering rollback procedures"
+            Write-Host "• Investigate root cause"
+        }
+        
+  notify-monitoring-complete:
+    needs: deployment-monitoring
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Notify Monitoring Status
+      shell: pwsh
+      run: |
+        $status = "${{ needs.deployment-monitoring.result }}"
+        
+        Write-Host "=== Monitoring Notification ==="
+        Write-Host "Status: $status"
+        Write-Host "Workflow: ${{ github.run_id }}"
+        
+        if ($status -eq "success") {
+            Write-Host "✅ Deployment monitoring completed successfully"
+            Write-Host "Application is healthy and performing well"
+        } else {
+            Write-Host "⚠️ Deployment monitoring completed with issues"
+            Write-Host "Review monitoring results and take appropriate action"
+        }
+        
+        # In a real environment, this would send notifications to:
+        # - Slack/Teams channels
+        # - Email distribution lists  
+        # - PagerDuty/incident management systems
+        # - Dashboard systems
