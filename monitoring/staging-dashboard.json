@@ -1,0 +1,86 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "variables": {},
+  "resources": [
+    {
+      "type": "Microsoft.Portal/dashboards",
+      "apiVersion": "2015-08-01-preview",
+      "name": "Zeus-People-Staging-Dashboard",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "hidden-title": "Zeus.People Staging Environment Dashboard"
+      },
+      "properties": {
+        "lenses": {
+          "0": {
+            "order": 0,
+            "parts": {
+              "0": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "queryParams",
+                      "value": {
+                        "metricName": "Requests",
+                        "resourceType": "microsoft.web/sites",
+                        "resourceName": "app-academic-staging-dvjm4oxxoy2g6",
+                        "resourceGroup": "rg-academic-staging-westus2",
+                        "timespan": "PT1H"
+                      }
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/MetricsChartPart",
+                  "settings": {}
+                }
+              },
+              "1": {
+                "position": {
+                  "x": 6,
+                  "y": 0,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "queryParams",
+                      "value": {
+                        "metricName": "ResponseTime",
+                        "resourceType": "microsoft.web/sites",
+                        "resourceName": "app-academic-staging-dvjm4oxxoy2g6",
+                        "resourceGroup": "rg-academic-staging-westus2",
+                        "timespan": "PT1H"
+                      }
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/MetricsChartPart"
+                }
+              }
+            }
+          }
+        },
+        "metadata": {
+          "model": {
+            "timeRange": {
+              "value": {
+                "relative": {
+                  "duration": 24,
+                  "timeUnit": 1
+                }
+              },
+              "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+            }
+          }
+        }
+      }
+    }
+  ]
+}
