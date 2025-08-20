@@ -118,9 +118,7 @@ resource serviceBusAuthRule 'Microsoft.ServiceBus/namespaces/authorizationRules@
   }
 }
 
-// RBAC assignments for the managed identity - TEMPORARILY DISABLED due to permission restrictions
-// TODO: Re-enable once service principal has User Access Administrator role
-/*
+// RBAC assignments for the managed identity
 // Service Bus Data Sender role
 resource serviceBusDataSenderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(serviceBusNamespace.id, managedIdentityPrincipalId, '69a216fc-b8fb-44d8-bc22-1f3c2cd27a39')
@@ -148,7 +146,6 @@ resource serviceBusDataReceiverRole 'Microsoft.Authorization/roleAssignments@202
     principalType: 'ServicePrincipal'
   }
 }
-*/
 
 // Diagnostic settings
 resource serviceBusDiagnostics 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
