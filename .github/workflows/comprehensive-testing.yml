@@ -351,6 +351,45 @@ jobs:
             security-analysis.txt
           retention-days: 30
 
+  # E2E Tests (runs against deployed staging environment)
+  e2e-tests:
+    name: End-to-End Tests
+    runs-on: ubuntu-latest
+    if: ${{ inputs.test_type == 'all' || inputs.test_type == 'e2e' || inputs.test_type == '' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore tests/Zeus.People.Tests.E2E/Zeus.People.Tests.E2E.csproj
+
+      - name: Build E2E Tests
+        run: dotnet build tests/Zeus.People.Tests.E2E/Zeus.People.Tests.E2E.csproj --configuration Release --no-restore
+
+      - name: Run E2E Tests
+        run: |
+          dotnet test tests/Zeus.People.Tests.E2E/Zeus.People.Tests.E2E.csproj \
+            --configuration Release \
+            --no-build \
+            --logger trx \
+            --logger "console;verbosity=detailed" \
+            --results-directory ${{ env.TEST_RESULTS_PATH }}/e2e \
+            --filter "Category=E2E"
+
+      - name: Upload E2E test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-test-results
+          path: ${{ env.TEST_RESULTS_PATH }}/e2e
+          retention-days: 30
+
   # Test Results Consolidation
   consolidate-results:
     name: Consolidate Test Results
@@ -362,6 +401,7 @@ jobs:
         api-tests,
         performance-tests,
         security-tests,
+        e2e-tests,
       ]
     if: always()
 
@@ -405,6 +445,7 @@ jobs:
           | API Tests | ${{ needs.api-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |
           | Performance Tests | ${{ needs.performance-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |
           | Security Tests | ${{ needs.security-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |
+          | E2E Tests | ${{ needs.e2e-tests.result == 'success' && '✅ PASSED' || '❌ FAILED' }} |
 
           ## Coverage Report
 
