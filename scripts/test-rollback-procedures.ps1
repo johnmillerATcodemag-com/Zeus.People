@@ -22,15 +22,15 @@
 #>
 
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [ValidateSet("Application", "Database", "Infrastructure", "Configuration", "All")]
     [string]$TestType = "All",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [ValidateSet("staging", "production")]
     [string]$Environment = "staging",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [switch]$DryRun
 )
 
@@ -40,15 +40,15 @@ $InformationPreference = "Continue"
 
 # Environment configuration
 $envConfig = @{
-    "staging" = @{
+    "staging"    = @{
         "resourceGroup" = "rg-academic-staging-westus2"
-        "appName" = "app-academic-staging-dvjm4oxxoy2g6"
-        "azdEnv" = "academic-staging"
+        "appName"       = "app-academic-staging-dvjm4oxxoy2g6"
+        "azdEnv"        = "academic-staging"
     }
     "production" = @{
         "resourceGroup" = "rg-academic-production-westus2"
-        "appName" = "app-academic-production"
-        "azdEnv" = "academic-production"
+        "appName"       = "app-academic-production"
+        "azdEnv"        = "academic-production"
     }
 }
 
@@ -83,16 +83,17 @@ function Test-ApplicationRollback {
         if (-not $DryRun) {
             # Create a temporary "broken" version by modifying health endpoint response
             $brokenHealthResponse = @{
-                status = "Degraded"
+                status    = "Degraded"
                 timestamp = (Get-Date).ToString("yyyy-MM-ddTHH:mm:ssZ")
-                message = "SIMULATED FAILURE - Testing rollback procedures"
-                version = "1.0.99-rollback-test"
+                message   = "SIMULATED FAILURE - Testing rollback procedures"
+                version   = "1.0.99-rollback-test"
             }
             
             # Store current deployment info for rollback
             $deploymentInfo = az webapp deployment source show --name $config.appName --resource-group $config.resourceGroup | ConvertFrom-Json
             Write-TestLog "Stored deployment info for rollback" "SUCCESS"
-        } else {
+        }
+        else {
             Write-TestLog "[DRY RUN] Would simulate problematic deployment" "WARNING"
         }
         
@@ -108,7 +109,8 @@ function Test-ApplicationRollback {
                     break
                 }
                 Write-TestLog "Health check ${i}/3: $($healthCheck.status)" "SUCCESS"
-            } catch {
+            }
+            catch {
                 $healthCheckFailed = $true
                 Write-TestLog "Health check ${i}/3 failed with error: $($_.Exception.Message)" "ERROR"
                 break
@@ -125,14 +127,17 @@ function Test-ApplicationRollback {
                 $rollbackResult = azd deploy --environment $config.azdEnv --force 2>&1
                 if ($LASTEXITCODE -eq 0) {
                     Write-TestLog "AZD rollback completed successfully" "SUCCESS"
-                } else {
+                }
+                else {
                     Write-TestLog "AZD rollback failed: $rollbackResult" "ERROR"
                     return $false
                 }
-            } else {
+            }
+            else {
                 Write-TestLog "[DRY RUN] Would execute automatic rollback" "WARNING"
             }
-        } else {
+        }
+        else {
             Write-TestLog "No health check failures detected - rollback not needed" "SUCCESS"
         }
         
@@ -144,12 +149,14 @@ function Test-ApplicationRollback {
         if ($postRollbackHealth.status -eq "Healthy") {
             Write-TestLog "Post-rollback health check: PASSED ✅" "SUCCESS"
             return $true
-        } else {
+        }
+        else {
             Write-TestLog "Post-rollback health check: FAILED ❌" "ERROR"
             return $false
         }
         
-    } catch {
+    }
+    catch {
         Write-TestLog "Application rollback test failed: $($_.Exception.Message)" "ERROR"
         return $false
     }
@@ -174,7 +181,8 @@ function Test-DatabaseRollback {
             # - Run rollback migration scripts
             # - Restore from backup if needed
             # - Validate data integrity
-        } else {
+        }
+        else {
             Write-TestLog "[DRY RUN] Would execute database rollback procedures" "WARNING"
         }
         
@@ -185,12 +193,14 @@ function Test-DatabaseRollback {
         if ($healthCheck.results.cosmosdb.status -eq "Healthy") {
             Write-TestLog "Database connectivity check: PASSED ✅" "SUCCESS"
             return $true
-        } else {
+        }
+        else {
             Write-TestLog "Database connectivity check: FAILED ❌" "ERROR"
             return $false
         }
         
-    } catch {
+    }
+    catch {
         Write-TestLog "Database rollback test failed: $($_.Exception.Message)" "ERROR"
         return $false
     }
@@ -209,7 +219,8 @@ function Test-InfrastructureRollback {
             # Get key resources
             $appService = az webapp show --name $config.appName --resource-group $config.resourceGroup --query "{state: state, availabilityState: availabilityState}" --output json | ConvertFrom-Json
             Write-TestLog "App Service state: $($appService.state)/$($appService.availabilityState)" "SUCCESS"
-        } else {
+        }
+        else {
             Write-TestLog "[DRY RUN] Would check infrastructure state" "WARNING"
         }
         
@@ -221,7 +232,8 @@ function Test-InfrastructureRollback {
             # - Restoring previous configuration
             # - Validating resource health
             Write-TestLog "Would execute infrastructure rollback via Bicep template" "WARNING"
-        } else {
+        }
+        else {
             Write-TestLog "[DRY RUN] Would execute infrastructure rollback" "WARNING"
         }
         
@@ -234,14 +246,16 @@ function Test-InfrastructureRollback {
             if ($service.Value.status -ne "Healthy") {
                 Write-TestLog "Service $($service.Name) is not healthy: $($service.Value.status)" "ERROR"
                 $allHealthy = $false
-            } else {
+            }
+            else {
                 Write-TestLog "Service $($service.Name): Healthy ✅" "SUCCESS"
             }
         }
         
         return $allHealthy
         
-    } catch {
+    }
+    catch {
         Write-TestLog "Infrastructure rollback test failed: $($_.Exception.Message)" "ERROR"
         return $false
     }
@@ -258,7 +272,8 @@ function Test-ConfigurationRollback {
         if ($healthCheck.results.configuration.status -eq "Healthy") {
             Write-TestLog "Configuration status: Healthy ✅" "SUCCESS"
             Write-TestLog "Configuration details: $($healthCheck.results.configuration.data.configuration_summary)" "INFO"
-        } else {
+        }
+        else {
             Write-TestLog "Configuration status: $($healthCheck.results.configuration.status) ❌" "ERROR"
         }
         
@@ -270,7 +285,8 @@ function Test-ConfigurationRollback {
             # - Restoring previous app settings
             # - Updating connection strings
             Write-TestLog "Would execute configuration rollback procedures" "WARNING"
-        } else {
+        }
+        else {
             Write-TestLog "[DRY RUN] Would execute configuration rollback" "WARNING"
         }
         
@@ -285,12 +301,14 @@ function Test-ConfigurationRollback {
             
             Write-TestLog "Configuration validation: PASSED ✅" "SUCCESS"
             return $true
-        } else {
+        }
+        else {
             Write-TestLog "Configuration validation: FAILED ❌" "ERROR"
             return $false
         }
         
-    } catch {
+    }
+    catch {
         Write-TestLog "Configuration rollback test failed: $($_.Exception.Message)" "ERROR"
         return $false
     }
@@ -345,7 +363,8 @@ function Test-RollbackProcedures {
     if ($overallSuccess) {
         Write-TestLog "🎉 ALL ROLLBACK TESTS PASSED! Rollback procedures are working correctly." "SUCCESS"
         exit 0
-    } else {
+    }
+    else {
         Write-TestLog "❌ SOME ROLLBACK TESTS FAILED! Review and fix rollback procedures." "ERROR"
         exit 1
     }

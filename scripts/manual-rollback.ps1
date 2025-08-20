@@ -21,15 +21,15 @@
 #>
 
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [ValidateSet("Application", "Database", "Infrastructure", "Emergency")]
     [string]$RollbackType,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [ValidateSet("staging", "production")]
     [string]$Environment = "staging",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [switch]$Force
 )
 
@@ -39,19 +39,19 @@ $InformationPreference = "Continue"
 
 # Environment configuration
 $envConfig = @{
-    "staging" = @{
+    "staging"    = @{
         "resourceGroup" = "rg-academic-staging-westus2"
-        "appName" = "app-academic-staging-dvjm4oxxoy2g6"
-        "azdEnv" = "academic-staging"
+        "appName"       = "app-academic-staging-dvjm4oxxoy2g6"
+        "azdEnv"        = "academic-staging"
         "cosmosAccount" = "cosmos-academic-staging-dvjm4oxxoy2g6"
-        "keyVault" = "kv-academic-staging-dvjm4oxxoy2g6"
+        "keyVault"      = "kv-academic-staging-dvjm4oxxoy2g6"
     }
     "production" = @{
         "resourceGroup" = "rg-academic-production-westus2"
-        "appName" = "app-academic-production"
-        "azdEnv" = "academic-production"
+        "appName"       = "app-academic-production"
+        "azdEnv"        = "academic-production"
         "cosmosAccount" = "cosmos-academic-production"
-        "keyVault" = "kv-academic-production"
+        "keyVault"      = "kv-academic-production"
     }
 }
 
@@ -90,7 +90,8 @@ function Confirm-RollbackAction {
     if ($confirmation -eq "CONFIRM") {
         Write-RollbackLog "Rollback action confirmed by user" "INFO"
         return $true
-    } else {
+    }
+    else {
         Write-RollbackLog "Rollback action cancelled by user" "WARNING"
         return $false
     }
@@ -122,14 +123,16 @@ function Backup-CurrentState {
         try {
             $healthStatus = Invoke-RestMethod -Uri "https://$($config.appName).azurewebsites.net/health" -Method Get
             $healthStatus | ConvertTo-Json -Depth 10 | Out-File -FilePath "$backupDir\health-status.json"
-        } catch {
+        }
+        catch {
             Write-RollbackLog "Could not backup health status: $($_.Exception.Message)" "WARNING"
         }
         
         Write-RollbackLog "Backup completed in directory: $backupDir" "SUCCESS"
         return $backupDir
         
-    } catch {
+    }
+    catch {
         Write-RollbackLog "Failed to create backup: $($_.Exception.Message)" "ERROR"
         throw
     }
@@ -163,7 +166,8 @@ function Rollback-Application {
             
             if ($LASTEXITCODE -eq 0) {
                 Write-RollbackLog "AZD rollback deployment completed successfully" "SUCCESS"
-            } else {
+            }
+            else {
                 Write-RollbackLog "AZD rollback failed: $azdResult" "ERROR"
                 Write-RollbackLog "Attempting alternative rollback method..." "WARNING"
                 
@@ -173,12 +177,14 @@ function Rollback-Application {
                 
                 if ($LASTEXITCODE -eq 0) {
                     Write-RollbackLog "App Service restart completed" "SUCCESS"
-                } else {
+                }
+                else {
                     Write-RollbackLog "App Service restart failed" "ERROR"
                     return $false
                 }
             }
-        } else {
+        }
+        else {
             Write-RollbackLog "AZD environment not found, using manual rollback..." "WARNING"
             
             # Manual rollback - restart app service
@@ -187,7 +193,8 @@ function Rollback-Application {
             
             if ($LASTEXITCODE -eq 0) {
                 Write-RollbackLog "Manual rollback (restart) completed" "SUCCESS"
-            } else {
+            }
+            else {
                 Write-RollbackLog "Manual rollback failed" "ERROR"
                 return $false
             }
@@ -207,10 +214,12 @@ function Rollback-Application {
                     Write-RollbackLog "Health check $i/5: Healthy ✅" "SUCCESS"
                     Write-RollbackLog "Application rollback completed successfully!" "SUCCESS"
                     return $true
-                } else {
+                }
+                else {
                     Write-RollbackLog "Health check $i/5: $($healthCheck.status) - Retrying..." "WARNING"
                 }
-            } catch {
+            }
+            catch {
                 Write-RollbackLog "Health check $i/5 failed: $($_.Exception.Message) - Retrying..." "WARNING"
             }
             
@@ -220,7 +229,8 @@ function Rollback-Application {
         Write-RollbackLog "Application rollback verification failed after 5 attempts" "ERROR"
         return $false
         
-    } catch {
+    }
+    catch {
         Write-RollbackLog "Application rollback failed with error: $($_.Exception.Message)" "ERROR"
         return $false
     }
@@ -248,13 +258,15 @@ function Rollback-Database {
             
             Write-RollbackLog "Database rollback completed (simulated - database is healthy)" "SUCCESS"
             return $true
-        } else {
+        }
+        else {
             Write-RollbackLog "Database connectivity: $($healthCheck.results.cosmosdb.status) ❌" "ERROR"
             Write-RollbackLog "Database rollback required but database is not healthy" "ERROR"
             return $false
         }
         
-    } catch {
+    }
+    catch {
         Write-RollbackLog "Database rollback failed: $($_.Exception.Message)" "ERROR"
         return $false
     }
@@ -284,7 +296,8 @@ function Rollback-Infrastructure {
         if ($appService.state -eq "Running" -and $appService.availabilityState -eq "Normal") {
             Write-RollbackLog "Infrastructure appears healthy - no rollback needed" "SUCCESS"
             return $true
-        } else {
+        }
+        else {
             Write-RollbackLog "Infrastructure issues detected - attempting rollback..." "WARNING"
             
             # Use AZD to redeploy infrastructure
@@ -294,13 +307,15 @@ function Rollback-Infrastructure {
             if ($LASTEXITCODE -eq 0) {
                 Write-RollbackLog "Infrastructure rollback completed successfully" "SUCCESS"
                 return $true
-            } else {
+            }
+            else {
                 Write-RollbackLog "Infrastructure rollback failed: $azdResult" "ERROR"
                 return $false
             }
         }
         
-    } catch {
+    }
+    catch {
         Write-RollbackLog "Infrastructure rollback failed: $($_.Exception.Message)" "ERROR"
         return $false
     }
@@ -339,13 +354,15 @@ function Rollback-Emergency {
             Write-RollbackLog "🚨 EMERGENCY ROLLBACK COMPLETED SUCCESSFULLY! 🚨" "SUCCESS"
             Write-RollbackLog "All systems restored to healthy state" "SUCCESS"
             return $true
-        } else {
+        }
+        else {
             Write-RollbackLog "🚨 EMERGENCY ROLLBACK COMPLETED BUT SYSTEM NOT HEALTHY! 🚨" "CRITICAL"
             Write-RollbackLog "Manual intervention may be required" "CRITICAL"
             return $false
         }
         
-    } catch {
+    }
+    catch {
         Write-RollbackLog "🚨 EMERGENCY ROLLBACK FAILED: $($_.Exception.Message) 🚨" "CRITICAL"
         return $false
     }
@@ -370,7 +387,8 @@ function Execute-Rollback {
     if ($success) {
         Write-RollbackLog "✅ $RollbackType rollback completed successfully!" "SUCCESS"
         exit 0
-    } else {
+    }
+    else {
         Write-RollbackLog "❌ $RollbackType rollback failed!" "ERROR"
         exit 1
     }

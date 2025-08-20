@@ -4,30 +4,30 @@ on:
   workflow_dispatch:
     inputs:
       rollback_type:
-        description: 'Type of rollback test to perform'
+        description: "Type of rollback test to perform"
         required: true
-        default: 'All'
+        default: "All"
         type: choice
         options:
-        - All
-        - Application
-        - Database
-        - Infrastructure
-        - Configuration
+          - All
+          - Application
+          - Database
+          - Infrastructure
+          - Configuration
       environment:
-        description: 'Target environment'
+        description: "Target environment"
         required: true
-        default: 'staging'
+        default: "staging"
         type: choice
         options:
-        - staging
-        - production
+          - staging
+          - production
       dry_run:
-        description: 'Perform dry run (no actual changes)'
+        description: "Perform dry run (no actual changes)"
         required: true
         default: true
         type: boolean
-  
+
   # Trigger on deployment failures (for automatic rollback)
   workflow_run:
     workflows: ["Staging Deployment"]
@@ -42,263 +42,263 @@ jobs:
   rollback-testing:
     runs-on: ubuntu-latest
     if: github.event.workflow_run.conclusion == 'failure' || github.event_name == 'workflow_dispatch'
-    
-    environment: 
+
+    environment:
       name: ${{ github.event.inputs.environment || 'staging' }}
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup PowerShell
-      shell: pwsh
-      run: |
-        Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
-        
-    - name: Azure CLI Login
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-        
-    - name: Setup AZD
-      uses: Azure/setup-azd@v1.0.0
-      
-    - name: Configure AZD Environment
-      shell: pwsh
-      run: |
-        $env_name = "${{ github.event.inputs.environment || 'staging' }}"
-        Write-Host "Configuring AZD environment: $env_name"
-        
-        # Set environment variables for AZD
-        azd env select academic-$env_name 2>$null || azd env new academic-$env_name
-        azd env set AZURE_LOCATION westus2
-        azd env set AZURE_SUBSCRIPTION_ID ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-        
-    - name: Determine Rollback Trigger
-      id: trigger
-      shell: pwsh
-      run: |
-        if ("${{ github.event_name }}" -eq "workflow_run") {
-            Write-Host "Rollback triggered by deployment failure"
-            echo "trigger_type=automatic" >> $env:GITHUB_OUTPUT
-            echo "rollback_type=Emergency" >> $env:GITHUB_OUTPUT
-            echo "dry_run=false" >> $env:GITHUB_OUTPUT
-        } else {
-            Write-Host "Rollback triggered manually"
-            echo "trigger_type=manual" >> $env:GITHUB_OUTPUT
-            echo "rollback_type=${{ github.event.inputs.rollback_type }}" >> $env:GITHUB_OUTPUT
-            echo "dry_run=${{ github.event.inputs.dry_run }}" >> $env:GITHUB_OUTPUT
-        }
-        
-    - name: Pre-Rollback Health Check
-      id: pre_health
-      shell: pwsh
-      run: |
-        $env_name = "${{ github.event.inputs.environment || 'staging' }}"
-        $app_name = if ($env_name -eq "staging") { "app-academic-staging-dvjm4oxxoy2g6" } else { "app-academic-production" }
-        
-        Write-Host "Performing pre-rollback health check..."
-        try {
-            $health = Invoke-RestMethod -Uri "https://$app_name.azurewebsites.net/health" -Method Get -TimeoutSec 30
-            Write-Host "Application Status: $($health.status)"
-            
-            if ($health.status -eq "Healthy") {
-                echo "pre_health_status=healthy" >> $env:GITHUB_OUTPUT
-                Write-Host "✅ Application is healthy"
-            } else {
-                echo "pre_health_status=unhealthy" >> $env:GITHUB_OUTPUT
-                Write-Host "❌ Application is unhealthy: $($health.status)"
-                
-                # Output detailed health information
-                Write-Host "Health Details:"
-                $health.results.PSObject.Properties | ForEach-Object {
-                    Write-Host "  $($_.Name): $($_.Value.status)"
-                }
-            }
-        } catch {
-            echo "pre_health_status=unreachable" >> $env:GITHUB_OUTPUT
-            Write-Host "❌ Application is unreachable: $($_.Exception.Message)"
-        }
-        
-    - name: Execute Rollback Testing
-      id: rollback_test
-      shell: pwsh
-      run: |
-        $rollback_type = "${{ steps.trigger.outputs.rollback_type }}"
-        $env_name = "${{ github.event.inputs.environment || 'staging' }}"
-        $dry_run = [System.Convert]::ToBoolean("${{ steps.trigger.outputs.dry_run }}")
-        
-        Write-Host "=== Rollback Testing Configuration ==="
-        Write-Host "Rollback Type: $rollback_type"
-        Write-Host "Environment: $env_name" 
-        Write-Host "Dry Run: $dry_run"
-        Write-Host "Trigger: ${{ steps.trigger.outputs.trigger_type }}"
-        Write-Host ""
-        
-        # Execute rollback test script
-        $scriptPath = "./scripts/test-rollback-procedures.ps1"
-        $params = @{
-            TestType = $rollback_type
-            Environment = $env_name
-        }
-        
-        if ($dry_run) {
-            $params.DryRun = $true
-        }
-        
-        try {
-            & $scriptPath @params
-            echo "rollback_result=success" >> $env:GITHUB_OUTPUT
-        } catch {
-            Write-Host "Rollback test failed: $($_.Exception.Message)"
-            echo "rollback_result=failure" >> $env:GITHUB_OUTPUT
-            throw
-        }
-        
-    - name: Execute Emergency Rollback
-      if: steps.trigger.outputs.trigger_type == 'automatic' && steps.pre_health.outputs.pre_health_status != 'healthy'
-      shell: pwsh
-      run: |
-        Write-Host "🚨 EXECUTING EMERGENCY ROLLBACK 🚨"
-        
-        $env_name = "${{ github.event.inputs.environment || 'staging' }}"
-        
-        # Execute manual rollback script for emergency
-        $scriptPath = "./scripts/manual-rollback.ps1"
-        try {
-            & $scriptPath -RollbackType Emergency -Environment $env_name -Force
-            Write-Host "✅ Emergency rollback completed successfully"
-        } catch {
-            Write-Host "❌ Emergency rollback failed: $($_.Exception.Message)"
-            throw
-        }
-        
-    - name: Post-Rollback Verification
-      shell: pwsh
-      run: |
-        $env_name = "${{ github.event.inputs.environment || 'staging' }}"
-        $app_name = if ($env_name -eq "staging") { "app-academic-staging-dvjm4oxxoy2g6" } else { "app-academic-production" }
-        
-        Write-Host "Performing post-rollback verification..."
-        
-        # Wait for system stabilization
-        Start-Sleep -Seconds 30
-        
-        # Comprehensive health check
-        try {
-            $health = Invoke-RestMethod -Uri "https://$app_name.azurewebsites.net/health" -Method Get -TimeoutSec 30
-            
-            Write-Host "=== Post-Rollback Health Status ==="
-            Write-Host "Overall Status: $($health.status)"
-            Write-Host "Timestamp: $($health.timestamp)"
-            
-            # Check all service components
-            foreach ($service in $health.results.PSObject.Properties) {
-                $status = $service.Value.status
-                $emoji = if ($status -eq "Healthy") { "✅" } else { "❌" }
-                Write-Host "$emoji $($service.Name): $status"
-                
-                if ($service.Value.data) {
-                    Write-Host "    Data: $($service.Value.data)"
-                }
-            }
-            
-            if ($health.status -eq "Healthy") {
-                Write-Host ""
-                Write-Host "🎉 POST-ROLLBACK VERIFICATION: PASSED"
-                Write-Host "All systems are healthy after rollback"
-            } else {
-                Write-Host ""
-                Write-Host "❌ POST-ROLLBACK VERIFICATION: FAILED"
-                Write-Host "System is not fully healthy after rollback"
-                exit 1
-            }
-            
-        } catch {
-            Write-Host "❌ POST-ROLLBACK VERIFICATION: ERROR"
-            Write-Host "Could not reach application: $($_.Exception.Message)"
-            exit 1
-        }
-        
-    - name: Generate Rollback Report
-      if: always()
-      shell: pwsh
-      run: |
-        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
-        $trigger = "${{ steps.trigger.outputs.trigger_type }}"
-        $env_name = "${{ github.event.inputs.environment || 'staging' }}"
-        $rollback_type = "${{ steps.trigger.outputs.rollback_type }}"
-        $dry_run = "${{ steps.trigger.outputs.dry_run }}"
-        $pre_health = "${{ steps.pre_health.outputs.pre_health_status }}"
-        $rollback_result = "${{ steps.rollback_test.outputs.rollback_result }}"
-        
-        Write-Host "Generating rollback report..."
-        Write-Host "Timestamp: $timestamp"
-        Write-Host "Trigger: $trigger"
-        Write-Host "Environment: $env_name"
-        Write-Host "Rollback Type: $rollback_type"
-        Write-Host "Dry Run: $dry_run"
-        Write-Host "Pre-Health: $pre_health"
-        Write-Host "Result: $rollback_result"
-        
-        # Create report content
-        $reportContent = "# Rollback Testing Report`n`n"
-        $reportContent += "**Generated:** $timestamp`n"
-        $reportContent += "**Trigger:** $trigger`n"
-        $reportContent += "**Environment:** $env_name`n"
-        $reportContent += "**Rollback Type:** $rollback_type`n"
-        $reportContent += "**Dry Run:** $dry_run`n`n"
-        $reportContent += "## Pre-Rollback Status`n"
-        $reportContent += "**Health Status:** $pre_health`n`n"
-        $reportContent += "## Rollback Execution`n"
-        $reportContent += "**Result:** $rollback_result`n`n"
-        $reportContent += "## Recommendations`n"
-        
-        if ($rollback_result -eq "success") {
-            $reportContent += "✅ Rollback procedures are working correctly and ready for production use.`n"
-        } else {
-            $reportContent += "❌ Rollback procedures need attention before production deployment.`n"
-        }
-        
-        $reportContent += "`n---`n"
-        $reportContent += "*This report was generated automatically by the Rollback Testing Pipeline*`n"
-        
-        # Write report to file
-        $reportContent | Out-File -FilePath "rollback-report.md" -Encoding UTF8
-        Write-Host "Rollback report generated: rollback-report.md"
-        
-    - name: Upload Rollback Artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: rollback-test-results-${{ github.run_number }}
-        path: |
-          rollback-*.log
-          rollback-report.md
-          rollback-backup-*/
-        retention-days: 30
-        
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PowerShell
+        shell: pwsh
+        run: |
+          Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+
+      - name: Azure CLI Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup AZD
+        uses: Azure/setup-azd@v1.0.0
+
+      - name: Configure AZD Environment
+        shell: pwsh
+        run: |
+          $env_name = "${{ github.event.inputs.environment || 'staging' }}"
+          Write-Host "Configuring AZD environment: $env_name"
+
+          # Set environment variables for AZD
+          azd env select academic-$env_name 2>$null || azd env new academic-$env_name
+          azd env set AZURE_LOCATION westus2
+          azd env set AZURE_SUBSCRIPTION_ID ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Determine Rollback Trigger
+        id: trigger
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_run") {
+              Write-Host "Rollback triggered by deployment failure"
+              echo "trigger_type=automatic" >> $env:GITHUB_OUTPUT
+              echo "rollback_type=Emergency" >> $env:GITHUB_OUTPUT
+              echo "dry_run=false" >> $env:GITHUB_OUTPUT
+          } else {
+              Write-Host "Rollback triggered manually"
+              echo "trigger_type=manual" >> $env:GITHUB_OUTPUT
+              echo "rollback_type=${{ github.event.inputs.rollback_type }}" >> $env:GITHUB_OUTPUT
+              echo "dry_run=${{ github.event.inputs.dry_run }}" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Pre-Rollback Health Check
+        id: pre_health
+        shell: pwsh
+        run: |
+          $env_name = "${{ github.event.inputs.environment || 'staging' }}"
+          $app_name = if ($env_name -eq "staging") { "app-academic-staging-dvjm4oxxoy2g6" } else { "app-academic-production" }
+
+          Write-Host "Performing pre-rollback health check..."
+          try {
+              $health = Invoke-RestMethod -Uri "https://$app_name.azurewebsites.net/health" -Method Get -TimeoutSec 30
+              Write-Host "Application Status: $($health.status)"
+              
+              if ($health.status -eq "Healthy") {
+                  echo "pre_health_status=healthy" >> $env:GITHUB_OUTPUT
+                  Write-Host "✅ Application is healthy"
+              } else {
+                  echo "pre_health_status=unhealthy" >> $env:GITHUB_OUTPUT
+                  Write-Host "❌ Application is unhealthy: $($health.status)"
+                  
+                  # Output detailed health information
+                  Write-Host "Health Details:"
+                  $health.results.PSObject.Properties | ForEach-Object {
+                      Write-Host "  $($_.Name): $($_.Value.status)"
+                  }
+              }
+          } catch {
+              echo "pre_health_status=unreachable" >> $env:GITHUB_OUTPUT
+              Write-Host "❌ Application is unreachable: $($_.Exception.Message)"
+          }
+
+      - name: Execute Rollback Testing
+        id: rollback_test
+        shell: pwsh
+        run: |
+          $rollback_type = "${{ steps.trigger.outputs.rollback_type }}"
+          $env_name = "${{ github.event.inputs.environment || 'staging' }}"
+          $dry_run = [System.Convert]::ToBoolean("${{ steps.trigger.outputs.dry_run }}")
+
+          Write-Host "=== Rollback Testing Configuration ==="
+          Write-Host "Rollback Type: $rollback_type"
+          Write-Host "Environment: $env_name" 
+          Write-Host "Dry Run: $dry_run"
+          Write-Host "Trigger: ${{ steps.trigger.outputs.trigger_type }}"
+          Write-Host ""
+
+          # Execute rollback test script
+          $scriptPath = "./scripts/test-rollback-procedures.ps1"
+          $params = @{
+              TestType = $rollback_type
+              Environment = $env_name
+          }
+
+          if ($dry_run) {
+              $params.DryRun = $true
+          }
+
+          try {
+              & $scriptPath @params
+              echo "rollback_result=success" >> $env:GITHUB_OUTPUT
+          } catch {
+              Write-Host "Rollback test failed: $($_.Exception.Message)"
+              echo "rollback_result=failure" >> $env:GITHUB_OUTPUT
+              throw
+          }
+
+      - name: Execute Emergency Rollback
+        if: steps.trigger.outputs.trigger_type == 'automatic' && steps.pre_health.outputs.pre_health_status != 'healthy'
+        shell: pwsh
+        run: |
+          Write-Host "🚨 EXECUTING EMERGENCY ROLLBACK 🚨"
+
+          $env_name = "${{ github.event.inputs.environment || 'staging' }}"
+
+          # Execute manual rollback script for emergency
+          $scriptPath = "./scripts/manual-rollback.ps1"
+          try {
+              & $scriptPath -RollbackType Emergency -Environment $env_name -Force
+              Write-Host "✅ Emergency rollback completed successfully"
+          } catch {
+              Write-Host "❌ Emergency rollback failed: $($_.Exception.Message)"
+              throw
+          }
+
+      - name: Post-Rollback Verification
+        shell: pwsh
+        run: |
+          $env_name = "${{ github.event.inputs.environment || 'staging' }}"
+          $app_name = if ($env_name -eq "staging") { "app-academic-staging-dvjm4oxxoy2g6" } else { "app-academic-production" }
+
+          Write-Host "Performing post-rollback verification..."
+
+          # Wait for system stabilization
+          Start-Sleep -Seconds 30
+
+          # Comprehensive health check
+          try {
+              $health = Invoke-RestMethod -Uri "https://$app_name.azurewebsites.net/health" -Method Get -TimeoutSec 30
+              
+              Write-Host "=== Post-Rollback Health Status ==="
+              Write-Host "Overall Status: $($health.status)"
+              Write-Host "Timestamp: $($health.timestamp)"
+              
+              # Check all service components
+              foreach ($service in $health.results.PSObject.Properties) {
+                  $status = $service.Value.status
+                  $emoji = if ($status -eq "Healthy") { "✅" } else { "❌" }
+                  Write-Host "$emoji $($service.Name): $status"
+                  
+                  if ($service.Value.data) {
+                      Write-Host "    Data: $($service.Value.data)"
+                  }
+              }
+              
+              if ($health.status -eq "Healthy") {
+                  Write-Host ""
+                  Write-Host "🎉 POST-ROLLBACK VERIFICATION: PASSED"
+                  Write-Host "All systems are healthy after rollback"
+              } else {
+                  Write-Host ""
+                  Write-Host "❌ POST-ROLLBACK VERIFICATION: FAILED"
+                  Write-Host "System is not fully healthy after rollback"
+                  exit 1
+              }
+              
+          } catch {
+              Write-Host "❌ POST-ROLLBACK VERIFICATION: ERROR"
+              Write-Host "Could not reach application: $($_.Exception.Message)"
+              exit 1
+          }
+
+      - name: Generate Rollback Report
+        if: always()
+        shell: pwsh
+        run: |
+          $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+          $trigger = "${{ steps.trigger.outputs.trigger_type }}"
+          $env_name = "${{ github.event.inputs.environment || 'staging' }}"
+          $rollback_type = "${{ steps.trigger.outputs.rollback_type }}"
+          $dry_run = "${{ steps.trigger.outputs.dry_run }}"
+          $pre_health = "${{ steps.pre_health.outputs.pre_health_status }}"
+          $rollback_result = "${{ steps.rollback_test.outputs.rollback_result }}"
+
+          Write-Host "Generating rollback report..."
+          Write-Host "Timestamp: $timestamp"
+          Write-Host "Trigger: $trigger"
+          Write-Host "Environment: $env_name"
+          Write-Host "Rollback Type: $rollback_type"
+          Write-Host "Dry Run: $dry_run"
+          Write-Host "Pre-Health: $pre_health"
+          Write-Host "Result: $rollback_result"
+
+          # Create report content
+          $reportContent = "# Rollback Testing Report`n`n"
+          $reportContent += "**Generated:** $timestamp`n"
+          $reportContent += "**Trigger:** $trigger`n"
+          $reportContent += "**Environment:** $env_name`n"
+          $reportContent += "**Rollback Type:** $rollback_type`n"
+          $reportContent += "**Dry Run:** $dry_run`n`n"
+          $reportContent += "## Pre-Rollback Status`n"
+          $reportContent += "**Health Status:** $pre_health`n`n"
+          $reportContent += "## Rollback Execution`n"
+          $reportContent += "**Result:** $rollback_result`n`n"
+          $reportContent += "## Recommendations`n"
+
+          if ($rollback_result -eq "success") {
+              $reportContent += "✅ Rollback procedures are working correctly and ready for production use.`n"
+          } else {
+              $reportContent += "❌ Rollback procedures need attention before production deployment.`n"
+          }
+
+          $reportContent += "`n---`n"
+          $reportContent += "*This report was generated automatically by the Rollback Testing Pipeline*`n"
+
+          # Write report to file
+          $reportContent | Out-File -FilePath "rollback-report.md" -Encoding UTF8
+          Write-Host "Rollback report generated: rollback-report.md"
+
+      - name: Upload Rollback Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rollback-test-results-${{ github.run_number }}
+          path: |
+            rollback-*.log
+            rollback-report.md
+            rollback-backup-*/
+          retention-days: 30
+
   notify-rollback-status:
     needs: rollback-testing
     runs-on: ubuntu-latest
     if: always()
-    
+
     steps:
-    - name: Notify Rollback Status
-      shell: pwsh
-      run: |
-        $status = "${{ needs.rollback-testing.result }}"
-        $trigger = "${{ needs.rollback-testing.outputs.trigger_type || 'unknown' }}"
-        
-        if ($status -eq "success") {
-            Write-Host "✅ Rollback testing completed successfully"
-            Write-Host "Rollback procedures are validated and ready for production"
-        } else {
-            Write-Host "❌ Rollback testing failed"
-            Write-Host "Review rollback procedures before production deployment"
-        }
-        
-        Write-Host ""
-        Write-Host "Trigger Type: $trigger"
-        Write-Host "Workflow Run: ${{ github.run_id }}"
-        Write-Host "Environment: ${{ github.event.inputs.environment || 'staging' }}"
+      - name: Notify Rollback Status
+        shell: pwsh
+        run: |
+          $status = "${{ needs.rollback-testing.result }}"
+          $trigger = "${{ needs.rollback-testing.outputs.trigger_type || 'unknown' }}"
+
+          if ($status -eq "success") {
+              Write-Host "✅ Rollback testing completed successfully"
+              Write-Host "Rollback procedures are validated and ready for production"
+          } else {
+              Write-Host "❌ Rollback testing failed"
+              Write-Host "Review rollback procedures before production deployment"
+          }
+
+          Write-Host ""
+          Write-Host "Trigger Type: $trigger"
+          Write-Host "Workflow Run: ${{ github.run_id }}"
+          Write-Host "Environment: ${{ github.event.inputs.environment || 'staging' }}"
