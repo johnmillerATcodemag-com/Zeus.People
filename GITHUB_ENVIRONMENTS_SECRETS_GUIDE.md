@@ -5,9 +5,17 @@
 The following secrets are required for Azure authentication in your workflows:
 
 - `AZURE_CLIENT_ID` - Service Principal Application ID
-- `AZURE_CLIENT_SECRET` - Service Principal Password/Secret
+- `AZURE_CLIENT_SECRET` - Service Principal Password/Secret  
 - `AZURE_TENANT_ID` - Azure Active Directory Tenant ID
 - `AZURE_SUBSCRIPTION_ID` - Target Azure Subscription ID
+
+## Additional Application Secrets
+
+The following additional secrets are required for application functionality:
+
+- `MANAGED_IDENTITY_CLIENT_ID` - User-Assigned Managed Identity Client ID for KeyVault access
+- `APP_INSIGHTS_CONNECTION_STRING` - Application Insights connection string for telemetry
+- `ALERT_EMAIL_ADDRESS` - Email address for monitoring alerts and notifications (e.g., `admin@yourcompany.com`)
 
 ## GitHub Environments That Need These Secrets
 

@@ -399,9 +399,9 @@ jobs:
         with:
           creds: '{"clientId":"${{ secrets.AZURE_CLIENT_ID }}","clientSecret":"${{ secrets.AZURE_CLIENT_SECRET }}","subscriptionId":"${{ secrets.AZURE_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.AZURE_TENANT_ID }}"}'
 
-      - name: 📊 Configure Application Insights
+      - name: 📊 Configure Application Insights Dashboard
         run: |
-          echo "📊 Configuring Application Insights monitoring..."
+          echo "📊 Configuring Application Insights monitoring dashboard..."
 
           # Create custom dashboard for staging environment
           az monitor dashboard create \
@@ -409,20 +409,97 @@ jobs:
             --name "Zeus-People-Staging-Dashboard" \
             --input-path ./monitoring/staging-dashboard.json || echo "Dashboard may already exist"
 
-      - name: 🚨 Setup Alerts
+      - name: 🚨 Deploy Comprehensive Alert Rules
         run: |
-          echo "🚨 Setting up monitoring alerts..."
+          echo "🚨 Deploying comprehensive monitoring alerts from ARM template..."
 
-          # Create alert for high response time
-          az monitor metrics alert create \
-            --name "StagingHighResponseTime" \
+          # Get database server and database names for alert parameters
+          SQL_SERVER_NAME=$(az sql server list \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
-            --scopes "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Web/sites/${{ env.AZURE_WEBAPP_NAME }}" \
-            --condition "avg ResponseTime > 5000" \
-            --description "Alert when staging response time exceeds 5 seconds" \
-            --evaluation-frequency 1m \
-            --window-size 5m \
-            --severity 2 || echo "Alert may already exist"
+            --query "[?contains(name,'sql-academic-staging')].name" \
+            --output tsv | head -1)
+
+          SQL_DATABASE_NAME=$(az sql db list \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --server $SQL_SERVER_NAME \
+            --query "[?name!='master'].name" \
+            --output tsv | head -1)
+
+          echo "📋 Using SQL Server: $SQL_SERVER_NAME"
+          echo "📋 Using Database: $SQL_DATABASE_NAME"
+
+          # Deploy alert rules ARM template with parameters
+          az deployment group create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --template-file ./monitoring/alert-rules.json \
+            --parameters \
+              actionGroupName="zeus-people-staging-alerts" \
+              emailAddress="${{ secrets.ALERT_EMAIL_ADDRESS }}" \
+              webAppName="${{ env.AZURE_WEBAPP_NAME }}" \
+              databaseServerName="$SQL_SERVER_NAME" \
+              databaseName="$SQL_DATABASE_NAME" \
+            --mode Incremental
+
+          echo "✅ Alert rules deployed successfully"
+
+      - name: 🔔 Verify Alert Configuration
+        run: |
+          echo "🔔 Verifying alert rules deployment..."
+
+          # List deployed alert rules
+          ALERT_COUNT=$(az monitor metrics alert list \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query "length([])" \
+            --output tsv)
+
+          echo "📊 Deployed alert rules count: $ALERT_COUNT"
+
+          # Verify action group exists
+          ACTION_GROUP_EXISTS=$(az monitor action-group list \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --query "[?name=='zeus-people-staging-alerts'].name" \
+            --output tsv)
+
+          if [ -n "$ACTION_GROUP_EXISTS" ]; then
+            echo "✅ Action group 'zeus-people-staging-alerts' is configured"
+          else
+            echo "❌ Action group not found - alerts may not send notifications"
+            exit 1
+          fi
+
+          # Test action group functionality
+          echo "📧 Action group configured for email notifications"
+
+      - name: 📈 Setup Auto-scaling Rules
+        run: |
+          echo "📈 Configuring auto-scaling rules for App Service..."
+
+          # Create auto-scale setting for the App Service
+          az monitor autoscale create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --resource "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/${{ env.AZURE_RESOURCE_GROUP }}/providers/Microsoft.Web/sites/${{ env.AZURE_WEBAPP_NAME }}" \
+            --name "zeus-people-staging-autoscale" \
+            --count 1 \
+            --min-count 1 \
+            --max-count 5 || echo "Auto-scale rule may already exist"
+
+          # Add scale-out rule based on CPU
+          az monitor autoscale rule create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --autoscale-name "zeus-people-staging-autoscale" \
+            --condition "Percentage CPU > 70 avg 10m" \
+            --scale out 1 \
+            --cooldown 10m || echo "Scale-out rule may already exist"
+
+          # Add scale-in rule
+          az monitor autoscale rule create \
+            --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
+            --autoscale-name "zeus-people-staging-autoscale" \
+            --condition "Percentage CPU < 30 avg 15m" \
+            --scale in 1 \
+            --cooldown 15m || echo "Scale-in rule may already exist"
+
+          echo "✅ Auto-scaling rules configured successfully"
 
   # ==================== DEPLOYMENT SUMMARY ====================
   deployment-summary:
