@@ -31,3 +31,11 @@ New addition to the business-rules instructions:
 * Workflow implementations must be shown to work before merging to main
 
 - Implement automated testing for all new features and bug fixes. This includes unit tests, integration tests, and end-to-end tests to ensure comprehensive coverage and prevent regressions.
+
+## cqrs-architecture
+
+### Documentation
+- Overview of CQRS principles and patterns
+- Explanation of command and query responsibilities
+- Guidelines for implementing CQRS in the application
+- Update mermaid architecture diagrams with any infrastructure, architecture, or business rule changes
