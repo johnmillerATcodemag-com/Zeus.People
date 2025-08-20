@@ -305,9 +305,7 @@ jobs:
           azd version
           
           # Login to AZD and set environment
-          azd auth login --client-id ${{ secrets.AZURE_CLIENT_ID }} \
-            --client-secret ${{ secrets.AZURE_CLIENT_SECRET }} \
-            --tenant-id ${{ secrets.AZURE_TENANT_ID }}
+          azd auth login --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
             
           # Set the AZD environment to access resource names
           azd env select academic-staging || echo "Environment may not exist yet, tests will fallback to manual names"
