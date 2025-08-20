@@ -31,8 +31,15 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         // Check if SQL Database features are enabled (check both formats for compatibility)
-        var enableSqlDatabase = bool.TryParse(configuration["Features:EnableSqlDatabase"] ?? configuration["Features__EnableSqlDatabase"], out var sqlEnabled) ? sqlEnabled : true;
-        var enableEventStore = bool.TryParse(configuration["Features:EnableEventStore"] ?? configuration["Features__EnableEventStore"], out var eventStoreEnabled) ? eventStoreEnabled : true;
+        var sqlDatabaseConfig = configuration["Features:EnableSqlDatabase"] ?? configuration["Features__EnableSqlDatabase"];
+        var eventStoreConfig = configuration["Features:EnableEventStore"] ?? configuration["Features__EnableEventStore"];
+        
+        var enableSqlDatabase = bool.TryParse(sqlDatabaseConfig, out var sqlEnabled) ? sqlEnabled : true;
+        var enableEventStore = bool.TryParse(eventStoreConfig, out var eventStoreEnabled) ? eventStoreEnabled : true;
+
+        // Debug logging for feature flag evaluation (will appear in app logs)
+        Console.WriteLine($"DEBUG: Features:EnableSqlDatabase config value: '{sqlDatabaseConfig}' -> parsed as: {enableSqlDatabase}");
+        Console.WriteLine($"DEBUG: Features:EnableEventStore config value: '{eventStoreConfig}' -> parsed as: {enableEventStore}");
 
         // Only add Entity Framework if SQL Database is enabled (feature flag takes priority)
         if (enableSqlDatabase)
@@ -229,12 +236,22 @@ public static class DependencyInjection
         // Only add SQL-based health checks if SQL services are enabled (feature flag takes priority)
         if (enableSqlDatabase)
         {
+            Console.WriteLine("DEBUG: Adding DatabaseHealthCheck because enableSqlDatabase = true");
             healthChecksBuilder.AddCheck<DatabaseHealthCheck>("database", tags: new[] { "database", "sql" });
+        }
+        else
+        {
+            Console.WriteLine("DEBUG: Skipping DatabaseHealthCheck because enableSqlDatabase = false");
         }
 
         if (enableEventStore)
         {
+            Console.WriteLine("DEBUG: Adding EventStoreHealthCheck because enableEventStore = true");
             healthChecksBuilder.AddCheck<EventStoreHealthCheck>("eventstore", tags: new[] { "eventstore", "sql" });
+        }
+        else
+        {
+            Console.WriteLine("DEBUG: Skipping EventStoreHealthCheck because enableEventStore = false");
         }
 
         // Only add Service Bus health check if Service Bus is available
