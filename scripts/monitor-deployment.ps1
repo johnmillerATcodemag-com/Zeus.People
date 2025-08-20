@@ -19,14 +19,14 @@
 #>
 
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [ValidateSet("staging", "production")]
     [string]$Environment = "staging",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [int]$MonitoringDuration = 30,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [int]$AlertThreshold = 5000
 )
 
@@ -36,19 +36,19 @@ $InformationPreference = "Continue"
 
 # Environment configuration
 $envConfig = @{
-    "staging" = @{
+    "staging"    = @{
         "resourceGroup" = "rg-academic-staging-westus2"
-        "appName" = "app-academic-staging-dvjm4oxxoy2g6"
-        "azdEnv" = "academic-staging"
-        "logAnalytics" = "law-academic-staging-dvjm4oxxoy2g6"
-        "appInsights" = "ai-academic-staging-dvjm4oxxoy2g6"
+        "appName"       = "app-academic-staging-dvjm4oxxoy2g6"
+        "azdEnv"        = "academic-staging"
+        "logAnalytics"  = "law-academic-staging-dvjm4oxxoy2g6"
+        "appInsights"   = "ai-academic-staging-dvjm4oxxoy2g6"
     }
     "production" = @{
         "resourceGroup" = "rg-academic-production-westus2"
-        "appName" = "app-academic-production"
-        "azdEnv" = "academic-production"
-        "logAnalytics" = "law-academic-production"
-        "appInsights" = "ai-academic-production"
+        "appName"       = "app-academic-production"
+        "azdEnv"        = "academic-production"
+        "logAnalytics"  = "law-academic-production"
+        "appInsights"   = "ai-academic-production"
     }
 }
 
@@ -56,12 +56,12 @@ $config = $envConfig[$Environment]
 
 # Monitoring data storage
 $monitoringData = @{
-    "startTime" = Get-Date
-    "healthChecks" = @()
+    "startTime"          = Get-Date
+    "healthChecks"       = @()
     "performanceMetrics" = @()
-    "errorEvents" = @()
-    "deploymentMetrics" = @()
-    "alerts" = @()
+    "errorEvents"        = @()
+    "deploymentMetrics"  = @()
+    "alerts"             = @()
 }
 
 # Logging
@@ -82,8 +82,8 @@ function Write-MonitorLog {
     # Log to file for analysis
     $logEntry = @{
         timestamp = $timestamp
-        level = $Level
-        message = $Message
+        level     = $Level
+        message   = $Message
     }
     
     $logFile = "deployment-monitoring-$(Get-Date -Format 'yyyyMMdd').json"
@@ -99,17 +99,17 @@ function Get-ApplicationHealth {
         $responseTime = (Get-Date) - $startTime
         
         $healthData = @{
-            timestamp = Get-Date
-            status = $healthResponse.status
+            timestamp    = Get-Date
+            status       = $healthResponse.status
             responseTime = $responseTime.TotalMilliseconds
-            services = @{}
+            services     = @{}
         }
         
         # Collect service-specific health
         foreach ($service in $healthResponse.results.PSObject.Properties) {
             $healthData.services[$service.Name] = @{
                 status = $service.Value.status
-                data = $service.Value.data
+                data   = $service.Value.data
             }
         }
         
@@ -123,19 +123,20 @@ function Get-ApplicationHealth {
             Write-MonitorLog $alertMessage "ALERT"
             $monitoringData.alerts += @{
                 timestamp = Get-Date
-                type = "Performance"
-                message = $alertMessage
-                severity = "Warning"
+                type      = "Performance"
+                message   = $alertMessage
+                severity  = "Warning"
             }
         }
         
         return $healthData
         
-    } catch {
+    }
+    catch {
         $errorData = @{
             timestamp = Get-Date
-            error = $_.Exception.Message
-            status = "Unhealthy"
+            error     = $_.Exception.Message
+            status    = "Unhealthy"
         }
         
         $monitoringData.errorEvents += $errorData
@@ -144,9 +145,9 @@ function Get-ApplicationHealth {
         $alertMessage = "Application health check failed: $($_.Exception.Message)"
         $monitoringData.alerts += @{
             timestamp = Get-Date
-            type = "Health"
-            message = $alertMessage
-            severity = "Critical"
+            type      = "Health"
+            message   = $alertMessage
+            severity  = "Critical"
         }
         
         return $errorData
@@ -172,12 +173,12 @@ requests
         # Note: In a real implementation, you would use Azure CLI or REST API to query App Insights
         # For now, we'll simulate metrics collection
         $metricsData = @{
-            timestamp = Get-Date
+            timestamp    = Get-Date
             requestCount = Get-Random -Minimum 50 -Maximum 200
-            avgDuration = Get-Random -Minimum 100 -Maximum 2000
-            maxDuration = Get-Random -Minimum 500 -Maximum 5000
-            successRate = [math]::Round((Get-Random -Minimum 95.0 -Maximum 100.0), 2)
-            errorRate = [math]::Round((Get-Random -Minimum 0.0 -Maximum 5.0), 2)
+            avgDuration  = Get-Random -Minimum 100 -Maximum 2000
+            maxDuration  = Get-Random -Minimum 500 -Maximum 5000
+            successRate  = [math]::Round((Get-Random -Minimum 95.0 -Maximum 100.0), 2)
+            errorRate    = [math]::Round((Get-Random -Minimum 0.0 -Maximum 5.0), 2)
         }
         
         $monitoringData.performanceMetrics += $metricsData
@@ -190,9 +191,9 @@ requests
             Write-MonitorLog $alertMessage "ALERT"
             $monitoringData.alerts += @{
                 timestamp = Get-Date
-                type = "Performance"
-                message = $alertMessage
-                severity = "Warning"
+                type      = "Performance"
+                message   = $alertMessage
+                severity  = "Warning"
             }
         }
         
@@ -201,15 +202,16 @@ requests
             Write-MonitorLog $alertMessage "ALERT"
             $monitoringData.alerts += @{
                 timestamp = Get-Date
-                type = "Reliability"
-                message = $alertMessage
-                severity = "Critical"
+                type      = "Reliability"
+                message   = $alertMessage
+                severity  = "Critical"
             }
         }
         
         return $metricsData
         
-    } catch {
+    }
+    catch {
         Write-MonitorLog "Failed to collect Application Insights metrics: $($_.Exception.Message)" "ERROR"
         return $null
     }
@@ -228,11 +230,11 @@ function Get-AzureResourceMetrics {
         
         if ($appMetrics) {
             $resourceMetrics = @{
-                timestamp = Get-Date
-                cpuPercentage = $appMetrics | Where-Object {$_.name.value -eq "CpuPercentage"} | ForEach-Object {$_.timeseries[0].data[-1].average}
-                memoryPercentage = $appMetrics | Where-Object {$_.name.value -eq "MemoryPercentage"} | ForEach-Object {$_.timeseries[0].data[-1].average}
-                requestCount = $appMetrics | Where-Object {$_.name.value -eq "Requests"} | ForEach-Object {$_.timeseries[0].data[-1].total}
-                avgResponseTime = $appMetrics | Where-Object {$_.name.value -eq "AverageResponseTime"} | ForEach-Object {$_.timeseries[0].data[-1].average}
+                timestamp        = Get-Date
+                cpuPercentage    = $appMetrics | Where-Object { $_.name.value -eq "CpuPercentage" } | ForEach-Object { $_.timeseries[0].data[-1].average }
+                memoryPercentage = $appMetrics | Where-Object { $_.name.value -eq "MemoryPercentage" } | ForEach-Object { $_.timeseries[0].data[-1].average }
+                requestCount     = $appMetrics | Where-Object { $_.name.value -eq "Requests" } | ForEach-Object { $_.timeseries[0].data[-1].total }
+                avgResponseTime  = $appMetrics | Where-Object { $_.name.value -eq "AverageResponseTime" } | ForEach-Object { $_.timeseries[0].data[-1].average }
             }
             
             $monitoringData.deploymentMetrics += $resourceMetrics
@@ -245,9 +247,9 @@ function Get-AzureResourceMetrics {
                 Write-MonitorLog $alertMessage "ALERT"
                 $monitoringData.alerts += @{
                     timestamp = Get-Date
-                    type = "Resource"
-                    message = $alertMessage
-                    severity = "Warning"
+                    type      = "Resource"
+                    message   = $alertMessage
+                    severity  = "Warning"
                 }
             }
             
@@ -256,19 +258,21 @@ function Get-AzureResourceMetrics {
                 Write-MonitorLog $alertMessage "ALERT"
                 $monitoringData.alerts += @{
                     timestamp = Get-Date
-                    type = "Resource"
-                    message = $alertMessage
-                    severity = "Critical"
+                    type      = "Resource"
+                    message   = $alertMessage
+                    severity  = "Critical"
                 }
             }
             
             return $resourceMetrics
-        } else {
+        }
+        else {
             Write-MonitorLog "No Azure resource metrics available" "WARNING"
             return $null
         }
         
-    } catch {
+    }
+    catch {
         Write-MonitorLog "Failed to collect Azure resource metrics: $($_.Exception.Message)" "WARNING"
         return $null
     }
@@ -283,7 +287,8 @@ function Get-ApplicationLogs {
         
         if ($LASTEXITCODE -eq 0) {
             Write-MonitorLog "Application logs downloaded successfully" "SUCCESS"
-        } else {
+        }
+        else {
             Write-MonitorLog "Failed to download application logs: $logOutput" "WARNING"
         }
         
@@ -304,14 +309,15 @@ function Get-ApplicationLogs {
                 Write-MonitorLog $alertMessage "ALERT"
                 $monitoringData.alerts += @{
                     timestamp = Get-Date
-                    type = "Application"
-                    message = $alertMessage
-                    severity = "Error"
+                    type      = "Application"
+                    message   = $alertMessage
+                    severity  = "Error"
                 }
             }
         }
         
-    } catch {
+    }
+    catch {
         Write-MonitorLog "Failed to collect application logs: $($_.Exception.Message)" "WARNING"
     }
 }
@@ -323,26 +329,27 @@ function Generate-MonitoringReport {
     $duration = $endTime - $monitoringData.startTime
     
     $report = @{
-        environment = $Environment
+        environment      = $Environment
         monitoringPeriod = @{
-            start = $monitoringData.startTime
-            end = $endTime
+            start    = $monitoringData.startTime
+            end      = $endTime
             duration = $duration.TotalMinutes
         }
-        summary = @{
-            healthChecks = $monitoringData.healthChecks.Count
+        summary          = @{
+            healthChecks       = $monitoringData.healthChecks.Count
             performanceMetrics = $monitoringData.performanceMetrics.Count
-            errorEvents = $monitoringData.errorEvents.Count
-            alerts = $monitoringData.alerts.Count
+            errorEvents        = $monitoringData.errorEvents.Count
+            alerts             = $monitoringData.alerts.Count
         }
-        healthStatus = @{
-            current = if ($monitoringData.healthChecks.Count -gt 0) { $monitoringData.healthChecks[-1].status } else { "Unknown" }
+        healthStatus     = @{
+            current         = if ($monitoringData.healthChecks.Count -gt 0) { $monitoringData.healthChecks[-1].status } else { "Unknown" }
             avgResponseTime = if ($monitoringData.healthChecks.Count -gt 0) { 
                 [math]::Round(($monitoringData.healthChecks | Measure-Object -Property responseTime -Average).Average, 2) 
-            } else { 0 }
+            }
+            else { 0 }
         }
-        alerts = $monitoringData.alerts
-        recommendations = @()
+        alerts           = $monitoringData.alerts
+        recommendations  = @()
     }
     
     # Generate recommendations based on monitoring data
@@ -441,10 +448,12 @@ function Start-DeploymentMonitoring {
     if ($monitoringData.alerts | Where-Object { $_.severity -eq "Critical" }) {
         Write-MonitorLog "Critical alerts detected during monitoring - review required" "ERROR"
         exit 1
-    } elseif ($monitoringData.alerts.Count -gt 0) {
+    }
+    elseif ($monitoringData.alerts.Count -gt 0) {
         Write-MonitorLog "Warnings detected during monitoring - review recommended" "WARNING"
         exit 2
-    } else {
+    }
+    else {
         Write-MonitorLog "Monitoring completed successfully - no issues detected" "SUCCESS"
         exit 0
     }

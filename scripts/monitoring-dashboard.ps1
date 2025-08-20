@@ -19,29 +19,29 @@
 #>
 
 param(
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [ValidateSet("staging", "production")]
     [string]$Environment = "staging",
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [int]$RefreshInterval = 5,
     
-    [Parameter(Mandatory=$false)]
+    [Parameter(Mandatory = $false)]
     [ValidateSet("Console", "File", "Both")]
     [string]$DashboardMode = "Console"
 )
 
 # Environment configuration
 $envConfig = @{
-    "staging" = @{
+    "staging"    = @{
         "resourceGroup" = "rg-academic-staging-westus2"
-        "appName" = "app-academic-staging-dvjm4oxxoy2g6"
-        "appUrl" = "https://app-academic-staging-dvjm4oxxoy2g6.azurewebsites.net"
+        "appName"       = "app-academic-staging-dvjm4oxxoy2g6"
+        "appUrl"        = "https://app-academic-staging-dvjm4oxxoy2g6.azurewebsites.net"
     }
     "production" = @{
         "resourceGroup" = "rg-academic-production-westus2"
-        "appName" = "app-academic-production"
-        "appUrl" = "https://app-academic-production.azurewebsites.net"
+        "appName"       = "app-academic-production"
+        "appUrl"        = "https://app-academic-production.azurewebsites.net"
     }
 }
 
@@ -49,11 +49,11 @@ $config = $envConfig[$Environment]
 
 # Dashboard state
 $dashboardData = @{
-    startTime = Get-Date
-    refreshCount = 0
-    healthHistory = @()
+    startTime          = Get-Date
+    refreshCount       = 0
+    healthHistory      = @()
     performanceHistory = @()
-    alerts = @()
+    alerts             = @()
 }
 
 function Get-ColoredStatus {
@@ -85,16 +85,16 @@ function Get-ApplicationHealth {
         $responseTime = ((Get-Date) - $startTime).TotalMilliseconds
         
         $healthData = @{
-            timestamp = Get-Date
-            status = $response.status
+            timestamp    = Get-Date
+            status       = $response.status
             responseTime = $responseTime
-            services = @{}
+            services     = @{}
         }
         
         foreach ($service in $response.results.PSObject.Properties) {
             $healthData.services[$service.Name] = @{
                 status = $service.Value.status
-                data = $service.Value.data
+                data   = $service.Value.data
             }
         }
         
@@ -108,11 +108,11 @@ function Get-ApplicationHealth {
     }
     catch {
         $errorData = @{
-            timestamp = Get-Date
-            status = "Unreachable"
+            timestamp    = Get-Date
+            status       = "Unreachable"
             responseTime = -1
-            error = $_.Exception.Message
-            services = @{}
+            error        = $_.Exception.Message
+            services     = @{}
         }
         
         $dashboardData.healthHistory += $errorData
@@ -124,12 +124,12 @@ function Get-QuickMetrics {
     try {
         # Simulate performance metrics (in real scenario, would query Application Insights)
         $metrics = @{
-            timestamp = Get-Date
+            timestamp         = Get-Date
             requestsPerMinute = Get-Random -Minimum 20 -Maximum 150
-            avgResponseTime = Get-Random -Minimum 100 -Maximum 2000
-            errorRate = [math]::Round((Get-Random -Minimum 0.0 -Maximum 5.0), 2)
-            cpuUsage = Get-Random -Minimum 10 -Maximum 95
-            memoryUsage = Get-Random -Minimum 30 -Maximum 90
+            avgResponseTime   = Get-Random -Minimum 100 -Maximum 2000
+            errorRate         = [math]::Round((Get-Random -Minimum 0.0 -Maximum 5.0), 2)
+            cpuUsage          = Get-Random -Minimum 10 -Maximum 95
+            memoryUsage       = Get-Random -Minimum 30 -Maximum 90
             activeConnections = Get-Random -Minimum 5 -Maximum 50
         }
         
@@ -179,7 +179,8 @@ function Show-ConsoleDashboard {
             $serviceStatus = Get-ColoredStatus $service.Value.status
             Write-Host "│ $($service.Key): $serviceStatus" -ForegroundColor White
         }
-    } else {
+    }
+    else {
         Write-Host "│ ❌ Unable to retrieve health data" -ForegroundColor Red
     }
     Write-Host "└───────────────────────────────────────────────────────────────────────────────┘" -ForegroundColor Green
@@ -194,7 +195,8 @@ function Show-ConsoleDashboard {
         Write-Host "│ CPU Usage: $($MetricsData.cpuUsage)% $(Get-PerformanceIndicator $MetricsData.cpuUsage 70 90)" -ForegroundColor White
         Write-Host "│ Memory Usage: $($MetricsData.memoryUsage)% $(Get-PerformanceIndicator $MetricsData.memoryUsage 80 95)" -ForegroundColor White
         Write-Host "│ Active Connections: $($MetricsData.activeConnections) $(Get-PerformanceIndicator $MetricsData.activeConnections 30 100)" -ForegroundColor White
-    } else {
+    }
+    else {
         Write-Host "│ ❌ Unable to retrieve performance metrics" -ForegroundColor Red
     }
     Write-Host "└───────────────────────────────────────────────────────────────────────────────┘" -ForegroundColor Magenta
@@ -237,7 +239,8 @@ function Show-ConsoleDashboard {
                 else { $trendBar += "█" }
             }
             Write-Host "│ $trendBar" -ForegroundColor Green
-        } else {
+        }
+        else {
             Write-Host "│ No response time data available" -ForegroundColor Yellow
         }
         Write-Host "└───────────────────────────────────────────────────────────────────────────────┘" -ForegroundColor Cyan
@@ -254,12 +257,12 @@ function Save-DashboardData {
     param($HealthData, $MetricsData)
     
     $dashboardSnapshot = @{
-        timestamp = Get-Date
-        environment = $Environment
-        refreshCount = $dashboardData.refreshCount
-        health = $HealthData
-        metrics = $MetricsData
-        healthHistory = $dashboardData.healthHistory
+        timestamp          = Get-Date
+        environment        = $Environment
+        refreshCount       = $dashboardData.refreshCount
+        health             = $HealthData
+        metrics            = $MetricsData
+        healthHistory      = $dashboardData.healthHistory
         performanceHistory = $dashboardData.performanceHistory
     }
     
@@ -296,9 +299,9 @@ function Start-MonitoringDashboard {
             if ($healthData -and $healthData.status -ne "Healthy") {
                 $alert = @{
                     timestamp = Get-Date
-                    type = "Health"
-                    severity = if ($healthData.status -eq "Unhealthy") { "Critical" } else { "Warning" }
-                    message = "Application health status: $($healthData.status)"
+                    type      = "Health"
+                    severity  = if ($healthData.status -eq "Unhealthy") { "Critical" } else { "Warning" }
+                    message   = "Application health status: $($healthData.status)"
                 }
                 $dashboardData.alerts += $alert
             }
@@ -307,9 +310,9 @@ function Start-MonitoringDashboard {
                 if ($metricsData.cpuUsage -gt 90) {
                     $alert = @{
                         timestamp = Get-Date
-                        type = "Performance"
-                        severity = "Critical"
-                        message = "High CPU usage: $($metricsData.cpuUsage)%"
+                        type      = "Performance"
+                        severity  = "Critical"
+                        message   = "High CPU usage: $($metricsData.cpuUsage)%"
                     }
                     $dashboardData.alerts += $alert
                 }
@@ -317,9 +320,9 @@ function Start-MonitoringDashboard {
                 if ($metricsData.memoryUsage -gt 95) {
                     $alert = @{
                         timestamp = Get-Date
-                        type = "Performance" 
-                        severity = "Critical"
-                        message = "High memory usage: $($metricsData.memoryUsage)%"
+                        type      = "Performance" 
+                        severity  = "Critical"
+                        message   = "High memory usage: $($metricsData.memoryUsage)%"
                     }
                     $dashboardData.alerts += $alert
                 }
@@ -365,13 +368,13 @@ function Start-MonitoringDashboard {
         
         # Save final summary
         $summary = @{
-            environment = $Environment
-            sessionStart = $dashboardData.startTime
-            sessionEnd = Get-Date
-            totalUptime = $totalUptime.TotalMinutes
-            refreshCount = $dashboardData.refreshCount
-            healthChecks = $dashboardData.healthHistory.Count
-            alerts = $dashboardData.alerts.Count
+            environment      = $Environment
+            sessionStart     = $dashboardData.startTime
+            sessionEnd       = Get-Date
+            totalUptime      = $totalUptime.TotalMinutes
+            refreshCount     = $dashboardData.refreshCount
+            healthChecks     = $dashboardData.healthHistory.Count
+            alerts           = $dashboardData.alerts.Count
             healthPercentage = if ($dashboardData.healthHistory.Count -gt 0) { [math]::Round((($dashboardData.healthHistory | Where-Object { $_.status -eq "Healthy" }).Count / $dashboardData.healthHistory.Count) * 100, 2) } else { 0 }
         }
         
