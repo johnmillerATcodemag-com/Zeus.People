@@ -234,12 +234,12 @@ jobs:
       - name: 🚀 Deploy to Azure App Service
         run: |
           echo "🚀 Deploying application to Azure App Service..."
-          
+
           # Create deployment package
           cd ./publish/app
           zip -r ../app-deployment.zip .
           cd ../..
-          
+
           # Deploy using Azure CLI
           az webapp deploy \
             --resource-group ${{ env.AZURE_RESOURCE_GROUP }} \
@@ -247,7 +247,7 @@ jobs:
             --src-path ./publish/app-deployment.zip \
             --type zip \
             --async false
-          
+
           echo "✅ Application deployed successfully"
 
       - name: ⚙️ Configure App Settings
@@ -303,7 +303,7 @@ jobs:
             }
           }
           azd version
-          
+
           # Login to AZD and set environment
           azd auth login --client-id "${{ secrets.AZURE_CLIENT_ID }}" --client-secret "${{ secrets.AZURE_CLIENT_SECRET }}" --tenant-id "${{ secrets.AZURE_TENANT_ID }}"
             
