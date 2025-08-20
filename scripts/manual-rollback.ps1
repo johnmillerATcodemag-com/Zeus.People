@@ -100,7 +100,9 @@ function Backup-CurrentState {
     Write-RollbackLog "Creating backup of current state before rollback..." "INFO"
     
     try {
-        $backupDir = "rollback-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+        # Create backup in temp directory to avoid committing sensitive data
+        $tempDir = [System.IO.Path]::GetTempPath()
+        $backupDir = Join-Path $tempDir "zeus-rollback-backup-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
         New-Item -ItemType Directory -Path $backupDir -Force | Out-Null
         
         # Backup current app settings
