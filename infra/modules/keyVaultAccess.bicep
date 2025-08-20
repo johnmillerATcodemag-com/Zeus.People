@@ -19,7 +19,9 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-
   name: managedIdentityName
 }
 
-// Role assignment for Key Vault Secrets User
+// Role assignment for Key Vault Secrets User - TEMPORARILY DISABLED due to permission restrictions
+// TODO: Re-enable once service principal has User Access Administrator role
+/*
 resource keyVaultSecretsUserAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(keyVault.id, managedIdentity.id, keyVaultSecretsUserRoleId)
   scope: keyVault
@@ -30,10 +32,11 @@ resource keyVaultSecretsUserAssignment 'Microsoft.Authorization/roleAssignments@
     description: 'Allows the managed identity to read secrets from Key Vault'
   }
 }
+*/
 
 // Output values
-@description('The resource ID of the Key Vault Secrets User role assignment')
-output keyVaultSecretsUserAssignmentId string = keyVaultSecretsUserAssignment.id
+@description('The resource ID of the Key Vault Secrets User role assignment - DISABLED')
+output keyVaultSecretsUserAssignmentId string = 'RBAC-ASSIGNMENT-DISABLED'
 
 @description('The principal ID of the managed identity')
 output managedIdentityPrincipalId string = managedIdentity.properties.principalId
