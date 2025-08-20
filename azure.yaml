@@ -11,4 +11,3 @@ services:
     project: src/API
     host: appservice
     language: dotnet
-    dist: publish
