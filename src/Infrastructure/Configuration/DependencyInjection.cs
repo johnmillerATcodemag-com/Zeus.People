@@ -30,80 +30,94 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Add Entity Framework for write operations
-        services.AddDbContext<AcademicContext>(options =>
-        {
-            var connectionString = configuration.GetConnectionString("AcademicDatabase");
-            options.UseSqlServer(connectionString, sqlOptions =>
-            {
-                sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 3,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd: null);
-            });
+        // Check if SQL Database features are enabled
+        var enableSqlDatabase = bool.TryParse(configuration["Features:EnableSqlDatabase"], out var sqlEnabled) ? sqlEnabled : true;
+        var enableEventStore = bool.TryParse(configuration["Features:EnableEventStore"], out var eventStoreEnabled) ? eventStoreEnabled : true;
 
-            // Enable sensitive data logging in development
-            if (bool.TryParse(configuration["Logging:EnableSensitiveDataLogging"], out var enableSensitiveDataLogging) && enableSensitiveDataLogging)
-            {
-                options.EnableSensitiveDataLogging();
-            }
-        });
-
-        // Add Event Store
-        services.AddDbContext<EventStoreContext>(options =>
+        // Only add Entity Framework if SQL Database is enabled and connection string exists
+        if (enableSqlDatabase && !string.IsNullOrEmpty(configuration.GetConnectionString("AcademicDatabase")))
         {
-            var connectionString = configuration.GetConnectionString("EventStoreDatabase");
-            options.UseSqlServer(connectionString, sqlOptions =>
+            services.AddDbContext<AcademicContext>(options =>
             {
-                sqlOptions.EnableRetryOnFailure(
-                    maxRetryCount: 3,
-                    maxRetryDelay: TimeSpan.FromSeconds(30),
-                    errorNumbersToAdd: null);
-            });
-        });
-
-        // Add Azure Service Bus
-        var serviceBusSection = configuration.GetSection(ServiceBusConfiguration.SectionName);
-        services.Configure<ServiceBusConfiguration>(options =>
-        {
-            options.Namespace = serviceBusSection[nameof(ServiceBusConfiguration.Namespace)] ?? string.Empty;
-            options.TopicName = serviceBusSection[nameof(ServiceBusConfiguration.TopicName)] ?? "domain-events";
-            options.SubscriptionName = serviceBusSection[nameof(ServiceBusConfiguration.SubscriptionName)] ?? "zeus-people-subscription";
-            if (bool.TryParse(serviceBusSection[nameof(ServiceBusConfiguration.UseManagedIdentity)], out var useManagedIdentity))
-                options.UseManagedIdentity = useManagedIdentity;
-            if (int.TryParse(serviceBusSection[nameof(ServiceBusConfiguration.MaxRetryAttempts)], out var maxRetryAttempts))
-                options.MaxRetryAttempts = maxRetryAttempts;
-            if (int.TryParse(serviceBusSection[nameof(ServiceBusConfiguration.DelayBetweenRetriesInSeconds)], out var delayBetweenRetries))
-                options.DelayBetweenRetriesInSeconds = delayBetweenRetries;
-            if (int.TryParse(serviceBusSection[nameof(ServiceBusConfiguration.MaxDelayInSeconds)], out var maxDelay))
-                options.MaxDelayInSeconds = maxDelay;
-        });
-
-        services.AddSingleton(serviceProvider =>
-        {
-            var connectionString = configuration.GetConnectionString("ServiceBus");
-            var clientOptions = new ServiceBusClientOptions
-            {
-                RetryOptions = new ServiceBusRetryOptions
+                var connectionString = configuration.GetConnectionString("AcademicDatabase");
+                options.UseSqlServer(connectionString, sqlOptions =>
                 {
-                    Mode = ServiceBusRetryMode.Exponential,
-                    MaxRetries = 3,
-                    Delay = TimeSpan.FromSeconds(2),
-                    MaxDelay = TimeSpan.FromSeconds(30)
-                }
-            };
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                });
 
-            // Use Managed Identity in production, connection string in development
-            if (string.IsNullOrEmpty(connectionString))
+                // Enable sensitive data logging in development
+                if (bool.TryParse(configuration["Logging:EnableSensitiveDataLogging"], out var enableSensitiveDataLogging) && enableSensitiveDataLogging)
+                {
+                    options.EnableSensitiveDataLogging();
+                }
+            });
+        }
+
+        // Only add Event Store if enabled and connection string exists
+        if (enableEventStore && !string.IsNullOrEmpty(configuration.GetConnectionString("EventStoreDatabase")))
+        {
+            services.AddDbContext<EventStoreContext>(options =>
             {
-                var serviceBusNamespace = configuration["ServiceBus:Namespace"];
-                return new ServiceBusClient(serviceBusNamespace, new DefaultAzureCredential(), clientOptions);
-            }
-            else
+                var connectionString = configuration.GetConnectionString("EventStoreDatabase");
+                options.UseSqlServer(connectionString, sqlOptions =>
+                {
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(30),
+                        errorNumbersToAdd: null);
+                });
+            });
+        }
+
+        // Add Azure Service Bus (only if connection string is available)
+        var serviceBusConnectionString = configuration.GetConnectionString("ServiceBus");
+        if (!string.IsNullOrEmpty(serviceBusConnectionString))
+        {
+            var serviceBusSection = configuration.GetSection(ServiceBusConfiguration.SectionName);
+            services.Configure<ServiceBusConfiguration>(options =>
             {
-                return new ServiceBusClient(connectionString, clientOptions);
-            }
-        });
+                options.Namespace = serviceBusSection[nameof(ServiceBusConfiguration.Namespace)] ?? string.Empty;
+                options.TopicName = serviceBusSection[nameof(ServiceBusConfiguration.TopicName)] ?? "domain-events";
+                options.SubscriptionName = serviceBusSection[nameof(ServiceBusConfiguration.SubscriptionName)] ?? "zeus-people-subscription";
+                if (bool.TryParse(serviceBusSection[nameof(ServiceBusConfiguration.UseManagedIdentity)], out var useManagedIdentity))
+                    options.UseManagedIdentity = useManagedIdentity;
+                if (int.TryParse(serviceBusSection[nameof(ServiceBusConfiguration.MaxRetryAttempts)], out var maxRetryAttempts))
+                    options.MaxRetryAttempts = maxRetryAttempts;
+                if (int.TryParse(serviceBusSection[nameof(ServiceBusConfiguration.DelayBetweenRetriesInSeconds)], out var delayBetweenRetries))
+                    options.DelayBetweenRetriesInSeconds = delayBetweenRetries;
+                if (int.TryParse(serviceBusSection[nameof(ServiceBusConfiguration.MaxDelayInSeconds)], out var maxDelay))
+                    options.MaxDelayInSeconds = maxDelay;
+            });
+
+            services.AddSingleton(serviceProvider =>
+            {
+                var connectionString = configuration.GetConnectionString("ServiceBus");
+                var clientOptions = new ServiceBusClientOptions
+                {
+                    RetryOptions = new ServiceBusRetryOptions
+                    {
+                        Mode = ServiceBusRetryMode.Exponential,
+                        MaxRetries = 3,
+                        Delay = TimeSpan.FromSeconds(2),
+                        MaxDelay = TimeSpan.FromSeconds(30)
+                    }
+                };
+
+                // Use Managed Identity in production, connection string in development
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    var serviceBusNamespace = configuration["ServiceBus:Namespace"];
+                    return new ServiceBusClient(serviceBusNamespace, new DefaultAzureCredential(), clientOptions);
+                }
+                else
+                {
+                    return new ServiceBusClient(connectionString, clientOptions);
+                }
+            });
+        }
 
         // Add Cosmos DB for read operations
         var cosmosDbSection = configuration.GetSection(CosmosDbConfiguration.SectionName);
@@ -179,29 +193,58 @@ public static class DependencyInjection
             }
         });
 
-        // Register repositories
-        services.AddScoped<IAcademicRepository, AcademicRepository>();
-        services.AddScoped<IDepartmentRepository, DepartmentRepository>();
-        services.AddScoped<IRoomRepository, RoomRepository>();
-        services.AddScoped<IExtensionRepository, ExtensionRepository>();
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        // Register repositories (conditionally based on SQL availability)
+        if (enableSqlDatabase && !string.IsNullOrEmpty(configuration.GetConnectionString("AcademicDatabase")))
+        {
+            services.AddScoped<IAcademicRepository, AcademicRepository>();
+            services.AddScoped<IDepartmentRepository, DepartmentRepository>();
+            services.AddScoped<IRoomRepository, RoomRepository>();
+            services.AddScoped<IExtensionRepository, ExtensionRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+        }
+        // Note: In Cosmos-only mode, write operations are handled via read repositories and direct Cosmos operations
 
-        // Register read repositories
+        // Register read repositories (always available via Cosmos DB)
         services.AddScoped<IAcademicReadRepository, CosmosDbReadModelRepository>();
         services.AddScoped<IDepartmentReadRepository, CosmosDbReadModelRepository>();
         services.AddScoped<IRoomReadRepository, CosmosDbReadModelRepository>();
         services.AddScoped<IExtensionReadRepository, CosmosDbReadModelRepository>();
 
-        // Register event store and publisher
-        services.AddScoped<IEventStore, SqlEventStore>();
-        services.AddScoped<IEventPublisher, ServiceBusEventPublisher>();
+        // Register event store and publisher (conditionally)
+        if (enableEventStore && !string.IsNullOrEmpty(configuration.GetConnectionString("EventStoreDatabase")))
+        {
+            services.AddScoped<IEventStore, SqlEventStore>();
+        }
+        // Note: In Cosmos-only mode, event sourcing is disabled
 
-        // Add health checks
-        services.AddHealthChecks()
-            .AddCheck<DatabaseHealthCheck>("database", tags: new[] { "database", "sql" })
-            .AddCheck<EventStoreHealthCheck>("eventstore", tags: new[] { "eventstore", "sql" })
-            .AddCheck<ServiceBusHealthCheck>("servicebus", tags: new[] { "servicebus", "messaging" })
-            .AddCheck<CosmosDbHealthCheck>("cosmosdb", tags: new[] { "cosmosdb", "nosql" });
+        if (!string.IsNullOrEmpty(serviceBusConnectionString))
+        {
+            services.AddScoped<IEventPublisher, ServiceBusEventPublisher>();
+        }
+        // Note: In Service Bus unavailable mode, events are not published
+
+        // Add health checks (conditionally based on available services)
+        var healthChecksBuilder = services.AddHealthChecks();
+
+        // Only add SQL-based health checks if SQL services are enabled
+        if (enableSqlDatabase && !string.IsNullOrEmpty(configuration.GetConnectionString("AcademicDatabase")))
+        {
+            healthChecksBuilder.AddCheck<DatabaseHealthCheck>("database", tags: new[] { "database", "sql" });
+        }
+
+        if (enableEventStore && !string.IsNullOrEmpty(configuration.GetConnectionString("EventStoreDatabase")))
+        {
+            healthChecksBuilder.AddCheck<EventStoreHealthCheck>("eventstore", tags: new[] { "eventstore", "sql" });
+        }
+
+        // Only add Service Bus health check if Service Bus is available
+        if (!string.IsNullOrEmpty(serviceBusConnectionString))
+        {
+            healthChecksBuilder.AddCheck<ServiceBusHealthCheck>("servicebus", tags: new[] { "servicebus", "messaging" });
+        }
+
+        // Always add Cosmos DB health check (primary database)
+        healthChecksBuilder.AddCheck<CosmosDbHealthCheck>("cosmosdb", tags: new[] { "cosmosdb", "nosql" });
 
         return services;
     }
@@ -212,24 +255,33 @@ public static class DependencyInjection
     public static async Task<IServiceProvider> EnsureDatabasesCreatedAsync(this IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
+        var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
         try
         {
-            // Ensure Academic database is created and migrated
-            var academicContext = scope.ServiceProvider.GetRequiredService<AcademicContext>();
-            if (await academicContext.Database.CanConnectAsync())
+            // Only migrate Academic database if it's configured
+            var enableSqlDatabase = bool.TryParse(configuration["Features:EnableSqlDatabase"], out var sqlEnabled) ? sqlEnabled : true;
+            if (enableSqlDatabase && !string.IsNullOrEmpty(configuration.GetConnectionString("AcademicDatabase")))
             {
-                await academicContext.Database.MigrateAsync();
+                var academicContext = scope.ServiceProvider.GetService<AcademicContext>();
+                if (academicContext != null && await academicContext.Database.CanConnectAsync())
+                {
+                    await academicContext.Database.MigrateAsync();
+                }
             }
 
-            // Ensure Event Store database is created and migrated
-            var eventStoreContext = scope.ServiceProvider.GetRequiredService<EventStoreContext>();
-            if (await eventStoreContext.Database.CanConnectAsync())
+            // Only migrate Event Store database if it's configured
+            var enableEventStore = bool.TryParse(configuration["Features:EnableEventStore"], out var eventStoreEnabled) ? eventStoreEnabled : true;
+            if (enableEventStore && !string.IsNullOrEmpty(configuration.GetConnectionString("EventStoreDatabase")))
             {
-                await eventStoreContext.Database.MigrateAsync();
+                var eventStoreContext = scope.ServiceProvider.GetService<EventStoreContext>();
+                if (eventStoreContext != null && await eventStoreContext.Database.CanConnectAsync())
+                {
+                    await eventStoreContext.Database.MigrateAsync();
+                }
             }
 
-            // Ensure Cosmos DB containers are created
+            // Always ensure Cosmos DB containers are created (primary database)
             await EnsureCosmosDbContainersAsync(scope.ServiceProvider);
         }
         catch (Exception ex)
