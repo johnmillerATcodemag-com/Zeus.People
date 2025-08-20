@@ -48,6 +48,11 @@ CodeCoverage/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+# Rollback artifacts (contain sensitive data)
+rollback-backup-*/
+rollback-*.log
+*.rollback.*
+
 # NUnit
 *.VisualState.xml
 TestResult.xml

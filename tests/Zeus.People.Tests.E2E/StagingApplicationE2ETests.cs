@@ -19,7 +19,7 @@ public class StagingApplicationE2ETests : IDisposable
     {
         _output = output;
         _baseUrl = "https://app-academic-staging-dvjm4oxxoy2g6.azurewebsites.net";
-        
+
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri(_baseUrl),
@@ -39,10 +39,10 @@ public class StagingApplicationE2ETests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.Contains("Healthy", content);
-        
+
         _output.WriteLine($"✅ Health Status: {response.StatusCode}");
         _output.WriteLine($"✅ Health Response: {content}");
-        
+
         // Verify JSON structure if applicable
         if (content.StartsWith("{"))
         {
@@ -64,20 +64,20 @@ public class StagingApplicationE2ETests : IDisposable
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        
+
         if (content.StartsWith("{"))
         {
             var healthData = JsonSerializer.Deserialize<JsonElement>(content);
-            
+
             // Check overall status
             Assert.True(healthData.TryGetProperty("status", out var overallStatus));
             Assert.Equal("Healthy", overallStatus.GetString());
-            
+
             // Check individual service health if available
             if (healthData.TryGetProperty("entries", out var entries))
             {
                 var expectedServices = new[] { "Configuration", "ServiceBus", "CosmosDB" };
-                
+
                 foreach (var serviceName in expectedServices)
                 {
                     if (entries.TryGetProperty(serviceName, out var serviceHealth))
@@ -89,7 +89,7 @@ public class StagingApplicationE2ETests : IDisposable
                 }
             }
         }
-        
+
         _output.WriteLine("✅ All dependent services are healthy in staging environment");
     }
 
@@ -104,10 +104,10 @@ public class StagingApplicationE2ETests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(response.Headers);
-        
+
         // Verify common API headers
         Assert.True(response.Content.Headers.ContentType != null);
-        
+
         _output.WriteLine($"✅ Content-Type: {response.Content.Headers.ContentType}");
         _output.WriteLine("✅ API responds with proper HTTP headers");
     }
@@ -126,9 +126,9 @@ public class StagingApplicationE2ETests : IDisposable
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.True(stopwatch.ElapsedMilliseconds < 5000, 
+        Assert.True(stopwatch.ElapsedMilliseconds < 5000,
             $"Response time {stopwatch.ElapsedMilliseconds}ms exceeds 5 second threshold");
-        
+
         _output.WriteLine($"✅ Response time: {stopwatch.ElapsedMilliseconds}ms (acceptable)");
     }
 
@@ -159,11 +159,11 @@ public class StagingApplicationE2ETests : IDisposable
         {
             var response = await httpClient.GetAsync($"{httpUrl}/health");
             // If we get here, check if it redirects to HTTPS
-            if (response.StatusCode == HttpStatusCode.Redirect || 
+            if (response.StatusCode == HttpStatusCode.Redirect ||
                 response.StatusCode == HttpStatusCode.MovedPermanently)
             {
                 var location = response.Headers.Location?.ToString();
-                Assert.True(location?.StartsWith("https://"), 
+                Assert.True(location?.StartsWith("https://"),
                     "HTTP should redirect to HTTPS");
                 _output.WriteLine("✅ HTTP properly redirects to HTTPS");
             }
@@ -198,9 +198,9 @@ public class StagingApplicationE2ETests : IDisposable
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             _output.WriteLine($"✅ Request {index + 1}/{numberOfRequests}: {response.StatusCode}");
         }
-        
+
         _output.WriteLine($"✅ All {numberOfRequests} concurrent requests handled successfully");
-        
+
         // Cleanup
         foreach (var response in responses)
         {

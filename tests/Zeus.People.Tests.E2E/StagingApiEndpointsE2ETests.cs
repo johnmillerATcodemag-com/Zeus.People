@@ -18,7 +18,7 @@ public class StagingApiEndpointsE2ETests : IDisposable
     {
         _output = output;
         _baseUrl = "https://app-academic-staging-dvjm4oxxoy2g6.azurewebsites.net";
-        
+
         _httpClient = new HttpClient
         {
             BaseAddress = new Uri(_baseUrl),
@@ -36,15 +36,15 @@ public class StagingApiEndpointsE2ETests : IDisposable
 
         // Assert
         // Swagger might be disabled in staging for security, which is expected
-        var acceptableStatusCodes = new[] { 
-            HttpStatusCode.OK, 
-            HttpStatusCode.Redirect, 
+        var acceptableStatusCodes = new[] {
+            HttpStatusCode.OK,
+            HttpStatusCode.Redirect,
             HttpStatusCode.MovedPermanently,
             HttpStatusCode.NotFound  // Acceptable if disabled for security
         };
-        
+
         Assert.Contains(response.StatusCode, acceptableStatusCodes);
-        
+
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
             _output.WriteLine("✅ Swagger is disabled in staging environment (security best practice)");
@@ -52,8 +52,8 @@ public class StagingApiEndpointsE2ETests : IDisposable
         else
         {
             _output.WriteLine($"✅ Swagger endpoint response: {response.StatusCode}");
-            
-            if (response.StatusCode == HttpStatusCode.Redirect || 
+
+            if (response.StatusCode == HttpStatusCode.Redirect ||
                 response.StatusCode == HttpStatusCode.MovedPermanently)
             {
                 var location = response.Headers.Location?.ToString();
@@ -74,36 +74,36 @@ public class StagingApiEndpointsE2ETests : IDisposable
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.StartsWith("{", content); // Should be JSON
-        
+
         var healthData = JsonSerializer.Deserialize<JsonElement>(content);
-        
+
         // Validate overall structure
         Assert.True(healthData.TryGetProperty("status", out var status));
         Assert.Equal("Healthy", status.GetString());
-        
+
         Assert.True(healthData.TryGetProperty("totalDuration", out var totalDuration));
         _output.WriteLine($"✅ Total health check duration: {totalDuration.GetString()}");
-        
+
         Assert.True(healthData.TryGetProperty("timestamp", out var timestamp));
         _output.WriteLine($"✅ Health check timestamp: {timestamp.GetString()}");
-        
+
         // Validate individual service results
         Assert.True(healthData.TryGetProperty("results", out var results));
-        
+
         var expectedServices = new[] { "configuration", "servicebus", "cosmosdb" };
         foreach (var serviceName in expectedServices)
         {
             Assert.True(results.TryGetProperty(serviceName, out var service));
             Assert.True(service.TryGetProperty("status", out var serviceStatus));
             Assert.Equal("Healthy", serviceStatus.GetString());
-            
+
             Assert.True(service.TryGetProperty("duration", out var serviceDuration));
             _output.WriteLine($"✅ {serviceName} duration: {serviceDuration.GetString()}");
-            
+
             Assert.True(service.TryGetProperty("description", out var description));
             _output.WriteLine($"✅ {serviceName}: {description.GetString()}");
         }
-        
+
         _output.WriteLine("✅ All health check components validated successfully");
     }
 
@@ -121,14 +121,14 @@ public class StagingApiEndpointsE2ETests : IDisposable
         var response = await _httpClient.SendAsync(request);
 
         // Assert
-        var acceptableStatusCodes = new[] { 
-            HttpStatusCode.OK, 
+        var acceptableStatusCodes = new[] {
+            HttpStatusCode.OK,
             HttpStatusCode.NoContent,
             HttpStatusCode.BadRequest  // May reject cross-origin requests, which is valid
         };
-        
+
         Assert.Contains(response.StatusCode, acceptableStatusCodes);
-        
+
         if (response.StatusCode == HttpStatusCode.BadRequest)
         {
             _output.WriteLine("✅ CORS policy appropriately restricts cross-origin requests");
@@ -155,7 +155,7 @@ public class StagingApiEndpointsE2ETests : IDisposable
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         Assert.NotNull(response.Content.Headers.ContentType);
         Assert.Contains("application/json", response.Content.Headers.ContentType.ToString());
-        
+
         _output.WriteLine($"✅ Content-Type: {response.Content.Headers.ContentType}");
         _output.WriteLine("✅ API properly responds with JSON content type");
     }
@@ -170,23 +170,23 @@ public class StagingApiEndpointsE2ETests : IDisposable
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        
+
         // Check for security headers (these may vary based on configuration)
         var securityHeaders = new Dictionary<string, string>
         {
             // Common security headers - check if present
         };
-        
+
         foreach (var header in response.Headers)
         {
             _output.WriteLine($"✅ Response header: {header.Key} = {string.Join(", ", header.Value)}");
         }
-        
+
         foreach (var header in response.Content.Headers)
         {
             _output.WriteLine($"✅ Content header: {header.Key} = {string.Join(", ", header.Value)}");
         }
-        
+
         _output.WriteLine("✅ Response headers logged for security validation");
     }
 
@@ -222,7 +222,7 @@ public class StagingApiEndpointsE2ETests : IDisposable
         {
             await shortTimeoutClient.GetAsync("/health");
         });
-        
+
         _output.WriteLine("✅ API handles timeout scenarios appropriately");
     }
 
