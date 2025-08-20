@@ -33,7 +33,7 @@ public static class DependencyInjection
         // Check if SQL Database features are enabled (explicit string checking for debugging)
         var sqlDatabaseConfigValue = configuration["Features:EnableSqlDatabase"] ?? configuration["Features__EnableSqlDatabase"] ?? "true";
         var eventStoreConfigValue = configuration["Features:EnableEventStore"] ?? configuration["Features__EnableEventStore"] ?? "true";
-        
+
         var enableSqlDatabase = !string.Equals(sqlDatabaseConfigValue, "false", StringComparison.OrdinalIgnoreCase);
         var enableEventStore = !string.Equals(eventStoreConfigValue, "false", StringComparison.OrdinalIgnoreCase);
 
