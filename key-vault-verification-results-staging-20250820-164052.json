@@ -1,0 +1,63 @@
+{
+  "TotalTests": 8,
+  "PassedTests": 3,
+  "FailedTests": 5,
+  "Results": [
+    {
+      "Timestamp": "2025-08-20 16:40:20",
+      "Message": "Key Vault 'kv2ymnmfmrvsb3w' is accessible in location 'westus2' with SKU ''",
+      "Passed": true,
+      "Data": null,
+      "TestName": "Key Vault Accessibility"
+    },
+    {
+      "Timestamp": "2025-08-20 16:40:20",
+      "Message": "RBAC authorization is properly enabled",
+      "Passed": true,
+      "Data": null,
+      "TestName": "Key Vault RBAC Configuration"
+    },
+    {
+      "Timestamp": "2025-08-20 16:40:23",
+      "Message": "Managed Identity has 'Key Vault Secrets User' role assigned",
+      "Passed": true,
+      "Data": null,
+      "TestName": "Managed Identity RBAC Permissions"
+    },
+    {
+      "Timestamp": "2025-08-20 16:40:25",
+      "Message": "No secrets found in Key Vault",
+      "Passed": false,
+      "Data": null,
+      "TestName": "Key Vault Secrets List"
+    },
+    {
+      "Timestamp": "2025-08-20 16:40:40",
+      "Message": "No critical secrets found",
+      "Passed": false,
+      "Data": null,
+      "TestName": "Critical Secrets Verification"
+    },
+    {
+      "Timestamp": "2025-08-20 16:40:43",
+      "Message": "Could not retrieve secret value",
+      "Passed": false,
+      "Data": null,
+      "TestName": "Secret Value Retrieval"
+    },
+    {
+      "Timestamp": "2025-08-20 16:40:45",
+      "Message": "Service Bus connection string not found",
+      "Passed": false,
+      "Data": null,
+      "TestName": "Service Bus Connection String"
+    },
+    {
+      "Timestamp": "2025-08-20 16:40:52",
+      "Message": "Some configuration values need to be updated",
+      "Passed": false,
+      "Data": null,
+      "TestName": "Application Configuration Readiness"
+    }
+  ]
+}
