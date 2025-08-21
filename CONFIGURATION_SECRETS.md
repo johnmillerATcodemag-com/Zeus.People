@@ -87,11 +87,43 @@ Use the provided PowerShell scripts to validate your configuration:
 # Test application configuration
 .\test-app-config.ps1
 
+# Test environment variable configuration specifically  
+.\test-app-config.ps1 -TestEnvironmentVariables
+
+# Test Azure Key Vault configuration
+.\test-app-config.ps1 -Environment "Staging" -TestKeyVault
+
 # Test Azure-specific configuration  
 .\test-azure-config.ps1
 
 # Validate monitoring configuration
 .\test-monitoring-validation.ps1
+```
+
+## Setup Scripts
+
+### Development Environment (Environment Variables)
+```powershell
+# Interactive setup of development secrets
+.\scripts\setup-development-secrets.ps1
+
+# Save to .env.local file for development  
+.\scripts\setup-development-secrets.ps1 -SaveToEnvFile
+
+# View current environment variable configuration (masked)
+.\scripts\setup-development-secrets.ps1 -ShowCurrentValues
+```
+
+### Azure Key Vault (Production)
+```powershell
+# Configure secrets in Azure Key Vault
+.\scripts\setup-keyvault-secrets.ps1 -KeyVaultName "your-keyvault" -ResourceGroupName "your-rg" -Environment "production"
+```
+
+### Azure App Service (Alternative to Key Vault)
+```powershell  
+# Configure secrets as App Service application settings
+.\scripts\setup-appservice-config.ps1 -AppServiceName "your-app-service" -ResourceGroupName "your-rg" -Environment "staging"
 ```
 
 ## Git Security

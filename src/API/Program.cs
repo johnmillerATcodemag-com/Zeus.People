@@ -30,6 +30,12 @@ try
 {
     Log.Information("Starting Zeus.People API configuration");
 
+    // Load environment variables from .env files if they exist
+    LoadEnvironmentVariables();
+
+    // Configure comprehensive secrets management (environment variables + Key Vault)
+    builder.ConfigureSecretsManagement();
+
     // Configure comprehensive configuration management with Azure Key Vault
     builder.ConfigureAppConfiguration();
 
@@ -145,6 +151,41 @@ catch (Exception ex)
 finally
 {
     Log.CloseAndFlush();
+}
+
+// Helper function to load environment variables from .env files
+static void LoadEnvironmentVariables()
+{
+    var envFiles = new[] { ".env.local", ".env.development", ".env" };
+    
+    foreach (var envFile in envFiles)
+    {
+        var envPath = Path.Combine(Directory.GetCurrentDirectory(), envFile);
+        if (File.Exists(envPath))
+        {
+            Log.Information("Loading environment variables from {EnvFile}", envFile);
+            
+            var lines = File.ReadAllLines(envPath);
+            foreach (var line in lines)
+            {
+                if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
+                    continue;
+                    
+                var parts = line.Split('=', 2);
+                if (parts.Length == 2)
+                {
+                    var key = parts[0].Trim();
+                    var value = parts[1].Trim();
+                    
+                    // Only set if not already set (environment variables take precedence)
+                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+                    {
+                        Environment.SetEnvironmentVariable(key, value);
+                    }
+                }
+            }
+        }
+    }
 }
 
 // Make Program class public for testing

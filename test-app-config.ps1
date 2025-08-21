@@ -1,15 +1,58 @@
-# Test application startup with Azure configuration
+# Test application startup with comprehensive secrets configuration
 param(
-    [string]$Environment = "staging"
+    [string]$Environment = "Development",
+    [switch]$TestEnvironmentVariables,
+    [switch]$TestKeyVault,
+    [switch]$TestAppService
 )
 
-Write-Host "[INFO] Testing application startup with Azure configuration"
+Write-Host "[INFO] Testing application configuration with secrets management"
 Write-Host "[INFO] Environment: $Environment"
 
-# Set environment variables for Azure Key Vault
+# Color functions
+function Write-Success($Message) { Write-Host "[SUCCESS] $Message" -ForegroundColor Green }
+function Write-Warning($Message) { Write-Host "[WARNING] $Message" -ForegroundColor Yellow }
+function Write-Error($Message) { Write-Host "[ERROR] $Message" -ForegroundColor Red }
+
+# Set environment for testing
 $env:ASPNETCORE_ENVIRONMENT = $Environment
-$env:AZURE_CLIENT_ID = "" # Managed identity will handle this
-$env:AZURE_TENANT_ID = "" # Managed identity will handle this
+
+if ($TestEnvironmentVariables) {
+    Write-Host "[INFO] Testing environment variable configuration..."
+    
+    # Check if environment variables are set
+    $envVars = @(
+        "JWT_SECRET_KEY",
+        "AZURE_AD_TENANT_ID", 
+        "AZURE_AD_CLIENT_ID",
+        "AZURE_AD_CLIENT_SECRET",
+        "DATABASE_CONNECTION_STRING",
+        "EVENT_STORE_CONNECTION_STRING",
+        "SERVICE_BUS_CONNECTION_STRING",
+        "APPLICATION_INSIGHTS_CONNECTION_STRING"
+    )
+    
+    $missing = @()
+    foreach ($var in $envVars) {
+        $value = [Environment]::GetEnvironmentVariable($var)
+        if ([string]::IsNullOrEmpty($value) -or $value.Contains("REPLACE_WITH")) {
+            $missing += $var
+        } else {
+            $maskedValue = if ($value.Length -gt 8) { $value.Substring(0, 4) + "..." + $value.Substring($value.Length - 4) } else { "***" }
+            Write-Success "✅ $var = $maskedValue"
+        }
+    }
+    
+    if ($missing.Count -gt 0) {
+        Write-Warning "Missing or placeholder environment variables:"
+        foreach ($var in $missing) {
+            Write-Warning "  ❌ $var"
+        }
+        Write-Host ""
+        Write-Host "Run .\scripts\setup-development-secrets.ps1 to configure them"
+        Write-Host ""
+    }
+}
 
 # Test configuration validation
 Write-Host "[INFO] Building and testing configuration validation..."
