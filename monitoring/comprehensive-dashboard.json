@@ -1,0 +1,430 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dashboardName": {
+      "type": "string",
+      "defaultValue": "Zeus-People-Comprehensive-Dashboard",
+      "metadata": {
+        "description": "Name of the comprehensive monitoring dashboard"
+      }
+    },
+    "webAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the App Service"
+      }
+    },
+    "applicationInsightsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of Application Insights"
+      }
+    },
+    "databaseServerName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the SQL Database server"
+      }
+    },
+    "databaseName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the SQL Database"
+      }
+    },
+    "serviceBusNamespace": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Service Bus namespace"
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Resource group name"
+      }
+    }
+  },
+  "variables": {
+    "webAppResourceId": "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+    "appInsightsResourceId": "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]",
+    "databaseResourceId": "[resourceId('Microsoft.Sql/servers/databases', parameters('databaseServerName'), parameters('databaseName'))]",
+    "serviceBusResourceId": "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespace'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Portal/dashboards",
+      "apiVersion": "2015-08-01-preview",
+      "name": "[parameters('dashboardName')]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "hidden-title": "Zeus.People Comprehensive Monitoring Dashboard"
+      },
+      "properties": {
+        "lenses": {
+          "0": {
+            "order": 0,
+            "parts": {
+              "0": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "resourceTypeMode",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Scope",
+                      "value": {
+                        "resourceIds": [
+                          "[variables('appInsightsResourceId')]"
+                        ]
+                      }
+                    },
+                    {
+                      "name": "PartId",
+                      "value": "1d5a6a3a-9fa1-491f-9c40-5d8c3c8f4d4c"
+                    },
+                    {
+                      "name": "Version",
+                      "value": "2.0"
+                    },
+                    {
+                      "name": "TimeRange",
+                      "value": "P1D"
+                    },
+                    {
+                      "name": "DashboardId",
+                      "isOptional": true
+                    },
+                    {
+                      "name": "Query",
+                      "value": "requests\n| summarize RequestCount = count(), AvgDuration = avg(duration) by bin(timestamp, 5m)\n| render timechart"
+                    },
+                    {
+                      "name": "ControlType",
+                      "value": "AnalyticsGrid"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "GridColumnsWidth": {
+                        "timestamp": "120px"
+                      },
+                      "title": "Request Rate and Response Time"
+                    }
+                  }
+                }
+              },
+              "1": {
+                "position": {
+                  "x": 6,
+                  "y": 0,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "requests\n| summarize ErrorRate = countif(success == false) * 100.0 / count() by bin(timestamp, 5m)\n| render timechart"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "Error Rate (%)"
+                    }
+                  }
+                }
+              },
+              "2": {
+                "position": {
+                  "x": 0,
+                  "y": 4,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "dependencies\n| where type == \"SQL\"\n| summarize AvgDuration = avg(duration), RequestCount = count() by bin(timestamp, 5m)\n| render timechart"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "Database Performance"
+                    }
+                  }
+                }
+              },
+              "3": {
+                "position": {
+                  "x": 6,
+                  "y": 4,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "customMetrics\n| where name startswith \"Performance.Memory\" or name startswith \"Performance.ThreadPool\"\n| summarize avg(value) by name, bin(timestamp, 5m)\n| render timechart"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "System Resource Utilization"
+                    }
+                  }
+                }
+              },
+              "4": {
+                "position": {
+                  "x": 0,
+                  "y": 8,
+                  "colSpan": 12,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "customEvents\n| where name in ('Business.Academic.Access', 'Business.Department.Access', 'Business.Room.Access')\n| summarize RequestCount = count() by name, bin(timestamp, 5m)\n| render timechart"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "Business Entity Access Patterns"
+                    }
+                  }
+                }
+              },
+              "5": {
+                "position": {
+                  "x": 0,
+                  "y": 12,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "customEvents\n| where name == 'BusinessRuleEvaluation'\n| extend Passed = tostring(customDimensions.Passed)\n| summarize Violations = countif(Passed == 'False'), Total = count() by bin(timestamp, 15m)\n| extend ViolationRate = Violations * 100.0 / Total\n| render timechart"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "Business Rule Violations"
+                    }
+                  }
+                }
+              },
+              "6": {
+                "position": {
+                  "x": 6,
+                  "y": 12,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "requests\n| where resultCode in (401, 403)\n| summarize FailedAuth = count() by bin(timestamp, 5m)\n| render timechart"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "Authentication Failures"
+                    }
+                  }
+                }
+              },
+              "7": {
+                "position": {
+                  "x": 0,
+                  "y": 16,
+                  "colSpan": 12,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "requests\n| summarize \n    RequestCount = count(),\n    AvgDuration = round(avg(duration), 2),\n    P50Duration = round(percentile(duration, 50), 2),\n    P95Duration = round(percentile(duration, 95), 2),\n    P99Duration = round(percentile(duration, 99), 2),\n    ErrorRate = round(countif(success == false) * 100.0 / count(), 2)\n  by url\n| order by RequestCount desc\n| limit 20"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "Top API Endpoints Performance Summary"
+                    }
+                  }
+                }
+              },
+              "8": {
+                "position": {
+                  "x": 0,
+                  "y": 20,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "dependencies\n| where type == \"Azure Service Bus\"\n| summarize MessageCount = count(), AvgDuration = avg(duration) by bin(timestamp, 5m)\n| render timechart"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "Service Bus Message Processing"
+                    }
+                  }
+                }
+              },
+              "9": {
+                "position": {
+                  "x": 6,
+                  "y": 20,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "ComponentId",
+                      "value": {
+                        "Name": "[parameters('applicationInsightsName')]",
+                        "SubscriptionId": "[subscription().subscriptionId]",
+                        "ResourceGroup": "[parameters('resourceGroupName')]"
+                      }
+                    },
+                    {
+                      "name": "Query",
+                      "value": "exceptions\n| summarize ExceptionCount = count() by type, bin(timestamp, 5m)\n| render timechart"
+                    }
+                  ],
+                  "type": "Extension/Microsoft_Azure_Monitoring/PartType/AnalyticsPart",
+                  "settings": {
+                    "content": {
+                      "title": "Exception Trends"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "metadata": {
+          "model": {
+            "timeRange": {
+              "value": {
+                "relative": {
+                  "duration": 24,
+                  "timeUnit": 1
+                }
+              },
+              "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "dashboardId": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Portal/dashboards', parameters('dashboardName'))]"
+    }
+  }
+}

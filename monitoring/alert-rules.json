@@ -21,6 +21,12 @@
         "description": "Name of the App Service"
       }
     },
+    "applicationInsightsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Application Insights instance"
+      }
+    },
     "databaseServerName": {
       "type": "string",
       "metadata": {
@@ -32,16 +38,28 @@
       "metadata": {
         "description": "Name of the SQL Database"
       }
+    },
+    "serviceBusNamespace": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Service Bus namespace"
+      }
     }
+  },
+  "variables": {
+    "webAppResourceId": "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+    "applicationInsightsResourceId": "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]",
+    "databaseResourceId": "[resourceId('Microsoft.Sql/servers/databases', parameters('databaseServerName'), parameters('databaseName'))]",
+    "serviceBusResourceId": "[resourceId('Microsoft.ServiceBus/namespaces', parameters('serviceBusNamespace'))]"
   },
   "resources": [
     {
       "type": "Microsoft.Insights/actionGroups",
-      "apiVersion": "2019-06-01",
+      "apiVersion": "2021-09-01",
       "name": "[parameters('actionGroupName')]",
       "location": "global",
       "properties": {
-        "groupShortName": "ZeusPeople",
+        "groupShortName": "ZeusAlerts",
         "enabled": true,
         "emailReceivers": [
           {
@@ -49,38 +67,32 @@
             "emailAddress": "[parameters('emailAddress')]",
             "useCommonAlertSchema": true
           }
-        ],
-        "smsReceivers": [],
-        "webhookReceivers": []
+        ]
       }
     },
     {
       "type": "Microsoft.Insights/metricAlerts",
       "apiVersion": "2018-03-01",
-      "name": "High-Error-Rate-Alert",
+      "name": "HighErrorRate",
       "location": "global",
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-      ],
+      "dependsOn": ["[parameters('actionGroupName')]"],
       "properties": {
-        "description": "Alert when error rate exceeds 5% for 5 minutes",
-        "severity": 1,
+        "description": "Alert when error rate exceeds 5% in 5 minutes",
+        "severity": 2,
         "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-        ],
+        "scopes": ["[variables('webAppResourceId')]"],
         "evaluationFrequency": "PT1M",
         "windowSize": "PT5M",
         "criteria": {
           "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
           "allOf": [
             {
-              "threshold": 5.0,
-              "name": "Metric1",
+              "threshold": 5,
+              "name": "ErrorRateThreshold",
               "metricNamespace": "Microsoft.Web/sites",
               "metricName": "Http5xx",
               "operator": "GreaterThan",
-              "timeAggregation": "Total",
+              "timeAggregation": "Count",
               "criterionType": "StaticThresholdCriterion"
             }
           ]
@@ -95,26 +107,22 @@
     {
       "type": "Microsoft.Insights/metricAlerts",
       "apiVersion": "2018-03-01",
-      "name": "High-Response-Time-Alert",
+      "name": "SlowResponseTime",
       "location": "global",
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-      ],
+      "dependsOn": ["[parameters('actionGroupName')]"],
       "properties": {
-        "description": "Alert when average response time exceeds 5 seconds for 5 minutes",
-        "severity": 2,
+        "description": "Alert when 95th percentile response time exceeds 2 seconds",
+        "severity": 3,
         "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-        ],
+        "scopes": ["[variables('webAppResourceId')]"],
         "evaluationFrequency": "PT1M",
         "windowSize": "PT5M",
         "criteria": {
           "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
           "allOf": [
             {
-              "threshold": 5000,
-              "name": "Metric1",
+              "threshold": 2000,
+              "name": "ResponseTimeThreshold",
               "metricNamespace": "Microsoft.Web/sites",
               "metricName": "AverageResponseTime",
               "operator": "GreaterThan",
@@ -133,143 +141,59 @@
     {
       "type": "Microsoft.Insights/metricAlerts",
       "apiVersion": "2018-03-01",
-      "name": "High-CPU-Usage-Alert",
+      "name": "HighCPUUsage",
       "location": "global",
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-      ],
+      "dependsOn": ["[parameters('actionGroupName')]"],
       "properties": {
-        "description": "Alert when CPU usage exceeds 80% for 15 minutes",
-        "severity": 2,
+        "description": "Alert when CPU usage exceeds 80% for 5 minutes",
+        "severity": 3,
         "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-        ],
-        "evaluationFrequency": "PT5M",
-        "windowSize": "PT15M",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "threshold": 80,
-              "name": "Metric1",
-              "metricNamespace": "Microsoft.Web/sites",
-              "metricName": "CpuPercentage",
-              "operator": "GreaterThan",
-              "timeAggregation": "Average",
-              "criterionType": "StaticThresholdCriterion"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Insights/metricAlerts",
-      "apiVersion": "2018-03-01",
-      "name": "High-Memory-Usage-Alert",
-      "location": "global",
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-      ],
-      "properties": {
-        "description": "Alert when memory usage exceeds 85% for 15 minutes",
-        "severity": 2,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-        ],
-        "evaluationFrequency": "PT5M",
-        "windowSize": "PT15M",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "threshold": 85,
-              "name": "Metric1",
-              "metricNamespace": "Microsoft.Web/sites",
-              "metricName": "MemoryPercentage",
-              "operator": "GreaterThan",
-              "timeAggregation": "Average",
-              "criterionType": "StaticThresholdCriterion"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Insights/metricAlerts",
-      "apiVersion": "2018-03-01",
-      "name": "Database-High-DTU-Alert",
-      "location": "global",
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-      ],
-      "properties": {
-        "description": "Alert when database DTU exceeds 80% for 10 minutes",
-        "severity": 1,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Sql/servers/databases', parameters('databaseServerName'), parameters('databaseName'))]"
-        ],
-        "evaluationFrequency": "PT5M",
-        "windowSize": "PT10M",
-        "criteria": {
-          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
-          "allOf": [
-            {
-              "threshold": 80,
-              "name": "Metric1",
-              "metricNamespace": "Microsoft.Sql/servers/databases",
-              "metricName": "dtu_consumption_percent",
-              "operator": "GreaterThan",
-              "timeAggregation": "Average",
-              "criterionType": "StaticThresholdCriterion"
-            }
-          ]
-        },
-        "actions": [
-          {
-            "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-          }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Insights/metricAlerts",
-      "apiVersion": "2018-03-01",
-      "name": "Application-Availability-Alert",
-      "location": "global",
-      "dependsOn": [
-        "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
-      ],
-      "properties": {
-        "description": "Alert when application availability drops below 99%",
-        "severity": 0,
-        "enabled": true,
-        "scopes": [
-          "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
-        ],
+        "scopes": ["[variables('webAppResourceId')]"],
         "evaluationFrequency": "PT1M",
         "windowSize": "PT5M",
         "criteria": {
           "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
           "allOf": [
             {
-              "threshold": 99,
-              "name": "Metric1",
+              "threshold": 80,
+              "name": "CPUThreshold",
               "metricNamespace": "Microsoft.Web/sites",
-              "metricName": "HealthCheckStatus",
-              "operator": "LessThan",
+              "metricName": "CpuTime",
+              "operator": "GreaterThan",
+              "timeAggregation": "Total",
+              "criterionType": "StaticThresholdCriterion"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "HighMemoryUsage",
+      "location": "global",
+      "dependsOn": ["[parameters('actionGroupName')]"],
+      "properties": {
+        "description": "Alert when memory usage exceeds 85% for 5 minutes",
+        "severity": 2,
+        "enabled": true,
+        "scopes": ["[variables('webAppResourceId')]"],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "threshold": 85000000,
+              "name": "MemoryThreshold",
+              "metricNamespace": "Microsoft.Web/sites",
+              "metricName": "AverageMemoryWorkingSet",
+              "operator": "GreaterThan",
               "timeAggregation": "Average",
               "criterionType": "StaticThresholdCriterion"
             }
@@ -280,6 +204,145 @@
             "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
           }
         ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-02-01-preview",
+      "name": "DatabaseConnectionFailures",
+      "location": "[resourceGroup().location]",
+      "dependsOn": ["[parameters('actionGroupName')]"],
+      "properties": {
+        "displayName": "Database Connection Failures",
+        "description": "Alert when database connection failures occur",
+        "severity": 1,
+        "enabled": true,
+        "evaluationFrequency": "PT5M",
+        "scopes": ["[variables('applicationInsightsResourceId')]"],
+        "windowSize": "PT5M",
+        "criteria": {
+          "allOf": [
+            {
+              "query": "exceptions | where customDimensions.Category == \"Database\" and customDimensions.EventId == \"100\" | summarize count() by bin(timestamp, 5m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 0,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-02-01-preview",
+      "name": "AuthenticationFailures",
+      "location": "[resourceGroup().location]",
+      "dependsOn": ["[parameters('actionGroupName')]"],
+      "properties": {
+        "displayName": "Authentication Failures",
+        "description": "Alert when authentication failure rate exceeds threshold",
+        "severity": 2,
+        "enabled": true,
+        "evaluationFrequency": "PT5M",
+        "scopes": ["[variables('applicationInsightsResourceId')]"],
+        "windowSize": "PT10M",
+        "criteria": {
+          "allOf": [
+            {
+              "query": "traces | where customDimensions.Category == \"Authentication\" and customDimensions.EventId == \"101\" | summarize count() by bin(timestamp, 5m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 10,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 2,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/metricAlerts",
+      "apiVersion": "2018-03-01",
+      "name": "ServiceBusMessageBacklog",
+      "location": "global",
+      "dependsOn": ["[parameters('actionGroupName')]"],
+      "properties": {
+        "description": "Alert when Service Bus message count exceeds threshold",
+        "severity": 3,
+        "enabled": true,
+        "scopes": ["[variables('serviceBusResourceId')]"],
+        "evaluationFrequency": "PT1M",
+        "windowSize": "PT5M",
+        "criteria": {
+          "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+          "allOf": [
+            {
+              "threshold": 100,
+              "name": "MessageCountThreshold",
+              "metricNamespace": "Microsoft.ServiceBus/namespaces",
+              "metricName": "ActiveMessages",
+              "operator": "GreaterThan",
+              "timeAggregation": "Average",
+              "criterionType": "StaticThresholdCriterion"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "actionGroupId": "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Insights/scheduledQueryRules",
+      "apiVersion": "2021-02-01-preview",
+      "name": "BusinessRuleViolations",
+      "location": "[resourceGroup().location]",
+      "dependsOn": ["[parameters('actionGroupName')]"],
+      "properties": {
+        "displayName": "Business Rule Violations",
+        "description": "Alert when business rule violations exceed threshold",
+        "severity": 2,
+        "enabled": true,
+        "evaluationFrequency": "PT15M",
+        "scopes": ["[variables('applicationInsightsResourceId')]"],
+        "windowSize": "PT15M",
+        "criteria": {
+          "allOf": [
+            {
+              "query": "customEvents | where name == \"BusinessRuleViolation\" | summarize count() by bin(timestamp, 15m)",
+              "timeAggregation": "Count",
+              "operator": "GreaterThan",
+              "threshold": 5,
+              "failingPeriods": {
+                "numberOfEvaluationPeriods": 1,
+                "minFailingPeriodsToAlert": 1
+              }
+            }
+          ]
+        },
+        "actions": {
+          "actionGroups": [
+            "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
+          ]
+        }
       }
     }
   ],
@@ -287,6 +350,10 @@
     "actionGroupId": {
       "type": "string",
       "value": "[resourceId('Microsoft.Insights/actionGroups', parameters('actionGroupName'))]"
+    },
+    "actionGroupName": {
+      "type": "string",
+      "value": "[parameters('actionGroupName')]"
     }
   }
 }

@@ -53,6 +53,24 @@ rollback-backup-*/
 rollback-*.log
 *.rollback.*
 
+# Security and Secrets
+appsettings.Production.json
+appsettings.*.Local.json
+appsettings.Secrets.json
+secrets.json
+.env
+.env.local
+.env.production
+*.pfx
+*.p12
+*.key
+*.pem
+
+# Azure credentials and logs
+azure-credentials*.txt
+*-credentials.json
+deployment-secrets*.json
+
 # NUnit
 *.VisualState.xml
 TestResult.xml

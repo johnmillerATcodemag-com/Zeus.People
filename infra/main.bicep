@@ -18,8 +18,11 @@ param primaryLocation string = 'westus2'
 @description('Secondary Azure region for high availability (prod only)')
 param secondaryLocation string = 'westus2'
 
+@description('Location for resource naming consistency')
+param location string = primaryLocation
+
 @description('Resource token for unique resource naming')
-param resourceToken string = uniqueString(subscription().subscriptionId, environmentName)
+param resourceToken string = uniqueString(subscription().id, location, environmentName)
 
 // SQL parameters - DISABLED DUE TO AZURE SQL PASSWORD VALIDATION RESTRICTIONS
 /*
@@ -294,6 +297,9 @@ module keyVaultSecrets 'modules/keyVaultSecrets.bicep' = {
 // Outputs for Azure Developer CLI (azd)
 @description('The name of the resource group')
 output AZURE_RESOURCE_GROUP_NAME string = resourceGroup.name
+
+@description('The ID of the resource group')
+output RESOURCE_GROUP_ID string = resourceGroup.id
 
 @description('The location of the primary region')
 output AZURE_LOCATION string = primaryLocation

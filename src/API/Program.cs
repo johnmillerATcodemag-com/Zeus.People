@@ -1,16 +1,28 @@
 using Zeus.People.API.Configuration;
 using Zeus.People.Application;
 using Zeus.People.Infrastructure.Configuration;
+using Zeus.People.API.Middleware;
 using Serilog;
+using Serilog.Events;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog early
+// Configure Serilog early with Application Insights integration
 Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .CreateLogger();
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Information)
+    .Enrich.FromLogContext()
+    .Enrich.WithEnvironmentName()
+    .Enrich.WithMachineName()
+    .Enrich.WithProcessId()
+    .Enrich.WithThreadId()
+    .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
+    .WriteTo.File("logs/zeus-people-api-.log", rollingInterval: RollingInterval.Day, 
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
+    .CreateBootstrapLogger();
 
 builder.Host.UseSerilog();
 
@@ -47,6 +59,9 @@ try
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
+    // Add comprehensive monitoring and observability
+    builder.Services.AddComprehensiveMonitoring(builder.Configuration, builder.Environment);
+
     // Configure JWT authentication with Key Vault support (before building the app)
     var serviceProvider = builder.Services.BuildServiceProvider();
     await Zeus.People.API.Configuration.ConfigurationExtensions.AddJwtAuthenticationAsync(builder.Services, serviceProvider);
@@ -72,6 +87,10 @@ try
 
     app.UseHttpsRedirection();
     app.UseCors("AllowAll");
+
+    // Add performance monitoring middleware
+    app.UseMiddleware<PerformanceMonitoringMiddleware>();
+    app.UseMiddleware<BusinessMetricsMiddleware>();
 
     // Add content-type validation middleware before exception handling
     app.UseMiddleware<Zeus.People.API.Middleware.ContentTypeValidationMiddleware>();

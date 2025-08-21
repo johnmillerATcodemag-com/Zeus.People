@@ -39,3 +39,6 @@ New addition to the business-rules instructions:
 - Explanation of command and query responsibilities
 - Guidelines for implementing CQRS in the application
 - Update mermaid architecture diagrams with any infrastructure, architecture, or business rule changes
+
+
+expect 200 response codebase

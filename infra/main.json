@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.37.4.10188",
-      "templateHash": "10181965197277973442"
+      "templateHash": "6535213304322330039"
     }
   },
   "parameters": {
@@ -42,9 +42,16 @@
         "description": "Secondary Azure region for high availability (prod only)"
       }
     },
+    "location": {
+      "type": "string",
+      "defaultValue": "[parameters('primaryLocation')]",
+      "metadata": {
+        "description": "Location for resource naming consistency"
+      }
+    },
     "resourceToken": {
       "type": "string",
-      "defaultValue": "[uniqueString(subscription().subscriptionId, parameters('environmentName'))]",
+      "defaultValue": "[uniqueString(subscription().id, parameters('location'), parameters('environmentName'))]",
       "metadata": {
         "description": "Resource token for unique resource naming"
       }
@@ -2317,6 +2324,13 @@
         "description": "The name of the resource group"
       },
       "value": "[variables('resourceGroupName')]"
+    },
+    "RESOURCE_GROUP_ID": {
+      "type": "string",
+      "metadata": {
+        "description": "The ID of the resource group"
+      },
+      "value": "[subscriptionResourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
     },
     "AZURE_LOCATION": {
       "type": "string",
