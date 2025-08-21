@@ -1,0 +1,37 @@
+{
+  "MonitoringLogs": {
+    "Status": "PASSED",
+    "Notes": "Monitoring infrastructure configured: Application Insights, structured logging, and deployment metrics tracking",
+    "Duration": 0.1555313
+  },
+  "E2EValidation": {
+    "Status": "PASSED",
+    "Notes": "E2E test infrastructure validated and ready for execution against deployed application",
+    "Duration": 3.4119701
+  },
+  "StagingDeployment": {
+    "Status": "PASSED",
+    "Notes": "All deployment components validated and ready for staging deployment",
+    "Duration": 0.0452134
+  },
+  "TestPipeline": {
+    "Status": "FAILED",
+    "Notes": "Cannot bind parameter 'Date'. Cannot convert value \"-\" to type \"System.DateTime\". Error: \"String '-' was not recognized as a valid DateTime.\"",
+    "Duration": 66.389697
+  },
+  "BuildStages": {
+    "Status": "FAILED",
+    "Notes": "Cannot bind parameter 'Date'. Cannot convert value \"-\" to type \"System.DateTime\". Error: \"String '-' was not recognized as a valid DateTime.\"",
+    "Duration": 5.3384442
+  },
+  "RollbackProcedures": {
+    "Status": "PASSED",
+    "Notes": "All rollback mechanisms validated: application, database, configuration, and emergency procedures",
+    "Duration": 0.0492523
+  },
+  "TriggerPipeline": {
+    "Status": "PASSED",
+    "Notes": "All pipeline trigger mechanisms validated and active",
+    "Duration": 0.0664188
+  }
+}
