@@ -24,7 +24,7 @@
 #>
 
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [ValidateSet("Development", "Staging", "Production")]
     [string]$Environment,
     
@@ -53,9 +53,9 @@ Write-Host ""
 
 $testResults = @{
     EnvironmentVariables = @{ Status = "Skipped"; Details = @() }
-    KeyVault = @{ Status = "Skipped"; Details = @() }
-    AppService = @{ Status = "Skipped"; Details = @() }
-    ApplicationStartup = @{ Status = "Skipped"; Details = @() }
+    KeyVault             = @{ Status = "Skipped"; Details = @() }
+    AppService           = @{ Status = "Skipped"; Details = @() }
+    ApplicationStartup   = @{ Status = "Skipped"; Details = @() }
 }
 
 # Test Environment Variables
@@ -63,14 +63,14 @@ if ($TestType -eq "All" -or $TestType -eq "EnvironmentVariables") {
     Write-Info "🔍 Testing Environment Variables Configuration..."
     
     $envVars = @{
-        "JWT_SECRET_KEY" = "JwtSettings:SecretKey"
-        "AZURE_AD_TENANT_ID" = "AzureAd:TenantId"
-        "AZURE_AD_CLIENT_ID" = "AzureAd:ClientId" 
-        "AZURE_AD_CLIENT_SECRET" = "AzureAd:ClientSecret"
-        "DATABASE_CONNECTION_STRING" = "ConnectionStrings:AcademicDatabase"
-        "EVENT_STORE_CONNECTION_STRING" = "ConnectionStrings:EventStoreDatabase"
-        "SERVICE_BUS_CONNECTION_STRING" = "ConnectionStrings:ServiceBus"
-        "APPLICATION_INSIGHTS_CONNECTION_STRING" = "ApplicationInsights:ConnectionString"
+        "JWT_SECRET_KEY"                           = "JwtSettings:SecretKey"
+        "AZURE_AD_TENANT_ID"                       = "AzureAd:TenantId"
+        "AZURE_AD_CLIENT_ID"                       = "AzureAd:ClientId" 
+        "AZURE_AD_CLIENT_SECRET"                   = "AzureAd:ClientSecret"
+        "DATABASE_CONNECTION_STRING"               = "ConnectionStrings:AcademicDatabase"
+        "EVENT_STORE_CONNECTION_STRING"            = "ConnectionStrings:EventStoreDatabase"
+        "SERVICE_BUS_CONNECTION_STRING"            = "ConnectionStrings:ServiceBus"
+        "APPLICATION_INSIGHTS_CONNECTION_STRING"   = "ApplicationInsights:ConnectionString"
         "APPLICATION_INSIGHTS_INSTRUMENTATION_KEY" = "ApplicationInsights:InstrumentationKey"
     }
     
@@ -83,9 +83,11 @@ if ($TestType -eq "All" -or $TestType -eq "EnvironmentVariables") {
         
         if ([string]::IsNullOrEmpty($value)) {
             $envResults += "❌ $envVar -> $configPath (Not Set)"
-        } elseif ($value.Contains("REPLACE_WITH")) {
+        }
+        elseif ($value.Contains("REPLACE_WITH")) {
             $envResults += "⚠️  $envVar -> $configPath (Placeholder)"
-        } else {
+        }
+        else {
             $maskedValue = if ($value.Length -gt 8) { $value.Substring(0, 4) + "..." + $value.Substring($value.Length - 4) } else { "***" }
             $envResults += "✅ $envVar -> $configPath ($maskedValue)"
             $validCount++
@@ -96,10 +98,12 @@ if ($TestType -eq "All" -or $TestType -eq "EnvironmentVariables") {
     if ($validCount -eq $envVars.Count) {
         $testResults.EnvironmentVariables.Status = "Passed"
         Write-Success "Environment Variables: All configured ($validCount/$($envVars.Count))"
-    } elseif ($validCount -gt 0) {
+    }
+    elseif ($validCount -gt 0) {
         $testResults.EnvironmentVariables.Status = "Partial"
         Write-Warning "Environment Variables: Partially configured ($validCount/$($envVars.Count))"
-    } else {
+    }
+    else {
         $testResults.EnvironmentVariables.Status = "Failed"
         Write-Error "Environment Variables: Not configured (0/$($envVars.Count))"
     }
@@ -134,27 +138,32 @@ if (($TestType -eq "All" -or $TestType -eq "KeyVault") -and $Environment -ne "De
                         Write-Success "Key Vault secrets readable"
                         $testResults.KeyVault.Status = "Passed"
                         $testResults.KeyVault.Details = @("✅ Key Vault accessible", "✅ Secrets readable")
-                    } else {
+                    }
+                    else {
                         Write-Warning "Key Vault accessible but secrets not readable or not configured"
                         $testResults.KeyVault.Status = "Partial"
                         $testResults.KeyVault.Details = @("✅ Key Vault accessible", "⚠️  Secrets not readable")
                     }
-                } else {
+                }
+                else {
                     Write-Error "Key Vault not accessible"
                     $testResults.KeyVault.Status = "Failed"
                     $testResults.KeyVault.Details = @("❌ Key Vault not accessible")
                 }
-            } else {
+            }
+            else {
                 Write-Warning "Not authenticated to Azure"
                 $testResults.KeyVault.Status = "Failed"
                 $testResults.KeyVault.Details = @("❌ Not authenticated to Azure")
             }
-        } catch {
+        }
+        catch {
             Write-Error "Error testing Key Vault: $($_.Exception.Message)"
             $testResults.KeyVault.Status = "Failed"
             $testResults.KeyVault.Details = @("❌ Error: $($_.Exception.Message)")
         }
-    } else {
+    }
+    else {
         Write-Warning "Azure CLI not available for Key Vault testing"
         $testResults.KeyVault.Status = "Skipped"
         $testResults.KeyVault.Details = @("⏭️  Azure CLI not available")
@@ -217,17 +226,20 @@ return 0;
                 Write-Success "Application configuration loads successfully"
                 $testResults.ApplicationStartup.Status = "Passed"
                 $testResults.ApplicationStartup.Details = @("✅ Build successful", "✅ Configuration loads")
-            } else {
+            }
+            else {
                 Write-Warning "Application builds but configuration has issues"
                 $testResults.ApplicationStartup.Status = "Partial"  
                 $testResults.ApplicationStartup.Details = @("✅ Build successful", "⚠️  Configuration issues")
             }
-        } else {
+        }
+        else {
             Write-Error "Application build failed"
             $testResults.ApplicationStartup.Status = "Failed"
             $testResults.ApplicationStartup.Details = @("❌ Build failed: $buildOutput")
         }
-    } catch {
+    }
+    catch {
         Write-Error "Error testing application startup: $($_.Exception.Message)"
         $testResults.ApplicationStartup.Status = "Failed"
         $testResults.ApplicationStartup.Details = @("❌ Error: $($_.Exception.Message)")
@@ -275,12 +287,15 @@ if ($totalTests -gt 0) {
     
     if ($passedTests -eq $totalTests) {
         Write-Success "🎉 All tests passed! ($passedTests/$totalTests - $successRate%)"
-    } elseif ($passedTests -gt 0) {
+    }
+    elseif ($passedTests -gt 0) {
         Write-Warning "⚠️  Some tests failed ($passedTests/$totalTests - $successRate%)"
-    } else {
+    }
+    else {
         Write-Error "❌ All tests failed (0/$totalTests - 0%)"
     }
-} else {
+}
+else {
     Write-Info "ℹ️  No tests were executed"
 }
 

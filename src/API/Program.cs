@@ -20,7 +20,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithProcessId()
     .Enrich.WithThreadId()
     .WriteTo.Console(outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
-    .WriteTo.File("logs/zeus-people-api-.log", rollingInterval: RollingInterval.Day, 
+    .WriteTo.File("logs/zeus-people-api-.log", rollingInterval: RollingInterval.Day,
         outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}")
     .CreateBootstrapLogger();
 
@@ -157,26 +157,26 @@ finally
 static void LoadEnvironmentVariables()
 {
     var envFiles = new[] { ".env.local", ".env.development", ".env" };
-    
+
     foreach (var envFile in envFiles)
     {
         var envPath = Path.Combine(Directory.GetCurrentDirectory(), envFile);
         if (File.Exists(envPath))
         {
             Log.Information("Loading environment variables from {EnvFile}", envFile);
-            
+
             var lines = File.ReadAllLines(envPath);
             foreach (var line in lines)
             {
                 if (string.IsNullOrWhiteSpace(line) || line.StartsWith("#"))
                     continue;
-                    
+
                 var parts = line.Split('=', 2);
                 if (parts.Length == 2)
                 {
                     var key = parts[0].Trim();
                     var value = parts[1].Trim();
-                    
+
                     // Only set if not already set (environment variables take precedence)
                     if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
                     {

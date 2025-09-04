@@ -37,7 +37,8 @@ if ($TestEnvironmentVariables) {
         $value = [Environment]::GetEnvironmentVariable($var)
         if ([string]::IsNullOrEmpty($value) -or $value.Contains("REPLACE_WITH")) {
             $missing += $var
-        } else {
+        }
+        else {
             $maskedValue = if ($value.Length -gt 8) { $value.Substring(0, 4) + "..." + $value.Substring($value.Length - 4) } else { "***" }
             Write-Success "✅ $var = $maskedValue"
         }

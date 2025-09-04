@@ -27,15 +27,15 @@
 #>
 
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$KeyVaultName,
     
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$ResourceGroupName,
     
     [string]$SubscriptionId,
     
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$Environment
 )
 
@@ -58,7 +58,8 @@ function Read-SecureValue($Prompt, $Required = $true) {
         Write-Host "$Prompt" -ForegroundColor Cyan
         if (-not $Required) {
             Write-Host "(Optional - press Enter to skip): " -NoNewline
-        } else {
+        }
+        else {
             Write-Host "(Required): " -NoNewline
         }
         
@@ -144,50 +145,50 @@ if ($confirm -ne 'y' -and $confirm -ne 'Y') {
 
 # Define the secrets we need to configure
 $secrets = @{
-    "JwtSettings--SecretKey" = @{
+    "JwtSettings--SecretKey"                  = @{
         Description = "JWT Secret Key (minimum 32 characters)"
-        Required = $true
-        Generate = $true
+        Required    = $true
+        Generate    = $true
     }
-    "AzureAd--TenantId" = @{
+    "AzureAd--TenantId"                       = @{
         Description = "Azure AD Tenant ID"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "AzureAd--ClientId" = @{
+    "AzureAd--ClientId"                       = @{
         Description = "Azure AD Client ID (Application ID)"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "AzureAd--ClientSecret" = @{
+    "AzureAd--ClientSecret"                   = @{
         Description = "Azure AD Client Secret"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "ConnectionStrings--AcademicDatabase" = @{
+    "ConnectionStrings--AcademicDatabase"     = @{
         Description = "Academic Database Connection String"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "ConnectionStrings--EventStoreDatabase" = @{
+    "ConnectionStrings--EventStoreDatabase"   = @{
         Description = "Event Store Database Connection String"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "ConnectionStrings--ServiceBus" = @{
+    "ConnectionStrings--ServiceBus"           = @{
         Description = "Service Bus Connection String"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "ApplicationInsights--ConnectionString" = @{
+    "ApplicationInsights--ConnectionString"   = @{
         Description = "Application Insights Connection String"
-        Required = $false
-        Generate = $false
+        Required    = $false
+        Generate    = $false
     }
     "ApplicationInsights--InstrumentationKey" = @{
         Description = "Application Insights Instrumentation Key"
-        Required = $false
-        Generate = $false
+        Required    = $false
+        Generate    = $false
     }
 }
 
@@ -237,7 +238,8 @@ foreach ($secretName in $secrets.Keys) {
         if ($secretInfo.Required) {
             Write-Warning "Required secret '$secretName' not provided"
             $skippedSecrets += $secretName
-        } else {
+        }
+        else {
             Write-Info "Optional secret '$secretName' skipped"
             $skippedSecrets += $secretName
         }
@@ -251,7 +253,8 @@ foreach ($secretName in $secrets.Keys) {
     if ($LASTEXITCODE -eq 0 -and $result) {
         Write-Success "✅ Successfully set '$secretName'"
         $configuredSecrets += $secretName
-    } else {
+    }
+    else {
         Write-Error "❌ Failed to set '$secretName'"
         $skippedSecrets += $secretName
     }

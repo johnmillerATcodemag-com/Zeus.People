@@ -57,7 +57,8 @@ function Get-MaskedValue($Value) {
 function Read-SecureValue($Prompt, $CurrentValue) {
     if ([string]::IsNullOrEmpty($CurrentValue)) {
         $maskedCurrent = "NOT_SET"
-    } else {
+    }
+    else {
         $maskedCurrent = Get-MaskedValue $CurrentValue
     }
     
@@ -84,14 +85,14 @@ if ($ShowCurrentValues) {
     Write-Host ""
     
     $secrets = @{
-        "JWT_SECRET_KEY" = $env:JWT_SECRET_KEY
-        "AZURE_AD_TENANT_ID" = $env:AZURE_AD_TENANT_ID
-        "AZURE_AD_CLIENT_ID" = $env:AZURE_AD_CLIENT_ID
-        "AZURE_AD_CLIENT_SECRET" = $env:AZURE_AD_CLIENT_SECRET
-        "DATABASE_CONNECTION_STRING" = $env:DATABASE_CONNECTION_STRING
-        "EVENT_STORE_CONNECTION_STRING" = $env:EVENT_STORE_CONNECTION_STRING
-        "SERVICE_BUS_CONNECTION_STRING" = $env:SERVICE_BUS_CONNECTION_STRING
-        "APPLICATION_INSIGHTS_CONNECTION_STRING" = $env:APPLICATION_INSIGHTS_CONNECTION_STRING
+        "JWT_SECRET_KEY"                           = $env:JWT_SECRET_KEY
+        "AZURE_AD_TENANT_ID"                       = $env:AZURE_AD_TENANT_ID
+        "AZURE_AD_CLIENT_ID"                       = $env:AZURE_AD_CLIENT_ID
+        "AZURE_AD_CLIENT_SECRET"                   = $env:AZURE_AD_CLIENT_SECRET
+        "DATABASE_CONNECTION_STRING"               = $env:DATABASE_CONNECTION_STRING
+        "EVENT_STORE_CONNECTION_STRING"            = $env:EVENT_STORE_CONNECTION_STRING
+        "SERVICE_BUS_CONNECTION_STRING"            = $env:SERVICE_BUS_CONNECTION_STRING
+        "APPLICATION_INSIGHTS_CONNECTION_STRING"   = $env:APPLICATION_INSIGHTS_CONNECTION_STRING
         "APPLICATION_INSIGHTS_INSTRUMENTATION_KEY" = $env:APPLICATION_INSIGHTS_INSTRUMENTATION_KEY
     }
     

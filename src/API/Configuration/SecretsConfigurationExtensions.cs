@@ -70,7 +70,7 @@ namespace Zeus.People.API.Configuration
                 if (!string.IsNullOrEmpty(envValue))
                 {
                     configValues[mapping.Value] = envValue;
-                    Log.Information("Configured {ConfigPath} from environment variable {EnvVar}", 
+                    Log.Information("Configured {ConfigPath} from environment variable {EnvVar}",
                         mapping.Value, mapping.Key);
                 }
             }

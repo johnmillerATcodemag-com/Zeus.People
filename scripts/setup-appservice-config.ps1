@@ -27,15 +27,15 @@
 #>
 
 param(
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$AppServiceName,
     
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$ResourceGroupName,
     
     [string]$SubscriptionId,
     
-    [Parameter(Mandatory=$true)]
+    [Parameter(Mandatory = $true)]
     [string]$Environment
 )
 
@@ -58,7 +58,8 @@ function Read-SecureValue($Prompt, $Required = $true) {
         Write-Host "$Prompt" -ForegroundColor Cyan
         if (-not $Required) {
             Write-Host "(Optional - press Enter to skip): " -NoNewline
-        } else {
+        }
+        else {
             Write-Host "(Required): " -NoNewline
         }
         
@@ -142,11 +143,13 @@ if (-not $managedIdentity) {
         if ($identity) {
             Write-Success "Managed Identity enabled with Principal ID: $identity"
             $managedIdentity = $identity
-        } else {
+        }
+        else {
             Write-Error "Failed to enable Managed Identity"
         }
     }
-} else {
+}
+else {
     Write-Success "Managed Identity is enabled with Principal ID: $managedIdentity"
 }
 
@@ -163,55 +166,55 @@ if ($confirm -ne 'y' -and $confirm -ne 'Y') {
 
 # Define the application settings we need to configure
 $appSettings = @{
-    "JwtSettings__SecretKey" = @{
+    "JwtSettings__SecretKey"                  = @{
         Description = "JWT Secret Key (minimum 32 characters)"
-        Required = $true
-        Generate = $true
+        Required    = $true
+        Generate    = $true
     }
-    "AzureAd__TenantId" = @{
+    "AzureAd__TenantId"                       = @{
         Description = "Azure AD Tenant ID"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "AzureAd__ClientId" = @{
+    "AzureAd__ClientId"                       = @{
         Description = "Azure AD Client ID (Application ID)"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "AzureAd__ClientSecret" = @{
+    "AzureAd__ClientSecret"                   = @{
         Description = "Azure AD Client Secret"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "ConnectionStrings__AcademicDatabase" = @{
+    "ConnectionStrings__AcademicDatabase"     = @{
         Description = "Academic Database Connection String"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "ConnectionStrings__EventStoreDatabase" = @{
+    "ConnectionStrings__EventStoreDatabase"   = @{
         Description = "Event Store Database Connection String"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "ConnectionStrings__ServiceBus" = @{
+    "ConnectionStrings__ServiceBus"           = @{
         Description = "Service Bus Connection String"
-        Required = $true
-        Generate = $false
+        Required    = $true
+        Generate    = $false
     }
-    "ApplicationInsights__ConnectionString" = @{
+    "ApplicationInsights__ConnectionString"   = @{
         Description = "Application Insights Connection String"
-        Required = $false
-        Generate = $false
+        Required    = $false
+        Generate    = $false
     }
     "ApplicationInsights__InstrumentationKey" = @{
         Description = "Application Insights Instrumentation Key"
-        Required = $false
-        Generate = $false
+        Required    = $false
+        Generate    = $false
     }
-    "ASPNETCORE_ENVIRONMENT" = @{
-        Description = "ASP.NET Core Environment"
-        Required = $true
-        Generate = $false
+    "ASPNETCORE_ENVIRONMENT"                  = @{
+        Description  = "ASP.NET Core Environment"
+        Required     = $true
+        Generate     = $false
         DefaultValue = $Environment
     }
 }
@@ -277,7 +280,8 @@ foreach ($settingName in $appSettings.Keys) {
         if ($settingInfo.Required) {
             Write-Warning "Required setting '$settingName' not provided"
             $skippedSettings += $settingName
-        } else {
+        }
+        else {
             Write-Info "Optional setting '$settingName' skipped"
             $skippedSettings += $settingName
         }
@@ -286,7 +290,7 @@ foreach ($settingName in $appSettings.Keys) {
     
     # Add to settings to update
     $settingsToUpdate += @{
-        Name = $settingName
+        Name  = $settingName
         Value = $settingValue
     }
     $configuredSettings += $settingName
@@ -306,10 +310,12 @@ if ($settingsToUpdate.Count -gt 0) {
     
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Successfully updated application settings"
-    } else {
+    }
+    else {
         Write-Error "Failed to update some application settings"
     }
-} else {
+}
+else {
     Write-Info "No settings to update"
 }
 
@@ -351,7 +357,8 @@ if ($restart -ne 'n' -and $restart -ne 'N') {
     az webapp restart --name $AppServiceName --resource-group $ResourceGroupName
     if ($LASTEXITCODE -eq 0) {
         Write-Success "App Service restarted successfully"
-    } else {
+    }
+    else {
         Write-Warning "Failed to restart App Service - you may need to restart it manually"
     }
 }
