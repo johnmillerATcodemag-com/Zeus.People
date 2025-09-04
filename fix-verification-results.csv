@@ -1,7 +1,0 @@
-"Expected","TestName","Actual","Success","Error","Description"
-"400","Zero Page Number","0","False","Timeout/Connection Error","Page number zero should return 400 Bad Request, not timeout"
-"400","Zero Page Size","0","False","Timeout/Connection Error","Page size zero should return 400 Bad Request, not timeout"
-"400","Alphanumeric Academic ID","0","False","Timeout/Connection Error","Invalid GUID format should return 400 Bad Request, not 404 Not Found"
-"400","Alphanumeric Department ID","0","False","Timeout/Connection Error","Invalid GUID format should return 400 Bad Request, not 404 Not Found"
-"415","XML Content-Type","0","False","Timeout/Connection Error","Unsupported media type should return 415 Unsupported Media Type, not 400"
-"415","Text Content-Type","0","False","Timeout/Connection Error","Unsupported media type should return 415 Unsupported Media Type, not 400"

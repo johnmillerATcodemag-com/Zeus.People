@@ -17,8 +17,8 @@ If specified, injects controlled error responses.
 .PARAMETER IncludeLatencySpikes
 If specified, injects intentional slow requests.
 
-.PARAMETER Verbose
-Prints detailed progress and scenario narration.
+.NOTES
+Use built-in -Verbose common parameter for detailed progress output.
 
 .EXAMPLE
 pwsh ./scripts/monitoring-validation.ps1 -BaseUrl https://api -DurationSeconds 120 -IncludeErrorScenarios -IncludeLatencySpikes -Verbose
@@ -29,8 +29,7 @@ param(
     [int]$DurationSeconds = 120,
     [int]$Concurrency = 5,
     [switch]$IncludeErrorScenarios,
-    [switch]$IncludeLatencySpikes,
-    [switch]$Verbose
+    [switch]$IncludeLatencySpikes
 )
 
 $ErrorActionPreference = 'Stop'
@@ -70,13 +69,13 @@ function Invoke-RandomRequest {
         if ($code -ge 200 -and $code -lt 300) { $summary.Success++ }
         elseif ($code -ge 400 -and $code -lt 500) { $summary.ClientErrors++ }
         elseif ($code -ge 500) { $summary.ServerErrors++ }
-        if ($Verbose) { Write-Host ("{0} {1}ms -> {2}" -f $Endpoint,$sw.ElapsedMilliseconds,$code) }
+    if ($VerbosePreference -eq 'Continue') { Write-Host ("{0} {1}ms -> {2}" -f $Endpoint,$sw.ElapsedMilliseconds,$code) }
     }
     catch {
         $sw.Stop()
         $summary.TotalRequests++
         $summary.ServerErrors++
-        if ($Verbose) { Write-Warning "Request failed $Endpoint $_" }
+    if ($VerbosePreference -eq 'Continue') { Write-Warning "Request failed $Endpoint $_" }
     }
 }
 
