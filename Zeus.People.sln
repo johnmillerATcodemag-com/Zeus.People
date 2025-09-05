@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zeus.People.Infrastructure.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zeus.People.API.Tests", "tests\Zeus.People.API.Tests\Zeus.People.API.Tests.csproj", "{1710D150-6F6E-45C0-9CE9-E21E49A87783}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zeus.People.API.IntegrationTests", "tests\Zeus.People.API.IntegrationTests\Zeus.People.API.IntegrationTests.csproj", "{6F9B9F5C-6C38-4A0C-8C49-0A6F4A4B9E21}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05-4346-4AA6-1389-037BE0695223}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zeus.People.Tests.E2E", "tests\Zeus.People.Tests.E2E\Zeus.People.Tests.E2E.csproj", "{C30FFE75-75E3-404C-9F68-AD64FED06FD7}"
