@@ -1,5 +1,5 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentParameters.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
     "environmentName": {
@@ -8,20 +8,14 @@
     "applicationPrefix": {
       "value": "academic"
     },
-    "primaryLocation": {
-      "value": "westus2"
-    },
-    "secondaryLocation": {
-      "value": "westus2"
-    },
     "location": {
       "value": "westus2"
     },
-    "resourceGroupName": {
-      "value": "rg-academic-staging-westus2"
-    },
     "keyVaultAccessPrincipalId": {
       "value": "ea0c97fd-c3ba-4510-a374-37cd7442b3db"
+    },
+    "sqlAdminPassword": {
+      "value": "Zeus2024!@#$%Complex"
     }
   }
 }

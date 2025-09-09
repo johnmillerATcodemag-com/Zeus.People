@@ -1,8 +1,8 @@
 # Comprehensive End-to-End Testing and Validation Script
 
 param(
-    [Parameter(Mandatory = $true)]
-    [string]$AppUrl = "https://app-academic-staging-dvjm4oxxoy2g6.azurewebsites.net",
+    [Parameter(Mandatory = $false)]
+    [string]$AppUrl = "https://az-app-a7awuksxtxj4k.azurewebsites.net",
     
     [Parameter(Mandatory = $false)]
     [string]$ApiKey = "",
@@ -109,19 +109,21 @@ Write-Host ""
 Write-Host "2. API ENDPOINTS TESTING" -ForegroundColor Magenta
 Write-Host "==========================" -ForegroundColor Magenta
 
-Invoke-Test -TestName "People API - Get All" -Endpoint "$AppUrl/api/people"
-Invoke-Test -TestName "People API - Get Count" -Endpoint "$AppUrl/api/people/count"
-Invoke-Test -TestName "People API - Search Empty" -Endpoint "$AppUrl/api/people/search?q="
+Invoke-Test -TestName "Academics API - Get All" -Endpoint "$AppUrl/api/academics"
+Invoke-Test -TestName "Departments API - Get All" -Endpoint "$AppUrl/api/departments"
+Invoke-Test -TestName "Rooms API - Get All" -Endpoint "$AppUrl/api/rooms"
+Invoke-Test -TestName "Extensions API - Get All" -Endpoint "$AppUrl/api/extensions"
 
-# Test POST endpoint with sample data
-$samplePerson = @{
-    firstName = "TestUser"
-    lastName = "EndToEnd"
-    email = "test.e2e@example.com"
-    dateOfBirth = "1990-01-01"
+# Test POST endpoint with sample academic data
+$sampleAcademic = @{
+    empNr = "AB1234"
+    empName = "Dr. Test Academic"
+    rank = "P"
+    phoneNr = "555-0123"
+    officeLocation = "Building A, Room 101"
 } | ConvertTo-Json
 
-Invoke-Test -TestName "People API - Create Person" -Endpoint "$AppUrl/api/people" -Method "POST" -Body $samplePerson -ExpectedStatusCode 201
+Invoke-Test -TestName "Academics API - Create Academic" -Endpoint "$AppUrl/api/academics" -Method "POST" -Body $sampleAcademic -ExpectedStatusCode 201
 
 Write-Host ""
 
@@ -145,7 +147,7 @@ Invoke-Test -TestName "HTTP to HTTPS Redirect" -Endpoint "$httpUrl" -ExpectedSta
 
 # Test CORS headers
 $corsHeaders = @{"Origin" = "https://localhost:3000"}
-Invoke-Test -TestName "CORS Policy Validation" -Endpoint "$AppUrl/api/people" -Headers $corsHeaders
+Invoke-Test -TestName "CORS Policy Validation" -Endpoint "$AppUrl/api/academics" -Headers $corsHeaders
 
 Write-Host ""
 
@@ -156,7 +158,7 @@ Write-Host "=========================" -ForegroundColor Magenta
 # Run multiple requests to establish baseline
 $performanceTests = @()
 for ($i = 1; $i -le 5; $i++) {
-    Invoke-Test -TestName "Performance Test $i" -Endpoint "$AppUrl/api/people" -TimeoutSeconds 10
+    Invoke-Test -TestName "Performance Test $i" -Endpoint "$AppUrl/api/academics" -TimeoutSeconds 10
 }
 
 Write-Host ""
@@ -166,7 +168,7 @@ Write-Host "6. ERROR HANDLING" -ForegroundColor Magenta
 Write-Host "==================" -ForegroundColor Magenta
 
 Invoke-Test -TestName "404 Not Found" -Endpoint "$AppUrl/api/nonexistent" -ExpectedStatusCode 404
-Invoke-Test -TestName "Invalid Method" -Endpoint "$AppUrl/api/people" -Method "PATCH" -ExpectedStatusCode 405
+Invoke-Test -TestName "Invalid Method" -Endpoint "$AppUrl/api/academics" -Method "PATCH" -ExpectedStatusCode 405
 
 Write-Host ""
 

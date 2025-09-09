@@ -3,7 +3,7 @@
 targetScope = 'resourceGroup'
 
 @description('Environment name (dev, staging, prod)')
-@allowed(['dev','staging','prod'])
+@allowed(['dev', 'staging', 'prod'])
 param environmentName string = 'staging'
 
 @description('Application name prefix')
@@ -14,6 +14,13 @@ param location string = 'westus2'
 
 @description('Principal ID granted Key Vault access (developer or SP)')
 param keyVaultAccessPrincipalId string = ''
+
+@description('SQL Administrator login name')
+param sqlAdminLogin string = 'zeusadmin'
+
+@description('SQL Administrator password')
+@secure()
+param sqlAdminPassword string
 
 // Resource token pattern required: uniqueString(subscription().id, resourceGroup().id, location, environmentName)
 // Intentionally not stored in a var so validator can see inline usage in names.
@@ -84,6 +91,7 @@ var environmentConfig = {
 }
 
 var currentConfig = environmentConfig[environmentName]
+var keyVaultName = 'az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
   name: 'az-la-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
@@ -110,7 +118,7 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
 
 // Key Vault Module
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
-  name: 'az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  name: keyVaultName
   location: location
   tags: commonTags
   properties: {
@@ -139,28 +147,25 @@ resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-
   tags: commonTags
 }
 
-// SQL Server and Database Module - DISABLED DUE TO AZURE SQL PASSWORD VALIDATION RESTRICTIONS
-/*
+// SQL Server and Database Module
 module sqlDatabase 'modules/sqlDatabase.bicep' = {
-  scope: resourceGroup
   name: 'sqlDatabase-deployment'
   params: {
-    sqlServerName: 'sql-${applicationPrefix}-${environmentName}-${resourceToken}'
-    location: primaryLocation
+    sqlServerName: 'az-sql-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+    location: location
     tags: commonTags
     administratorLogin: sqlAdminLogin
     administratorLoginPassword: sqlAdminPassword
-    databaseName: 'Zeus.People'
-    eventStoreDatabaseName: 'Zeus.People.EventStore'
+    databaseName: 'zeuspeople'
+    eventStoreDatabaseName: 'zeuspeoplestore'
     skuName: currentConfig.sqlSkuName
     skuTier: currentConfig.sqlSkuTier
     enableAdvancedThreatProtection: true
     enableAuditingToLogAnalytics: true
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
-    managedIdentityPrincipalId: managedIdentity.outputs.principalId
+    logAnalyticsWorkspaceId: logAnalytics.id
+    managedIdentityPrincipalId: managedIdentity.properties.principalId
   }
 }
-*/
 
 // Cosmos DB Module
 resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = {
@@ -202,7 +207,7 @@ resource serviceBusAuthRule 'Microsoft.ServiceBus/namespaces/authorizationRules@
   name: 'app-access'
   parent: serviceBusNamespace
   properties: {
-    rights: [ 'Listen', 'Send' ]
+    rights: ['Listen', 'Send']
   }
 }
 
@@ -214,7 +219,7 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   kind: 'linux'
   sku: {
     name: currentConfig.appServicePlanSku
-    tier: contains(currentConfig.appServicePlanSku,'B') ? 'Basic' : 'Standard'
+    tier: contains(currentConfig.appServicePlanSku, 'B') ? 'Basic' : 'Standard'
   }
   properties: {
     reserved: true
@@ -266,23 +271,23 @@ resource appService 'Microsoft.Web/sites@2024-04-01' = {
         }
         {
           name: 'ConnectionStrings__DefaultConnection'
-          value: '@Microsoft.KeyVault(VaultName=az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)};SecretName=DefaultConnection)'
+          value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=DefaultConnection)'
         }
         {
           name: 'ConnectionStrings__EventStoreConnection'
-          value: '@Microsoft.KeyVault(VaultName=az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)};SecretName=EventStoreConnection)'
+          value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=EventStoreConnection)'
         }
         {
           name: 'ConnectionStrings__CosmosDbConnection'
-          value: '@Microsoft.KeyVault(VaultName=az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)};SecretName=CosmosDbConnection)'
+          value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=CosmosDbConnection)'
         }
         {
           name: 'ConnectionStrings__ServiceBusConnection'
-          value: '@Microsoft.KeyVault(VaultName=az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)};SecretName=ServiceBusConnection)'
+          value: '@Microsoft.KeyVault(VaultName=${keyVaultName};SecretName=ServiceBusConnection)'
         }
         {
           name: 'KeyVaultSettings__VaultName'
-          value: 'az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+          value: keyVaultName
         }
         {
           name: 'KeyVaultSettings__ClientId'
@@ -309,7 +314,7 @@ resource defaultConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' 
   name: 'DefaultConnection'
   parent: keyVault
   properties: {
-    value: 'Server=tcp:${applicationPrefix}-sql-server,1433;Database=zeuspeople;Authentication=Active Directory Managed Identity'
+    value: 'Server=tcp:${sqlDatabase.outputs.sqlServerFqdn},1433;Database=${sqlDatabase.outputs.academicDatabaseName};Authentication=Active Directory Managed Identity'
   }
 }
 
@@ -317,7 +322,7 @@ resource eventStoreConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-0
   name: 'EventStoreConnection'
   parent: keyVault
   properties: {
-    value: 'Server=tcp:${applicationPrefix}-eventstore-sql,1433;Database=zeuspeoplestore;Authentication=Active Directory Managed Identity'
+    value: 'Server=tcp:${sqlDatabase.outputs.sqlServerFqdn},1433;Database=${sqlDatabase.outputs.eventStoreDatabaseName};Authentication=Active Directory Managed Identity'
   }
 }
 
@@ -350,7 +355,10 @@ resource kvMiSecretsUserAssignment 'Microsoft.Authorization/roleAssignments@2022
   name: guid(subscription().id, keyVault.name, managedIdentity.name, 'kv-secrets-user')
   scope: keyVault
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions','4633458b-17de-408a-b874-0445c86b69e6')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '4633458b-17de-408a-b874-0445c86b69e6'
+    )
     principalId: managedIdentity.properties.principalId
     principalType: 'ServicePrincipal'
   }
@@ -360,7 +368,10 @@ resource kvExtraPrincipalAssignment 'Microsoft.Authorization/roleAssignments@202
   name: guid(subscription().id, keyVault.name, keyVaultAccessPrincipalId, 'kv-extra-principal')
   scope: keyVault
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions','4633458b-17de-408a-b874-0445c86b69e6')
+    roleDefinitionId: subscriptionResourceId(
+      'Microsoft.Authorization/roleDefinitions',
+      '4633458b-17de-408a-b874-0445c86b69e6'
+    )
     principalId: keyVaultAccessPrincipalId
     principalType: 'ServicePrincipal'
   }
