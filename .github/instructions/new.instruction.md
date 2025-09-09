@@ -12,6 +12,8 @@ Provision resources in the Azure SouthCentralUS region. This includes setting up
 
 Use the Azure Configuration Management Service to manage the configuration of the application. This service allows for centralized management of application settings, secrets, and other configuration data, making it easier to maintain and update configurations across different environments.
 
+expect 200 responses unless explictly testing for error conditions
+
 New addition to the business-rules instructions:
 * Workflows are use cases that guide data capture and processing in the application. Implement the following workflows:
     * Promote a Lecturer to Senior Lecturer
@@ -33,6 +35,9 @@ New addition to the business-rules instructions:
 - Implement automated testing for all new features and bug fixes. This includes unit tests, integration tests, and end-to-end tests to ensure comprehensive coverage and prevent regressions.
 
 ## cqrs-architecture
+- Ensure all commands and queries have corresponding handlers
+- Validate that commands modify state and queries retrieve data
+
 
 ### Documentation
 - Overview of CQRS principles and patterns
@@ -40,7 +45,3 @@ New addition to the business-rules instructions:
 - Guidelines for implementing CQRS in the application
 - Update mermaid architecture diagrams with any infrastructure, architecture, or business rule changes
 
-
-- expect 200 responses unless explictly testing for error conditions
-- Ensure all commands and queries have corresponding handlers
-- Validate that commands modify state and queries retrieve data
