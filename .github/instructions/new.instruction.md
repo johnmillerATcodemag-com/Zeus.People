@@ -41,4 +41,6 @@ New addition to the business-rules instructions:
 - Update mermaid architecture diagrams with any infrastructure, architecture, or business rule changes
 
 
-expect 200 response codebase
+- expect 200 responses unless explictly testing for error conditions
+- Ensure all commands and queries have corresponding handlers
+- Validate that commands modify state and queries retrieve data
