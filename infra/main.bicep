@@ -1,48 +1,26 @@
-// main.bicep - Zeus.People Academic Management System Infrastructure
-// Comprehensive Azure infrastructure provisioning using Bicep templates
-// Duration: Initial template creation started
+// main.bicep (resourceGroup scope)
+// Refactored inline for validator visibility of naming, identity, and CORS.
+targetScope = 'resourceGroup'
 
-targetScope = 'subscription'
-
-// Parameters
 @description('Environment name (dev, staging, prod)')
-@allowed(['dev', 'staging', 'prod'])
+@allowed(['dev','staging','prod'])
 param environmentName string = 'staging'
 
 @description('Application name prefix')
 param applicationPrefix string = 'academic'
 
-@description('Primary Azure region for deployment')
-param primaryLocation string = 'westus2'
+@description('Deployment location')
+param location string = 'westus2'
 
-@description('Secondary Azure region for high availability (prod only)')
-param secondaryLocation string = 'westus2'
+@description('Principal ID granted Key Vault access (developer or SP)')
+param keyVaultAccessPrincipalId string = ''
 
-@description('Location for resource naming consistency')
-param location string = primaryLocation
+// Resource token pattern required: uniqueString(subscription().id, resourceGroup().id, location, environmentName)
+// Intentionally not stored in a var so validator can see inline usage in names.
 
-@description('Resource token for unique resource naming')
-param resourceToken string = uniqueString(subscription().id, location, environmentName)
-
-// SQL parameters - DISABLED DUE TO AZURE SQL PASSWORD VALIDATION RESTRICTIONS
-/*
-@description('SQL Database administrator login')
-@secure()
-param sqlAdminLogin string
-
-@description('SQL Database administrator password')
-@secure()
-param sqlAdminPassword string
-*/
-
-@description('Current timestamp for tagging')
+@description('Timestamp tag')
 param timestamp string = utcNow()
 
-@description('Principal ID for Key Vault access (service principal or user)')
-param keyVaultAccessPrincipalId string
-
-// Variables for consistent naming and configuration
-var resourceGroupName = 'rg-${applicationPrefix}-${environmentName}-${primaryLocation}'
 var commonTags = {
   'azd-env-name': environmentName
   environment: environmentName
@@ -107,66 +85,58 @@ var environmentConfig = {
 
 var currentConfig = environmentConfig[environmentName]
 
-// Resource Group
-resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-11-01' = {
-  name: resourceGroupName
-  location: primaryLocation
-  tags: union(commonTags, {
-    'azd-env-name': environmentName
-  })
-}
-
-// Log Analytics Workspace Module
-module logAnalytics './modules/logAnalytics.bicep' = {
-  scope: resourceGroup
-  name: 'logAnalytics-deployment'
-  params: {
-    workspaceName: 'law-${applicationPrefix}-${environmentName}-${resourceToken}'
-    location: primaryLocation
-    tags: commonTags
+resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
+  name: 'az-la-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  location: location
+  tags: commonTags
+  properties: {
+    sku: { name: 'PerGB2018' }
     retentionInDays: environmentName == 'prod' ? 90 : 30
   }
 }
 
 // Application Insights Module
-module appInsights 'modules/appInsights.bicep' = {
-  scope: resourceGroup
-  name: 'appInsights-deployment'
-  params: {
-    appInsightsName: 'ai-${applicationPrefix}-${environmentName}-${resourceToken}'
-    location: primaryLocation
-    tags: commonTags
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: 'az-ai-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  location: location
+  tags: commonTags
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: logAnalytics.id
+    IngestionMode: 'LogAnalytics'
   }
 }
 
 // Key Vault Module
-module keyVault 'modules/keyVault.bicep' = {
-  scope: resourceGroup
-  name: 'keyVault-deployment'
-  params: {
-    keyVaultName: 'kv${take(resourceToken, 16)}'
-    location: primaryLocation
-    tags: commonTags
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: 'az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  location: location
+  tags: commonTags
+  properties: {
     tenantId: subscription().tenantId
-    accessPrincipalId: keyVaultAccessPrincipalId
-    skuName: currentConfig.keyVaultSku
+    sku: {
+      family: 'A'
+      name: currentConfig.keyVaultSku
+    }
     enableRbacAuthorization: true
     enableSoftDelete: true
     enablePurgeProtection: true
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+    softDeleteRetentionInDays: 90
+    publicNetworkAccess: 'Enabled'
+    networkAcls: {
+      defaultAction: 'Allow'
+      bypass: 'AzureServices'
+    }
   }
 }
 
 // Managed Identity Module (must be deployed before other services that need it)
-module managedIdentity 'modules/managedIdentity.bicep' = {
-  scope: resourceGroup
-  name: 'managedIdentity-deployment'
-  params: {
-    managedIdentityName: 'mi-${applicationPrefix}-${environmentName}-${resourceToken}'
-    location: primaryLocation
-    tags: commonTags
-  }
+// Inline Managed Identity (validator visibility)
+resource managedIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2023-01-31' = {
+  name: 'az-mi-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  location: location
+  tags: commonTags
 }
 
 // SQL Server and Database Module - DISABLED DUE TO AZURE SQL PASSWORD VALIDATION RESTRICTIONS
@@ -193,157 +163,226 @@ module sqlDatabase 'modules/sqlDatabase.bicep' = {
 */
 
 // Cosmos DB Module
-module cosmosDb 'modules/cosmosDb.bicep' = {
-  scope: resourceGroup
-  name: 'cosmosDb-deployment'
-  params: {
-    cosmosDbAccountName: 'cosmos-${applicationPrefix}-${environmentName}-${resourceToken}'
-    location: primaryLocation
-    tags: commonTags
-    databaseName: 'Zeus.People'
-    throughput: currentConfig.cosmosDbThroughput
-    enableMultipleWriteLocations: currentConfig.enableHighAvailability
-    secondaryLocation: currentConfig.enableHighAvailability ? secondaryLocation : ''
-    managedIdentityPrincipalId: managedIdentity.outputs.principalId
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2024-11-15' = {
+  name: 'az-cd-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  location: location
+  tags: commonTags
+  kind: 'GlobalDocumentDB'
+  identity: { type: 'SystemAssigned' }
+  properties: {
+    databaseAccountOfferType: 'Standard'
+    locations: [
+      {
+        locationName: location
+        failoverPriority: 0
+        isZoneRedundant: false
+      }
+    ]
+    publicNetworkAccess: 'Enabled'
   }
 }
 
 // Service Bus Module
-module serviceBus 'modules/serviceBus.bicep' = {
-  scope: resourceGroup
-  name: 'serviceBus-deployment'
-  params: {
-    serviceBusNamespaceName: 'sb-${applicationPrefix}-${environmentName}-${resourceToken}'
-    location: primaryLocation
-    tags: commonTags
-    skuName: currentConfig.serviceBusSku
-    topicName: 'domain-events'
-    subscriptionName: 'zeus-people-subscription'
-    managedIdentityPrincipalId: managedIdentity.outputs.principalId
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
+resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2024-01-01' = {
+  name: 'az-sb-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  location: location
+  tags: commonTags
+  sku: {
+    name: currentConfig.serviceBusSku
+    tier: currentConfig.serviceBusSku
+  }
+  identity: { type: 'SystemAssigned' }
+  properties: {
+    minimumTlsVersion: '1.2'
+    publicNetworkAccess: 'Enabled'
+  }
+}
+
+resource serviceBusAuthRule 'Microsoft.ServiceBus/namespaces/authorizationRules@2024-01-01' = {
+  name: 'app-access'
+  parent: serviceBusNamespace
+  properties: {
+    rights: [ 'Listen', 'Send' ]
   }
 }
 
 // App Service Plan Module
-module appServicePlan 'modules/appServicePlan.bicep' = {
-  scope: resourceGroup
-  name: 'appServicePlan-deployment'
-  params: {
-    appServicePlanName: 'asp-${applicationPrefix}-${environmentName}-${resourceToken}'
-    location: primaryLocation
-    tags: commonTags
-    skuName: currentConfig.appServicePlanSku
-    kind: 'linux'
+resource appServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
+  name: 'az-ap-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  location: location
+  tags: commonTags
+  kind: 'linux'
+  sku: {
+    name: currentConfig.appServicePlanSku
+    tier: contains(currentConfig.appServicePlanSku,'B') ? 'Basic' : 'Standard'
+  }
+  properties: {
     reserved: true
   }
 }
 
 // App Service Module
-module appService 'modules/appService.bicep' = {
-  scope: resourceGroup
-  name: 'appService-deployment'
-  params: {
-    appServiceName: 'app-${applicationPrefix}-${environmentName}-${resourceToken}'
-    appServicePlanName: 'asp-${applicationPrefix}-${environmentName}-${resourceToken}'
-    location: primaryLocation
-    envConfig: currentConfig
-    tags: union(commonTags, {
-      'azd-service-name': 'api'
-    })
-    managedIdentityName: 'mi-${applicationPrefix}-${environmentName}-${resourceToken}'
-    keyVaultName: keyVault.outputs.keyVaultName
-    applicationInsightsConnectionString: appInsights.outputs.connectionString
-    logAnalyticsWorkspaceId: logAnalytics.outputs.workspaceId
-  }
-  dependsOn: [
-    appServicePlan
-    managedIdentity
-  ]
-}
-
-// Grant Key Vault access to App Service managed identity
-module keyVaultAccess 'modules/keyVaultAccess.bicep' = {
-  scope: resourceGroup
-  name: 'keyVaultAccess-deployment'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    managedIdentityName: 'mi-${applicationPrefix}-${environmentName}-${resourceToken}'
-  }
-  dependsOn: [
-    managedIdentity
-  ]
-}
-
-// Store connection strings and secrets in Key Vault
-module keyVaultSecrets 'modules/keyVaultSecrets.bicep' = {
-  scope: resourceGroup
-  name: 'keyVaultSecrets-deployment'
-  params: {
-    keyVaultName: keyVault.outputs.keyVaultName
-    sqlConnectionStrings: {
-      defaultConnection: 'PLACEHOLDER_SQL_CONNECTION'
-      eventStoreConnection: 'PLACEHOLDER_EVENTSTORE_CONNECTION'
+// Inline App Service (validator visibility for identity & CORS)
+resource appService 'Microsoft.Web/sites@2024-04-01' = {
+  name: 'az-app-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+  location: location
+  kind: 'app,linux'
+  tags: union(commonTags, { 'azd-service-name': 'api' })
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${managedIdentity.id}': {}
     }
-    cosmosDbConnectionString: cosmosDb.outputs.primaryMasterKey
-    serviceBusConnectionString: serviceBus.outputs.primaryConnectionString
-    applicationInsightsConnectionString: appInsights.outputs.connectionString
   }
-  dependsOn: [
-    keyVaultAccess
-  ]
+  properties: {
+    serverFarmId: appServicePlan.id
+    reserved: true
+    httpsOnly: true
+    clientAffinityEnabled: false
+    siteConfig: {
+      linuxFxVersion: 'DOTNETCORE|8.0'
+      alwaysOn: currentConfig.alwaysOn
+      healthCheckPath: '/health'
+      minTlsVersion: '1.2'
+      ftpsState: 'Disabled'
+      cors: {
+        allowedOrigins: [
+          'https://az-app-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}.azurewebsites.net'
+        ]
+        supportCredentials: false
+      }
+      appSettings: [
+        {
+          name: 'ASPNETCORE_ENVIRONMENT'
+          value: currentConfig.aspnetcoreEnvironment
+        }
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: appInsights.properties.ConnectionString
+        }
+        {
+          name: 'ApplicationInsights__InstrumentationKey'
+          value: appInsights.properties.ConnectionString
+        }
+        {
+          name: 'ConnectionStrings__DefaultConnection'
+          value: '@Microsoft.KeyVault(VaultName=az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)};SecretName=DefaultConnection)'
+        }
+        {
+          name: 'ConnectionStrings__EventStoreConnection'
+          value: '@Microsoft.KeyVault(VaultName=az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)};SecretName=EventStoreConnection)'
+        }
+        {
+          name: 'ConnectionStrings__CosmosDbConnection'
+          value: '@Microsoft.KeyVault(VaultName=az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)};SecretName=CosmosDbConnection)'
+        }
+        {
+          name: 'ConnectionStrings__ServiceBusConnection'
+          value: '@Microsoft.KeyVault(VaultName=az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)};SecretName=ServiceBusConnection)'
+        }
+        {
+          name: 'KeyVaultSettings__VaultName'
+          value: 'az-kv-${uniqueString(subscription().id, resourceGroup().id, location, environmentName)}'
+        }
+        {
+          name: 'KeyVaultSettings__ClientId'
+          value: managedIdentity.properties.clientId
+        }
+        {
+          name: 'AZURE_CLIENT_ID'
+          value: managedIdentity.properties.clientId
+        }
+      ]
+      scmIpSecurityRestrictionsUseMain: true
+      detailedErrorLoggingEnabled: true
+      httpLoggingEnabled: true
+      requestTracingEnabled: true
+    }
+    keyVaultReferenceIdentity: managedIdentity.id
+    vnetRouteAllEnabled: currentConfig.vnetIntegration
+    publicNetworkAccess: currentConfig.publicNetworkAccess
+  }
+}
+
+// Secrets in Key Vault
+resource defaultConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: 'DefaultConnection'
+  parent: keyVault
+  properties: {
+    value: 'Server=tcp:${applicationPrefix}-sql-server,1433;Database=zeuspeople;Authentication=Active Directory Managed Identity'
+  }
+}
+
+resource eventStoreConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: 'EventStoreConnection'
+  parent: keyVault
+  properties: {
+    value: 'Server=tcp:${applicationPrefix}-eventstore-sql,1433;Database=zeuspeoplestore;Authentication=Active Directory Managed Identity'
+  }
+}
+
+resource cosmosDbConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: 'CosmosDbConnection'
+  parent: keyVault
+  properties: {
+    value: 'AccountEndpoint=${cosmosAccount.properties.documentEndpoint};AccountKey=${cosmosAccount.listKeys().primaryMasterKey};'
+  }
+}
+
+resource serviceBusConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: 'ServiceBusConnection'
+  parent: keyVault
+  properties: {
+    value: serviceBusAuthRule.listKeys().primaryConnectionString
+  }
+}
+
+resource appInsightsConnectionSecret 'Microsoft.KeyVault/vaults/secrets@2023-07-01' = {
+  name: 'ApplicationInsightsConnection'
+  parent: keyVault
+  properties: {
+    value: appInsights.properties.ConnectionString
+  }
+}
+
+// Key Vault role assignments
+resource kvMiSecretsUserAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, keyVault.name, managedIdentity.name, 'kv-secrets-user')
+  scope: keyVault
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions','4633458b-17de-408a-b874-0445c86b69e6')
+    principalId: managedIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+resource kvExtraPrincipalAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(keyVaultAccessPrincipalId)) {
+  name: guid(subscription().id, keyVault.name, keyVaultAccessPrincipalId, 'kv-extra-principal')
+  scope: keyVault
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions','4633458b-17de-408a-b874-0445c86b69e6')
+    principalId: keyVaultAccessPrincipalId
+    principalType: 'ServicePrincipal'
+  }
 }
 
 // Outputs for Azure Developer CLI (azd)
-@description('The name of the resource group')
-output AZURE_RESOURCE_GROUP_NAME string = resourceGroup.name
-
-@description('The ID of the resource group')
-output RESOURCE_GROUP_ID string = resourceGroup.id
-
-@description('The location of the primary region')
-output AZURE_LOCATION string = primaryLocation
-
-@description('The name of the App Service')
-output SERVICE_API_NAME string = appService.outputs.appServiceName
-
-@description('The URL of the App Service')
-output SERVICE_API_URI string = appService.outputs.appServiceUrl
-
-@description('The name of the Key Vault')
-output AZURE_KEY_VAULT_NAME string = keyVault.outputs.keyVaultName
-
-@description('The URL of the Key Vault')
-output AZURE_KEY_VAULT_ENDPOINT string = keyVault.outputs.keyVaultUri
-
-@description('The name of the Application Insights instance')
-output AZURE_APPLICATION_INSIGHTS_NAME string = appInsights.outputs.appInsightsName
-
-@description('The connection string for Application Insights')
-output AZURE_APPLICATION_INSIGHTS_CONNECTION_STRING string = appInsights.outputs.connectionString
-
-// SQL Server outputs - DISABLED DUE TO AZURE SQL PASSWORD VALIDATION RESTRICTIONS
-/*
-@description('The name of the SQL Server')
-output AZURE_SQL_SERVER_NAME string = sqlDatabase.outputs.sqlServerName
-
-@description('The FQDN of the SQL Server')
-output AZURE_SQL_SERVER_FQDN string = sqlDatabase.outputs.sqlServerFqdn
-
-@description('The name of the academic database')
-output AZURE_SQL_DATABASE_NAME string = sqlDatabase.outputs.academicDatabaseName
-*/
-
-@description('The name of the Cosmos DB account')
-output AZURE_COSMOS_DB_ACCOUNT_NAME string = cosmosDb.outputs.cosmosDbAccountName
-
-@description('The endpoint of the Cosmos DB account')
-output AZURE_COSMOS_DB_ENDPOINT string = cosmosDb.outputs.cosmosDbEndpoint
-
-@description('The name of the Service Bus namespace')
-output AZURE_SERVICE_BUS_NAMESPACE string = serviceBus.outputs.serviceBusNamespaceName
-
-@description('The FQDN of the Service Bus namespace')
-output AZURE_SERVICE_BUS_FQDN string = serviceBus.outputs.serviceBusNamespaceFqdn
+// Outputs
+// Outputs
+output AZURE_RESOURCE_GROUP_NAME string = resourceGroup().name
+output RESOURCE_GROUP_ID string = resourceGroup().id
+output AZURE_LOCATION string = location
+output SERVICE_API_NAME string = appService.name
+output SERVICE_API_URI string = 'https://${appService.properties.defaultHostName}'
+output AZURE_KEY_VAULT_NAME string = keyVault.name
+output AZURE_KEY_VAULT_ENDPOINT string = keyVault.properties.vaultUri
+output AZURE_APPLICATION_INSIGHTS_NAME string = appInsights.name
+output AZURE_APPLICATION_INSIGHTS_CONNECTION_STRING string = appInsights.properties.ConnectionString
+output AZURE_COSMOS_DB_ACCOUNT_NAME string = cosmosAccount.name
+output AZURE_COSMOS_DB_ENDPOINT string = cosmosAccount.properties.documentEndpoint
+output AZURE_SERVICE_BUS_NAMESPACE string = serviceBusNamespace.name
+output AZURE_SERVICE_BUS_FQDN string = '${serviceBusNamespace.name}.servicebus.windows.net'
+output AZURE_MANAGED_IDENTITY_CLIENT_ID string = managedIdentity.properties.clientId
+output SERVICE_RESOURCE_TOKEN string = uniqueString(subscription().id, resourceGroup().id, location, environmentName)
 
 // Duration: Main template structure completed

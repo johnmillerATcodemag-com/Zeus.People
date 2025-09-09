@@ -1,0 +1,4 @@
+@baseUrl = http://localhost:5000
+
+GET {{baseUrl}}/
+Content-Type: application/json

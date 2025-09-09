@@ -14,6 +14,12 @@
     "secondaryLocation": {
       "value": "westus2"
     },
+    "location": {
+      "value": "westus2"
+    },
+    "resourceGroupName": {
+      "value": "rg-academic-staging-westus2"
+    },
     "keyVaultAccessPrincipalId": {
       "value": "ea0c97fd-c3ba-4510-a374-37cd7442b3db"
     }
