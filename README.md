@@ -1,4 +1,4 @@
-# Zeus.People
+# Zeus.Academia
 
 This repo contains the files that accompany the Septemeber 10th 2025 CODE Presents on AI Assisted Greenfield development and the 2025 NextGen/AI session: AI Assisted Greenfield Software Development
 
