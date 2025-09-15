@@ -1,10 +1,10 @@
 # Zeus.People
 
-This repo contains the files that accompany the 2025 NextGen/AI session: AI Assisted Software Development
+This repo contains the files that accompany the Septemeber 10th 2025 CODE Presents on AI Assisted Greenfield development and the 2025 NextGen/AI session: AI Assisted Greenfield Software Development
 
 ## Domain
 
-The domain is a People Management System, which includes features for managing employees, departments, and roles.
+The domain is a Academic Management System, which includes features for managing academics, departments, and roles.
 
 The model is taken from the ORM white paper, which can be found here: https://orm.net/pdf/ORMwhitePaper.pdf
 
