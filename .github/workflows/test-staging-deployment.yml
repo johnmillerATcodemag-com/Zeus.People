@@ -29,9 +29,7 @@ on:
         required: false
         default: false
         type: boolean
-  schedule:
-    # Run staging deployment test daily at 2 AM UTC
-    - cron: "0 2 * * *"
+
 
 env:
   DOTNET_VERSION: "8.0.x"
